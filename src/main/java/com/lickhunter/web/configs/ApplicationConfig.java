@@ -1,18 +1,13 @@
 package com.lickhunter.web.configs;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.lickhunter.web.entities.public_.tables.Candlestick;
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.annotation.*;
+import com.lickhunter.web.factory.JsonPropertySourceFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -37,26 +32,15 @@ import org.springframework.stereotype.Component;
         "sleeponstop"
 })
 @Component
-@PropertySource(value = "classpath:settings.json")
+@PropertySource(value = "classpath:settings.json", factory = JsonPropertySourceFactory.class)
 @ConfigurationProperties
 //TODO allow user to select custom location of settings.json
 public class ApplicationConfig {
-
-    public static String API_KEY;
-    public static String API_SECRET;
-
-    ApplicationConfig() {
-        API_KEY = this.key;
-        API_SECRET = this.secret;
-    }
-
     @JsonProperty("exchange")
     private String exchange;
     @JsonProperty("key")
-    @Value("${key}")
     private String key;
     @JsonProperty("secret")
-    @Value("${secret}")
     private String secret;
     @JsonProperty("auto_qty")
     private String autoQty;

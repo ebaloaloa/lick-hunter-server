@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
 public class PersistenceContextConfig {
+
     @Autowired
     private Environment environment;
 

@@ -5,8 +5,8 @@ public enum ErrorCode {
     RESOURCE_NOT_FOUND(4000, "Resournce not found."),
     TOO_MANY_REQUESTS(4100, "Binance API requests limitation reached.");
 
-    private int code;
-    private String value;
+    private final int code;
+    private final String value;
 
     ErrorCode(int code, String value) {
         this.code = code;

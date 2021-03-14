@@ -1,5 +1,8 @@
 package com.lickhunter.web.controllers;
 
+import com.binance.client.SubscriptionClient;
+import com.binance.client.SyncRequestClient;
+import com.lickhunter.web.configs.ApplicationConfig;
 import com.lickhunter.web.exceptions.ServiceException;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.MarketService;
@@ -19,12 +22,28 @@ public class TestController {
 
     private final MarketService marketService;
     private final AccountService accountService;
+    private final ApplicationConfig config;
 
     @GetMapping
     public ResponseEntity<?> testEndpoint() throws ServiceException {
-        return ResponseEntity.ok(
-                marketService.getTickerByQuery(new TickerQueryTO()
-                .withMinimumTradingAge(500)
-                .withPercentageFromAllTimeHigh(10L)));
+        // Start user data stream
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(config.getKey(), config.getSecret());
+        String listenKey = syncRequestClient.startUserDataStream();
+        System.out.println("listenKey: " + listenKey);
+
+        // Keep user data stream
+        syncRequestClient.keepUserDataStream(listenKey);
+
+        // Close user data stream
+        syncRequestClient.closeUserDataStream(listenKey);
+
+        SubscriptionClient client = SubscriptionClient.create(config.getKey(), config.getAuth());
+
+        client.subscribeUserDataEvent(listenKey, ((event) -> {
+            log.info(event.toString());
+        }), null);
+        return ResponseEntity.ok(marketService.getTickerByQuery(new TickerQueryTO()
+                .withMinimumTradingAge(30)
+                .withPercentageFromAllTimeHigh(5L)));
     }
 }

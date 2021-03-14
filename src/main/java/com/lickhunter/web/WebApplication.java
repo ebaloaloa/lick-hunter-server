@@ -1,9 +1,8 @@
 package com.lickhunter.web;
 
 import com.binance.client.model.enums.CandlestickInterval;
+import com.lickhunter.web.controllers.ApplicationController;
 import com.lickhunter.web.exceptions.ServiceException;
-import com.lickhunter.web.services.MarketService;
-import com.lickhunter.web.websockets.BinanceSubscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,10 +13,7 @@ import org.springframework.context.event.EventListener;
 public class WebApplication {
 
 	@Autowired
-	private BinanceSubscription binanceSubscription;
-
-	@Autowired
-	private MarketService marketService;
+	private ApplicationController applicationController;
 
 	public static void main(String[] args) {
 		SpringApplication.run(WebApplication.class, args);
@@ -25,8 +21,12 @@ public class WebApplication {
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void initProcess() throws ServiceException {
-		binanceSubscription.subscribeCandleStickData();
-		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 100);
+		applicationController.subscribeCandleStickData();
+		applicationController.subscribeMarkPrice();
+		applicationController.getMarkPriceData();
+		applicationController.getAccountInformation();
+		//TODO add properties to enable/disable candlestickDate on application startup
+		applicationController.getCandleStickData(CandlestickInterval.HOURLY, 100);
 	}
 
 }

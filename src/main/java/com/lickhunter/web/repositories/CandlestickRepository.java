@@ -35,10 +35,6 @@ public class CandlestickRepository {
                 .execute();
     }
 
-    public void truncate() {
-        dsl.truncate(CANDLESTICK);
-    }
-
     public void batchInsert(List<CandlestickRecord> candlestickRecords) {
         dsl.batchInsert(candlestickRecords);
     }
