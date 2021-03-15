@@ -1,7 +1,9 @@
 package com.lickhunter.web.services;
 
+import java.io.IOException;
+
 public interface AccountService {
 
-    void getAccountInformation();
+    void getAccountInformation() throws IOException, Exception;
 
 }

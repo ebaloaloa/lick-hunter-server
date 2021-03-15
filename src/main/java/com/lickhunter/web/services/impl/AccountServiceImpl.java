@@ -2,9 +2,11 @@ package com.lickhunter.web.services.impl;
 
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.trade.AccountInformation;
-import com.lickhunter.web.configs.ApplicationConfig;
+import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.services.AccountService;
+import com.lickhunter.web.services.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,13 @@ import java.math.RoundingMode;
 @Slf4j
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
-
-    private final ApplicationConfig config;
     private final AccountRepository accountRepository;
+    private final FileService fileService;
 
-    public void getAccountInformation() {
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(config.getKey(), config.getSecret());
-        accountRepository.insertOrUpdate(syncRequestClient.getAccountInformation(), config.getKey());
+    public void getAccountInformation() throws Exception {
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        accountRepository.insertOrUpdate(syncRequestClient.getAccountInformation(), settings.getKey());
     }
 
     private Boolean isOpenOrderIsolationActive(AccountInformation accountInformation, BigDecimal isolationPercentage) {

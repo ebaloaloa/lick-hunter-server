@@ -2,7 +2,6 @@ package com.lickhunter.web;
 
 import com.binance.client.model.enums.CandlestickInterval;
 import com.lickhunter.web.controllers.ApplicationController;
-import com.lickhunter.web.exceptions.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,11 +19,9 @@ public class WebApplication {
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
-	public void initProcess() throws ServiceException {
+	public void initProcess() throws Exception {
 		applicationController.subscribeCandleStickData();
 		applicationController.subscribeMarkPrice();
-		applicationController.getMarkPriceData();
-		applicationController.getAccountInformation();
 		//TODO add properties to enable/disable candlestickDate on application startup
 		applicationController.getCandleStickData(CandlestickInterval.HOURLY, 100);
 	}

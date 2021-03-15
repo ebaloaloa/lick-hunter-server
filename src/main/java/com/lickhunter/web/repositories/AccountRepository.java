@@ -74,7 +74,7 @@ public class AccountRepository {
                 .set(ACCOUNT.TOTAL_WALLET_BALANCE, input.getTotalWalletBalance().doubleValue())
                 .set(ACCOUNT.UPDATE_TIME, input.getUpdateTime())
                 .where(ACCOUNT.ID.eq(key))
+                .and(ACCOUNT.ID.eq(key))
                 .execute();
     }
-
 }

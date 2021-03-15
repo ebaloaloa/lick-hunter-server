@@ -20,7 +20,7 @@ public interface MarketService {
      * @return List of PriceChangeTicker
      * @throws ServiceException
      */
-    List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws ServiceException;
+    List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws ServiceException, Exception;
 
     /**
      * Current exchange trading rules and symbol information
@@ -50,11 +50,11 @@ public interface MarketService {
      * @param limit identifies the number of bars to be retrieved
      * @throws ServiceException
      */
-    void getCandleStickData(CandlestickInterval interval, int limit) throws ServiceException;
+    void getCandleStickData(CandlestickInterval interval, int limit) throws Exception;
 
     /**
      * Retrieves Mark Price Data
      * @throws ServiceException
      */
-    List<SymbolRecord> getMarkPriceData() throws ServiceException;
+    List<SymbolRecord> getMarkPriceData() throws Exception;
 }

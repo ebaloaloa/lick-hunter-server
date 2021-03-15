@@ -7,7 +7,8 @@ import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.PriceChangeTicker;
 import com.jcabi.aspects.Cacheable;
 import com.jcabi.aspects.RetryOnFailure;
-import com.lickhunter.web.configs.ApplicationConfig;
+import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.public_.tables.records.CandlestickRecord;
 import com.lickhunter.web.entities.public_.tables.records.SymbolRecord;
 import com.lickhunter.web.exceptions.ServiceException;
@@ -15,6 +16,7 @@ import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.models.market.Symbol;
 import com.lickhunter.web.repositories.CandlestickRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
+import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -49,16 +50,17 @@ import java.util.stream.Collectors;
 @EnableAsync
 public class MarketServiceImpl implements MarketService {
 
-    private final ApplicationConfig config;
+    private final FileService fileService;
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
 
     /**
      * {@inheritDoc}
      */
-    public List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws ServiceException {
+    public List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws Exception {
         log.debug(String.format("Retrieving Symbols using input: %s", query));
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(config.getKey(), config.getSecret());
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<PriceChangeTicker> result;
         if(Objects.nonNull(query.getSymbol())) {
             return syncRequestClient.get24hrTickerPriceChange(query.getSymbol());
@@ -109,9 +111,10 @@ public class MarketServiceImpl implements MarketService {
      */
     @Async
     @RetryOnFailure(attempts = 5, delay = 5, unit = TimeUnit.SECONDS)
-    public void getCandleStickData(CandlestickInterval interval, int limit) throws ServiceException {
+    public void getCandleStickData(CandlestickInterval interval, int limit) throws Exception {
         log.info("Retrieving candlesticks data");
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(config.getKey(), config.getSecret());
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         this.getExchangeInformation().getSymbols()
                 .forEach(s -> {
                     List<CandlestickRecord> candlestickRecords = candlestickRepository.getCandleStickBySymbol(s.getSymbol());
@@ -127,15 +130,14 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    @Scheduled(fixedDelay = 1000 * 30)
-    public List<SymbolRecord> getMarkPriceData() {
+    public List<SymbolRecord> getMarkPriceData() throws Exception {
         log.info("Retrieving Mark Price data");
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(config.getKey(), config.getSecret());
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         syncRequestClient.getMarkPrice("")
                 .forEach(symbolRepository::insert);
         log.info("Successfully retrieved Mark Price data");
         return symbolRepository.findAll();
-
     }
 
     private Predicate<PriceChangeTicker> isNearThreshHoldAllTimeHigh(Long threshHold, List<SymbolRecord> markPrices) {

@@ -1,9 +1,6 @@
 package com.lickhunter.web.configs;
 
 import com.fasterxml.jackson.annotation.*;
-import com.lickhunter.web.factory.JsonPropertySourceFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -32,10 +29,7 @@ import java.util.Map;
         "sleeponstop"
 })
 @Component
-@PropertySource(value = "classpath:settings.json", factory = JsonPropertySourceFactory.class)
-@ConfigurationProperties
-//TODO allow user to select custom location of settings.json
-public class ApplicationConfig {
+public final class Settings {
     @JsonProperty("exchange")
     private String exchange;
     @JsonProperty("key")

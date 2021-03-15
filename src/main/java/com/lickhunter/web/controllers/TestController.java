@@ -2,9 +2,9 @@ package com.lickhunter.web.controllers;
 
 import com.binance.client.SubscriptionClient;
 import com.binance.client.SyncRequestClient;
-import com.lickhunter.web.configs.ApplicationConfig;
-import com.lickhunter.web.exceptions.ServiceException;
-import com.lickhunter.web.services.AccountService;
+import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     private final MarketService marketService;
-    private final AccountService accountService;
-    private final ApplicationConfig config;
+    private final FileService fileService;
 
     @GetMapping
-    public ResponseEntity<?> testEndpoint() throws ServiceException {
+    public ResponseEntity<?> testEndpoint() throws Exception {
         // Start user data stream
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(config.getKey(), config.getSecret());
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         String listenKey = syncRequestClient.startUserDataStream();
         System.out.println("listenKey: " + listenKey);
 
@@ -37,7 +37,7 @@ public class TestController {
         // Close user data stream
         syncRequestClient.closeUserDataStream(listenKey);
 
-        SubscriptionClient client = SubscriptionClient.create(config.getKey(), config.getAuth());
+        SubscriptionClient client = SubscriptionClient.create(settings.getKey(), settings.getAuth());
 
         client.subscribeUserDataEvent(listenKey, ((event) -> {
             log.info(event.toString());

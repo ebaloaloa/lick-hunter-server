@@ -109,11 +109,21 @@
 			<version>1.6.12</version>
 			<scope>runtime</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.simpleflatmapper</groupId>-->
-<!--			<artifactId>sfm-jooq</artifactId>-->
-<!--			<version>8.2.3</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -245,5 +255,6 @@
 		<sql-maven-plugin.version>1.5</sql-maven-plugin.version>
 		<properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
 		<h2.version>1.4.198</h2.version>
+		<jackson.version>2.12.2</jackson.version>
 	</properties>
 </project>
