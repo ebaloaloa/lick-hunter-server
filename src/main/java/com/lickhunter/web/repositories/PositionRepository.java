@@ -1,10 +1,18 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.Position;
+import com.binance.client.model.user.PositionUpdate;
+import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 import static com.lickhunter.web.entities.public_.tables.Position.POSITION;
 
@@ -49,5 +57,51 @@ public class PositionRepository {
                 .where(POSITION.ACCOUNT_ID.eq(accountId))
                 .and(POSITION.SYMBOL.eq(position.getSymbol()))
                 .execute();
+    }
+
+    public void insert(List<PositionUpdate> positionUpdates, String accountId) {
+        positionUpdates.forEach(positionUpdate -> dsl.insertInto(POSITION)
+                .set(POSITION.SYMBOL, positionUpdate.getSymbol())
+                .set(POSITION.ACCOUNT_ID, accountId)
+                .set(POSITION.POSITION_INITIAL_MARGIN, positionUpdate.getAmount().doubleValue())
+                .set(POSITION.UNREALIZED_PROFIT, positionUpdate.getUnrealizedPnl().doubleValue())
+                .set(POSITION.ENTRY_PRICE, positionUpdate.getEntryPrice().toString())
+                .execute());
+    }
+
+    public void update(List<PositionUpdate> positionUpdates, String accountId) {
+        positionUpdates.stream().sorted(Comparator.comparing(p -> p.getAmount().abs()))
+            .forEach(
+                positionUpdate -> {
+                    Optional<PositionRecord> positionRecord = this.findBySymbolAndAccountId(positionUpdate.getSymbol(), accountId);
+                    positionRecord.ifPresent(record -> dsl.update(POSITION)
+                            .set(POSITION.INITIAL_MARGIN, positionUpdate.getAmount().abs()
+                                    .multiply(positionUpdate.getEntryPrice())
+                                    .divide(BigDecimal.valueOf(record.getLeverage()), RoundingMode.DOWN)
+                                    .doubleValue())
+                            .set(POSITION.POSITION_INITIAL_MARGIN, positionUpdate.getAmount().abs()
+                                    .multiply(positionUpdate.getEntryPrice())
+                                    .divide(BigDecimal.valueOf(record.getLeverage()), RoundingMode.DOWN)
+                                    .doubleValue())
+                            .set(POSITION.UNREALIZED_PROFIT, positionUpdate.getUnrealizedPnl().doubleValue())
+                            .set(POSITION.ENTRY_PRICE, positionUpdate.getEntryPrice().toString())
+                            .where(POSITION.ACCOUNT_ID.eq(accountId))
+                            .and(POSITION.SYMBOL.eq(positionUpdate.getSymbol()))
+                            .execute());
+                }
+        );
+    }
+
+    public Optional<PositionRecord> findBySymbolAndAccountId(String symbol, String accountId) {
+        return dsl.selectFrom(POSITION)
+                .where(POSITION.ACCOUNT_ID.eq(accountId))
+                .and(POSITION.SYMBOL.eq(symbol))
+                .fetchOptional();
+    }
+
+    public List<PositionRecord> findByAccountId(String accountId) {
+        return dsl.selectFrom(POSITION)
+                .where(POSITION.ACCOUNT_ID.eq(accountId))
+                .fetch();
     }
 }

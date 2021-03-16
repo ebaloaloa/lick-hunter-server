@@ -8,9 +8,9 @@ import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.MarkPrice;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.constants.UserDataEventConstants;
 import com.lickhunter.web.models.market.ExchangeInformation;
-import com.lickhunter.web.repositories.CandlestickRepository;
-import com.lickhunter.web.repositories.SymbolRepository;
+import com.lickhunter.web.repositories.*;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +30,14 @@ public class BinanceSubscription {
     private final MarketService marketService;
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
+    private final AssetRepository assetRepository;
+    private final AccountRepository accountRepository;
+    private final PositionRepository positionRepository;
     private final FileService fileService;
 
     @Async
     public void subscribeCandleStickData() throws Exception {
         log.info("Subscribing to Binance candlesticks data");
-        SubscriptionOptions options = new SubscriptionOptions();
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(settings.getKey(), settings.getSecret());
         ExchangeInformation exchangeInformation = marketService.getExchangeInformation();
@@ -78,8 +80,34 @@ public class BinanceSubscription {
         String listenKey = syncRequestClient.startUserDataStream();
         syncRequestClient.keepUserDataStream(listenKey);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(settings.getKey(), settings.getSecret());
-        subscriptionClient.subscribeUserDataEvent(listenKey, (System.out::println),
-                e -> log.error(String.format("Error during user data subscription event: %s", e.getMessage())));
+        subscriptionClient.subscribeUserDataEvent(listenKey, ((event) -> {
+
+                switch(UserDataEventConstants.valueOf(event.getEventType())) {
+                    case ACCOUNT_UPDATE:
+                        log.debug(event.toString());
+                        //TODO find a way to update maintenance margin
+                        positionRepository.update(event.getAccountUpdate().getPositions(), settings.getKey());
+                        assetRepository.updateFromPosition(event.getAccountUpdate(), settings.getKey());
+                        accountRepository.updateFromAsset(settings.getKey());
+                        break;
+                    case MARGIN_CALL:
+                        //TODO add notifications for margin calls
+                        break;
+                    case ORDER_TRADE_UPDATE:
+                        //TODO implement position updates here. **HISTORICAL DATA**
+                        //  executionType=TRADE
+                        //  orderStatus=FILLED
+                        //  isReduceOnly=true
+                        break;
+                    case ACCOUNT_CONFIG_UPDATE:
+                        //TODO implement leverage change and update position table
+//                        positionRepository.update(event.getAccountUpdate().getPositions(), settings.getKey());
+                    default:
+                        //TODO add more event types here
+                        // ACCOUNT_CONFIG_UPDATE = leverage
+                        log.warn("Event not identified.");
+                }
+        }), e -> log.error(e.getMessage()));
     }
 
     @Async

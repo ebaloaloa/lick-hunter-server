@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,9 +44,8 @@ import java.util.stream.Collectors;
  * Market Data Facade Service
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
-@EnableAsync
+@RequiredArgsConstructor
 public class MarketServiceImpl implements MarketService {
 
     private final FileService fileService;
@@ -79,11 +77,10 @@ public class MarketServiceImpl implements MarketService {
                         t -> true)
                 .filter(Objects.nonNull(query.getVolumeLowerLimit()) && Objects.nonNull(query.getVolumeUpperLimit()) ?
                         t -> t.getQuoteVolume().compareTo(query.getVolumeLowerLimit()) > 0 &&
-                            t.getQuoteVolume().compareTo(query.getVolumeLowerLimit()) < 0
+                            t.getQuoteVolume().compareTo(query.getVolumeUpperLimit()) < 0
                         : t -> true)
                 .collect(Collectors.toList());
 
-        //TODO save mark price into database using websockets. Update existing
         //all time high
         List<SymbolRecord> markPrices = symbolRepository.findAll();
         if(Objects.nonNull(query.getPercentageFromAllTimeHigh())) {

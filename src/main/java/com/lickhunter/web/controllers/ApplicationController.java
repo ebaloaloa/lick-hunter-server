@@ -8,9 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/application")
+@RequestMapping("/api/application")
 @RestController
 @RequiredArgsConstructor
 public class ApplicationController extends BaseController {
@@ -26,8 +27,8 @@ public class ApplicationController extends BaseController {
     }
 
     @GetMapping("/candlestick")
-    public ResponseEntity<?> getCandleStickData(CandlestickInterval interval, int limit) throws Exception {
-        marketService.getCandleStickData(interval, limit);
+    public ResponseEntity<?> getCandleStickData(@RequestParam String interval, @RequestParam String limit) throws Exception {
+        marketService.getCandleStickData(CandlestickInterval.valueOf(interval), Integer.valueOf(limit));
         return ResponseEntity.ok(null);
     }
 

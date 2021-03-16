@@ -48,7 +48,7 @@ CREATE TABLE account (
 );
 
 CREATE TABLE asset (
-    ASSET                     VARCHAR(20) NOT NULL,
+    ASSET                     VARCHAR(20)  NOT NULL,
     INITIAL_MARGIN            DOUBLE       NOT NULL,
     MAINT_MARGIN              DOUBLE       NOT NULL,
     MARGIN_BALANCE            DOUBLE       NOT NULL,
@@ -62,17 +62,17 @@ CREATE TABLE asset (
 );
 
 CREATE TABLE position (
-    ISOLATED                  BOOLEAN      NOT NULL,
-    LEVERAGE                  DOUBLE       NOT NULL,
+    ISOLATED                  BOOLEAN      NULL,
+    LEVERAGE                  DOUBLE       NULL,
     INITIAL_MARGIN            DOUBLE       NOT NULL,
-    MAINT_MARGIN              DOUBLE       NOT NULL,
-    OPEN_ORDER_INITIAL_MARGIN DOUBLE       NOT NULL,
+    MAINT_MARGIN              DOUBLE       NULL,
+    OPEN_ORDER_INITIAL_MARGIN DOUBLE       NULL,
     POSITION_INITIAL_MARGIN   DOUBLE       NOT NULL,
     SYMBOL                    VARCHAR(20)  NOT NULL,
     UNREALIZED_PROFIT         DOUBLE       NOT NULL,
     ENTRY_PRICE               VARCHAR(255) NOT NULL,
-    MAX_NOTIONAL              VARCHAR(255) NOT NULL,
-    POSITION_SIDE             VARCHAR(255) NOT NULL,
+    MAX_NOTIONAL              VARCHAR(255) NULL,
+    POSITION_SIDE             VARCHAR(255) NULL,
     ACCOUNT_ID                VARCHAR(255) NOT NULL,
 
     CONSTRAINT pk_position    PRIMARY KEY (SYMBOL),
