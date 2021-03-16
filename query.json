@@ -1,0 +1,8 @@
+{
+  "symbol": "AAVEUSDT",
+  "maxPriceChangePercent":null,
+  "volumeUpperLimit":300000000000000,
+  "volumeLowerLimit":2619008083,
+  "minimumTradingAge":30,
+  "percentageFromAllTimeHigh":5
+}

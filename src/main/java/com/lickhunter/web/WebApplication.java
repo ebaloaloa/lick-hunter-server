@@ -1,7 +1,7 @@
 package com.lickhunter.web;
 
-import com.binance.client.model.enums.CandlestickInterval;
 import com.lickhunter.web.controllers.ApplicationController;
+import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,6 +14,9 @@ public class WebApplication {
 	@Autowired
 	private ApplicationController applicationController;
 
+	@Autowired
+	private LickHunterScheduledTasks lickHunterScheduledTasks;
+
 	public static void main(String[] args) {
 		SpringApplication.run(WebApplication.class, args);
 	}
@@ -22,8 +25,10 @@ public class WebApplication {
 	public void initProcess() throws Exception {
 		applicationController.subscribeCandleStickData();
 		applicationController.subscribeMarkPrice();
-		//TODO add properties to enable/disable candlestickDate on application startup
-		applicationController.getCandleStickData(CandlestickInterval.HOURLY, 100);
+		applicationController.subscribeUserData();
+		//TODO create configuration to allow execution of below api requests on application startup
+		applicationController.getAccountInformation();
+		applicationController.getMarkPriceData();
+		applicationController.getCandleStickData("HOURLY", "100");
 	}
-
 }

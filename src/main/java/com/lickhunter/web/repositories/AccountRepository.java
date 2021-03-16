@@ -2,12 +2,14 @@ package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.AccountInformation;
 import com.lickhunter.web.entities.public_.tables.records.AccountRecord;
+import com.lickhunter.web.entities.public_.tables.records.AssetRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.lickhunter.web.entities.public_.tables.Account.ACCOUNT;
@@ -74,7 +76,33 @@ public class AccountRepository {
                 .set(ACCOUNT.TOTAL_WALLET_BALANCE, input.getTotalWalletBalance().doubleValue())
                 .set(ACCOUNT.UPDATE_TIME, input.getUpdateTime())
                 .where(ACCOUNT.ID.eq(key))
-                .and(ACCOUNT.ID.eq(key))
+                .execute();
+    }
+
+    public void updateFromAsset(String accountId) {
+        List<AssetRecord> assetRecords = assetRepository.findByAccountId(accountId);
+        Double totalMargin = assetRecords.stream()
+                .map(AssetRecord::getInitialMargin)
+                .reduce(0.0, Double::sum);
+
+        Double unrealizedProfit = assetRecords.stream()
+                .map(AssetRecord::getUnrealizedProfit)
+                .reduce(0.0, Double::sum);
+
+        Double totalMarginBalance = assetRecords.stream()
+                .map(AssetRecord::getMarginBalance)
+                .reduce(0.0, Double::sum);
+
+        dsl.update(ACCOUNT)
+                .set(ACCOUNT.TOTAL_MARGIN_BALANCE, totalMarginBalance)
+                .set(ACCOUNT.TOTAL_UNREALIZED_PROFIT, unrealizedProfit)
+                .set(ACCOUNT.TOTAL_POSITION_INITIAL_MARGIN, totalMargin)
+                .set(ACCOUNT.TOTAL_INITIAL_MARGIN, totalMargin)
+                .set(ACCOUNT.TOTAL_WALLET_BALANCE, assetRepository.findByAccountId(accountId).stream()
+                        .map(AssetRecord::getMarginBalance)
+                        .reduce(0.0, Double::sum))
+                .set(ACCOUNT.MAX_WITHDRAW_AMOUNT, totalMarginBalance - totalMargin)
+                .where(ACCOUNT.ID.eq(accountId))
                 .execute();
     }
 }

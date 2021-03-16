@@ -35,10 +35,6 @@ public class CandlestickRepository {
                 .execute();
     }
 
-    public void batchInsert(List<CandlestickRecord> candlestickRecords) {
-        dsl.batchInsert(candlestickRecords);
-    }
-
     public List<CandlestickRecord> getCandleStickBySymbol(String symbol) {
         return dsl.selectFrom(CANDLESTICK)
                 .where(CANDLESTICK.SYMBOL.eq(symbol))
