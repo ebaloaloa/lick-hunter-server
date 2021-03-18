@@ -13,7 +13,6 @@ import java.util.Map;
         "lickvalue"
 })
 public class Coins {
-
     @JsonProperty("symbol")
     private String symbol;
     @JsonProperty("longoffset")

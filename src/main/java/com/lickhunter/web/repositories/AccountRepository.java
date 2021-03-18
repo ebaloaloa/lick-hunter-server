@@ -36,11 +36,9 @@ public class AccountRepository {
             this.insert(input, key);
             input.getAssets()
                     .forEach(a -> assetRepository.insert(a, key));
-
             input.getPositions()
                     .forEach(p -> positionRepository.insert(p, key));
         }
-
     }
 
     public void insert(AccountInformation input, String key) {
@@ -104,5 +102,11 @@ public class AccountRepository {
                 .set(ACCOUNT.MAX_WITHDRAW_AMOUNT, totalMarginBalance - totalMargin)
                 .where(ACCOUNT.ID.eq(accountId))
                 .execute();
+    }
+
+    public Optional<AccountRecord> findByAccountId(String accountId) {
+        return dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ID.eq(accountId))
+                .fetchOptional();
     }
 }

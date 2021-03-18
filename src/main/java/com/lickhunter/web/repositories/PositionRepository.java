@@ -104,4 +104,11 @@ public class PositionRepository {
                 .where(POSITION.ACCOUNT_ID.eq(accountId))
                 .fetch();
     }
+
+    public List<PositionRecord> findActivePositionsByAccountId(String accountId) {
+        return dsl.selectFrom(POSITION)
+                .where(POSITION.ACCOUNT_ID.eq(accountId))
+                .and(POSITION.INITIAL_MARGIN.notEqual(0.0))
+                .fetch();
+    }
 }

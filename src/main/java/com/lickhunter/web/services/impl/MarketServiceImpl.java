@@ -22,7 +22,6 @@ import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -55,6 +54,7 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
+    @Cacheable(lifetime = 1, unit = TimeUnit.MINUTES)
     public List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws Exception {
         log.debug(String.format("Retrieving Symbols using input: %s", query));
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
@@ -63,10 +63,12 @@ public class MarketServiceImpl implements MarketService {
         if(Objects.nonNull(query.getSymbol())) {
             return syncRequestClient.get24hrTickerPriceChange(query.getSymbol());
         }
+        //TODO save to database
         ExchangeInformation exchangeInformation = this.getExchangeInformation();
 
         //get symbols by trading age
         List<Symbol> symbols = exchangeInformation.getSymbols().stream()
+                .filter(s -> s.getSymbol().matches("^.*USDT$"))
                 .filter(s -> ChronoUnit.DAYS.between(Instant.ofEpochMilli(s.getOnboardDate().longValue()).atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now()) > query.getMinimumTradingAge())
                 .collect(Collectors.toList());
 
@@ -95,7 +97,7 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    @Cacheable(lifetime = 5)
+    @Cacheable(lifetime = 5, unit = TimeUnit.MINUTES)
     public ExchangeInformation getExchangeInformation() throws ServiceException {
         log.debug("Retrieving Exchange Information");
         RestTemplate restTemplate = new RestTemplate();
@@ -106,7 +108,6 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    @Async
     @RetryOnFailure(attempts = 5, delay = 5, unit = TimeUnit.SECONDS)
     public void getCandleStickData(CandlestickInterval interval, int limit) throws Exception {
         log.info("Retrieving candlesticks data");
@@ -127,6 +128,7 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
+    @Cacheable(lifetime = 1, unit = TimeUnit.MINUTES)
     public List<SymbolRecord> getMarkPriceData() throws Exception {
         log.info("Retrieving Mark Price data");
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
@@ -141,6 +143,7 @@ public class MarketServiceImpl implements MarketService {
         return priceChangeTicker -> {
             Optional<Double> markPrice = markPrices.stream()
                     .filter(m -> m.getSymbol().contains(priceChangeTicker.getSymbol()))
+                    .filter(Objects::nonNull)
                     .map(SymbolRecord::getMarkPrice)
                     .findAny();
             if(markPrice.isPresent()) {
