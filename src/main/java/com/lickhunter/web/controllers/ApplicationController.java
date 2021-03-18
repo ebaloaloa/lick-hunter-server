@@ -1,7 +1,11 @@
 package com.lickhunter.web.controllers;
 
+import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.CandlestickInterval;
+import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.services.AccountService;
+import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.websockets.BinanceSubscription;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,7 @@ public class ApplicationController extends BaseController {
     private final BinanceSubscription binanceSubscription;
     private final MarketService marketService;
     private final AccountService accountService;
+    private final FileService fileService;
 
     @GetMapping("/candlestick/subscribe")
     public ResponseEntity<?> subscribeCandleStickData() throws Exception {
@@ -52,7 +57,8 @@ public class ApplicationController extends BaseController {
 
     @GetMapping("/account_information")
     public ResponseEntity<?> getAccountInformation() throws Exception {
-        accountService.getAccountInformation();
-        return ResponseEntity.ok(null);
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        return ResponseEntity.ok(syncRequestClient.getAccountInformation());
     }
 }

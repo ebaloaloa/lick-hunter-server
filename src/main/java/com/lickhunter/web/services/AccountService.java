@@ -1,9 +1,9 @@
 package com.lickhunter.web.services;
 
-import java.io.IOException;
-
 public interface AccountService {
 
-    void getAccountInformation() throws IOException, Exception;
+    void getAccountInformation() throws Exception;
+    Boolean isOpenOrderIsolationActive(String key, Double isolationPercentage);
+    Boolean isMaxOpenActive(String key, Long maxOpen);
 
 }

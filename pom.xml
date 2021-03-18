@@ -182,7 +182,7 @@
 							<username>${db.username}</username>
 							<password>${db.password}</password>
 							<srcFiles>
-								<srcFile>src/main/resources/sql/create_tables.sql</srcFile>
+								<srcFile>src/main/resources/schema.sql</srcFile>
 							</srcFiles>
 						</configuration>
 					</execution>
@@ -235,6 +235,44 @@
 						<goals>
 							<goal>ajc</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>copy-resources-1</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/data</outputDirectory>
+							<resources>
+								<resource>
+									<directory>data</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-resources-2</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/resources/scripts</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

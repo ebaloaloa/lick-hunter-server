@@ -1,6 +1,8 @@
 package com.lickhunter.web.services.impl;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lickhunter.web.services.FileService;
 import org.springframework.context.annotation.Primary;
@@ -20,6 +22,7 @@ public class FileServiceImpl<T, FILE> implements FileService<FILE, T> {
 
     public void writeToFile(String path, String filename, T t) throws Exception {
         ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.writeValue(Paths.get(path.concat(filename)).toFile(), t);
+        ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+        writer.writeValue(Paths.get(path.concat(filename)).toFile(), t);
     }
 }

@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS candlestick, symbol, account, asset, position;
+DROP TABLE IF EXISTS candlestick, symbol, account, asset, position, coins;
 
 CREATE TABLE candlestick (
     ID                     INTEGER      NOT NULL IDENTITY(1,1),
@@ -24,7 +24,6 @@ CREATE TABLE symbol (
     LAST_FUNDING_RATE DOUBLE       NULL,
     NEXT_FUNDING_TIME DOUBLE       NULL,
     TIME              NUMBER(13)   NULL,
-    ENABLED           BOOLEAN      NULL,
 
     CONSTRAINT pk_symbol          PRIMARY KEY (symbol)
 );
@@ -75,10 +74,18 @@ CREATE TABLE position (
     POSITION_SIDE             VARCHAR(255) NULL,
     ACCOUNT_ID                VARCHAR(255) NOT NULL,
 
-    CONSTRAINT pk_position    PRIMARY KEY (SYMBOL),
+    CONSTRAINT pk_position             PRIMARY KEY (SYMBOL),
     CONSTRAINT fk_position_account_id  FOREIGN KEY (ACCOUNT_ID)    REFERENCES account(id),
 );
 
+CREATE TABLE coins (
+    SYMBOL       VARCHAR(20) NOT NULL,
+    LONG_OFFSET  DOUBLE      NULL,
+    SHORT_OFFSET DOUBLE      NULL,
+    LICK_VALUE   DOUBLE      NULL,
+
+    CONSTRAINT pk_coins PRIMARY KEY (SYMBOL)
+);
 --INDEX
 CREATE INDEX idx_symbol
 ON candlestick (symbol);

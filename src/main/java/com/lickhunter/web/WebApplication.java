@@ -1,7 +1,10 @@
 package com.lickhunter.web;
 
+import com.binance.client.model.enums.CandlestickInterval;
 import com.lickhunter.web.controllers.ApplicationController;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
+import com.lickhunter.web.services.AccountService;
+import com.lickhunter.web.services.MarketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,10 +15,16 @@ import org.springframework.context.event.EventListener;
 public class WebApplication {
 
 	@Autowired
-	private ApplicationController applicationController;
+	private AccountService accountService;
+
+	@Autowired
+	private MarketService marketService;
 
 	@Autowired
 	private LickHunterScheduledTasks lickHunterScheduledTasks;
+
+	@Autowired
+	private ApplicationController applicationController;
 
 	public static void main(String[] args) {
 		SpringApplication.run(WebApplication.class, args);
@@ -23,12 +32,20 @@ public class WebApplication {
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void initProcess() throws Exception {
-		applicationController.subscribeCandleStickData();
-		applicationController.subscribeMarkPrice();
+		//TODO Major bug for websockets. Always disconnects. Data loss
 		applicationController.subscribeUserData();
-		//TODO create configuration to allow execution of below api requests on application startup
-		applicationController.getAccountInformation();
-		applicationController.getMarkPriceData();
-		applicationController.getCandleStickData("HOURLY", "100");
+//		applicationController.subscribeCandleStickData();
+//		applicationController.subscribeMarkPrice();
+
+		/**
+		 * BinanceScheduledTasks
+		 */
+		accountService.getAccountInformation();
+		marketService.getCandleStickData(CandlestickInterval.DAILY, 500);
+		marketService.getMarkPriceData();
+
+
+
+//		lickHunterScheduledTasks.writeToCoinsJson();
 	}
 }
