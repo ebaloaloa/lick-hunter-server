@@ -152,7 +152,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>data</directory>
+                            <directory>${project.parent.basedir}/data</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
