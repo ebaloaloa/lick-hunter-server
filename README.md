@@ -135,7 +135,7 @@ To get a local copy up and running follow these simple steps.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-####query.json
+###query.json
 ````
 {
   "symbol": null,       
@@ -151,8 +151,8 @@ To get a local copy up and running follow these simple steps.
 * **volumeUpperLimit:** Maximum volume limit for the past 24H
 * **volumeLowerLimit:** Minimum volume limit within 24H
 * **minimumTradingAge:** Minimum trading age required for coins
-* **percentageFromAllTimeHigh:** Coins will not be traded when this threshold(+/-)   is reached
-####web-settings.json
+* **percentageFromAllTimeHigh:** Coins will not be traded when this threshold(+/-)   is reached  
+###web-settings.json  
 ````
 {
   "maxOpen":3,
@@ -165,9 +165,10 @@ To get a local copy up and running follow these simple steps.
 ````  
 * **maxOpen:** Maximum allowed positions at a time
 * **openOrderIsolationPercentage:** New positions will not be opened when percentage of total balance is reached
-* **marginPercentNotification:** Discord notification when margin reached a percentage of total balance  
-###Sample API Requests (WIP will update soon)
-**Save income history into database**  
+* **marginPercentNotification:** Discord notification when margin reached a percentage of total balance    
+
+###Sample API Requests (WIP will update soon)  
+**Save income history into database**   
 ```/api/application/income_history?limit=10&incomeType=REALIZED_PNL```     
 
 **Save candlestick data into database**  
