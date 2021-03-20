@@ -1,0 +1,8 @@
+{
+  "maxOpen":3,
+  "openOrderIsolationPercentage":5,
+  "longOffset": 3,
+  "shortOffset": 3,
+  "lickValue": 1000,
+  "marginPercentNotification":30
+}

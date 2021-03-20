@@ -1,0 +1,8 @@
+{
+  "symbol": null,
+  "maxPriceChangePercent":null,
+  "volumeUpperLimit":300000000,
+  "volumeLowerLimit":0,
+  "minimumTradingAge":30,
+  "percentageFromAllTimeHigh":5
+}
