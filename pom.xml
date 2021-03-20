@@ -149,6 +149,21 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>data</directory>
+							<includes>
+								<include>**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
 				<version>${properties-maven-plugin.version}</version>
@@ -239,40 +254,20 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.2.0</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+						<descriptors>
+							<descriptor>src/main/assembly/bin.xml</descriptor>
+						</descriptors>
+				</configuration>
 				<executions>
 					<execution>
-						<id>copy-resources-1</id>
-						<phase>install</phase>
+						<id>assembly</id>
+						<phase>package</phase>
 						<goals>
-							<goal>copy-resources</goal>
+							<goal>single</goal>
 						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/target/data</outputDirectory>
-							<resources>
-								<resource>
-									<directory>data</directory>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-resources-2</id>
-						<phase>install</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/target</outputDirectory>
-							<resources>
-								<resource>
-									<directory>src/main/resources/scripts</directory>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
