@@ -22,6 +22,7 @@
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>*.properties</include>
+                <include>*.json</include>
             </includes>
         </fileSet>
         <fileSet>
