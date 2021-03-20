@@ -30,7 +30,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Candlestick extends TableImpl<CandlestickRecord> {
 
-    private static final long serialVersionUID = 392439968;
+    private static final long serialVersionUID = -953002652;
 
     /**
      * The reference instance of <code>PUBLIC.CANDLESTICK</code>
@@ -150,7 +150,7 @@ public class Candlestick extends TableImpl<CandlestickRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.IDX_SYMBOL, Indexes.PRIMARY_KEY_F);
+        return Arrays.<Index>asList(Indexes.IDX_CANDLESTICK_SYMBOL, Indexes.PRIMARY_KEY_F);
     }
 
     @Override

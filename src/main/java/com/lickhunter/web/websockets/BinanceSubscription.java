@@ -84,7 +84,7 @@ public class BinanceSubscription {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         String listenKey = syncRequestClient.startUserDataStream();
-        Thread listenKeyKeepALive = new Thread(() -> this.listenKeyKeepAlive(syncRequestClient, listenKey));
+        Thread listenKeyKeepALive = new Thread(() -> syncRequestClient.keepUserDataStream(listenKey));
         executorService.scheduleWithFixedDelay(listenKeyKeepALive, 0, 45, TimeUnit.MINUTES);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(settings.getKey(), settings.getSecret());
         subscriptionClient.subscribeUserDataEvent(listenKey, ((event) -> {
@@ -149,9 +149,5 @@ public class BinanceSubscription {
     private void publishBinanceEvent(final String message) {
         BinanceEvents binanceEvents = new BinanceEvents(this, message);
         applicationEventPublisher.publishEvent(binanceEvents);
-    }
-
-    private void listenKeyKeepAlive(SyncRequestClient syncRequestClient, String listenKey) {
-        syncRequestClient.keepUserDataStream(listenKey);
     }
 }

@@ -1,11 +1,8 @@
 package com.lickhunter.web.controllers;
 
-import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.CandlestickInterval;
-import com.lickhunter.web.configs.Settings;
-import com.lickhunter.web.constants.ApplicationConstants;
+import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.services.AccountService;
-import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.websockets.BinanceSubscription;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +20,6 @@ public class ApplicationController extends BaseController {
     private final BinanceSubscription binanceSubscription;
     private final MarketService marketService;
     private final AccountService accountService;
-    private final FileService fileService;
 
     @GetMapping("/candlestick/subscribe")
     public ResponseEntity<?> subscribeCandleStickData() throws Exception {
@@ -57,8 +53,15 @@ public class ApplicationController extends BaseController {
 
     @GetMapping("/account_information")
     public ResponseEntity<?> getAccountInformation() throws Exception {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
-        return ResponseEntity.ok(syncRequestClient.getAccountInformation());
+        return ResponseEntity.ok(accountService.getAccountInformation());
+    }
+
+    @GetMapping("/income_history")
+    public ResponseEntity<?> getIncomeHistory(@RequestParam(required = false) String symbol,
+                                              @RequestParam(required = false) IncomeType incomeType,
+                                              @RequestParam(required = false) Long startTime,
+                                              @RequestParam(required = false) Long endTime,
+                                              @RequestParam(required = false) Integer limit) throws Exception {
+        return ResponseEntity.ok(accountService.getIncomeHistory(symbol, incomeType, startTime, endTime, limit));
     }
 }
