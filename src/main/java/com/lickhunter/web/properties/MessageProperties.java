@@ -4,10 +4,14 @@ import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 @Configuration
 @ConfigurationProperties(prefix = "notification")
-@PropertySource("classpath:message.properties")
+@PropertySources({
+        @PropertySource(value = "classpath:message.properties", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:message.properties", ignoreResourceNotFound = true)
+})
 @With
 @Getter
 @Setter
