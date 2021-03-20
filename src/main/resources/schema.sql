@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS candlestick, symbol, account, asset, position, coins;
+DROP TABLE IF EXISTS candlestick, symbol, account, asset, position, coins, income_history;
 
 CREATE TABLE candlestick (
     ID                     INTEGER      NOT NULL IDENTITY(1,1),
@@ -86,6 +86,26 @@ CREATE TABLE coins (
 
     CONSTRAINT pk_coins PRIMARY KEY (SYMBOL)
 );
+
+CREATE TABLE income_history (
+    ID          IDENTITY     NOT NULL,
+    TRX_ID      DOUBLE       NOT NULL,
+    SYMBOL      VARCHAR(20)  NULL,
+    INCOME_TYPE VARCHAR(20)  NULL,
+    INCOME      DOUBLE       NULL,
+    ASSET       VARCHAR(20)  NULL,
+    TIME        DOUBLE       NULL,
+    ACCOUNT_ID  VARCHAR(255) NOT NULL,
+
+    CONSTRAINT pk_income_history PRIMARY KEY (ID),
+);
 --INDEX
-CREATE INDEX idx_symbol
+CREATE INDEX idx_candlestick_symbol
 ON candlestick (symbol);
+CREATE INDEX idx_income_history_symbol
+ON income_history (symbol);
+CREATE INDEX idx_income_history_income_type
+ON income_history (income_type);
+CREATE INDEX idx_income_history_trx_id
+ON income_history (trx_id);
+

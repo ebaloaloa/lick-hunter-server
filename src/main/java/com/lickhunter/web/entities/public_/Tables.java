@@ -43,6 +43,11 @@ public class Tables {
     public static final Coins COINS = Coins.COINS;
 
     /**
+     * The table <code>PUBLIC.INCOME_HISTORY</code>.
+     */
+    public static final IncomeHistory INCOME_HISTORY = IncomeHistory.INCOME_HISTORY;
+
+    /**
      * The table <code>PUBLIC.POSITION</code>.
      */
     public static final Position POSITION = Position.POSITION;

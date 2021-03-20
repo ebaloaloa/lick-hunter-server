@@ -33,6 +33,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final Identity<CandlestickRecord, Integer> IDENTITY_CANDLESTICK = Identities0.IDENTITY_CANDLESTICK;
+    public static final Identity<IncomeHistoryRecord, Long> IDENTITY_INCOME_HISTORY = Identities0.IDENTITY_INCOME_HISTORY;
 
     // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
@@ -42,6 +43,7 @@ public class Keys {
     public static final UniqueKey<AssetRecord> PK_ASSET = UniqueKeys0.PK_ASSET;
     public static final UniqueKey<CandlestickRecord> PK_CANDLESTICK = UniqueKeys0.PK_CANDLESTICK;
     public static final UniqueKey<CoinsRecord> PK_COINS = UniqueKeys0.PK_COINS;
+    public static final UniqueKey<IncomeHistoryRecord> PK_INCOME_HISTORY = UniqueKeys0.PK_INCOME_HISTORY;
     public static final UniqueKey<PositionRecord> PK_POSITION = UniqueKeys0.PK_POSITION;
     public static final UniqueKey<SymbolRecord> PK_SYMBOL = UniqueKeys0.PK_SYMBOL;
 
@@ -58,6 +60,7 @@ public class Keys {
 
     private static class Identities0 {
         public static Identity<CandlestickRecord, Integer> IDENTITY_CANDLESTICK = Internal.createIdentity(Candlestick.CANDLESTICK, Candlestick.CANDLESTICK.ID);
+        public static Identity<IncomeHistoryRecord, Long> IDENTITY_INCOME_HISTORY = Internal.createIdentity(IncomeHistory.INCOME_HISTORY, IncomeHistory.INCOME_HISTORY.ID);
     }
 
     private static class UniqueKeys0 {
@@ -65,6 +68,7 @@ public class Keys {
         public static final UniqueKey<AssetRecord> PK_ASSET = Internal.createUniqueKey(Asset.ASSET, "PK_ASSET", Asset.ASSET.ASSET_);
         public static final UniqueKey<CandlestickRecord> PK_CANDLESTICK = Internal.createUniqueKey(Candlestick.CANDLESTICK, "PK_CANDLESTICK", Candlestick.CANDLESTICK.ID);
         public static final UniqueKey<CoinsRecord> PK_COINS = Internal.createUniqueKey(Coins.COINS, "PK_COINS", Coins.COINS.SYMBOL);
+        public static final UniqueKey<IncomeHistoryRecord> PK_INCOME_HISTORY = Internal.createUniqueKey(IncomeHistory.INCOME_HISTORY, "PK_INCOME_HISTORY", IncomeHistory.INCOME_HISTORY.ID);
         public static final UniqueKey<PositionRecord> PK_POSITION = Internal.createUniqueKey(Position.POSITION, "PK_POSITION", Position.POSITION.SYMBOL);
         public static final UniqueKey<SymbolRecord> PK_SYMBOL = Internal.createUniqueKey(Symbol.SYMBOL, "PK_SYMBOL", Symbol.SYMBOL.SYMBOL_);
     }

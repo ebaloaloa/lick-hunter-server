@@ -29,7 +29,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1042151213;
+    private static final long serialVersionUID = -431597065;
 
     /**
      * The reference instance of <code>PUBLIC</code>
@@ -55,6 +55,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.COINS</code>.
      */
     public final Coins COINS = com.lickhunter.web.entities.public_.tables.Coins.COINS;
+
+    /**
+     * The table <code>PUBLIC.INCOME_HISTORY</code>.
+     */
+    public final IncomeHistory INCOME_HISTORY = com.lickhunter.web.entities.public_.tables.IncomeHistory.INCOME_HISTORY;
 
     /**
      * The table <code>PUBLIC.POSITION</code>.
@@ -92,6 +97,7 @@ public class Public extends SchemaImpl {
             Asset.ASSET,
             Candlestick.CANDLESTICK,
             Coins.COINS,
+            IncomeHistory.INCOME_HISTORY,
             Position.POSITION,
             Symbol.SYMBOL);
     }
