@@ -256,7 +256,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
-                        <descriptor>server/src/main/assembly/bin.xml</descriptor>
+                        <descriptor>src/main/assembly/bin.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
@@ -271,6 +271,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/ebaloaloa/lick-hunter-server</url>
+        </repository>
+    </distributionManagement>
 
     <repositories>
         <repository>
