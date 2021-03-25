@@ -70,7 +70,7 @@ public class Symbol {
     @JsonProperty("underlyingSubType")
     private List<Object> underlyingSubType = null;
     @JsonProperty("settlePlan")
-    private Integer settlePlan;
+    private Long settlePlan;
     @JsonProperty("triggerProtect")
     private String triggerProtect;
     @JsonProperty("filters")
@@ -253,12 +253,12 @@ public class Symbol {
     }
 
     @JsonProperty("settlePlan")
-    public Integer getSettlePlan() {
+    public Long getSettlePlan() {
         return settlePlan;
     }
 
     @JsonProperty("settlePlan")
-    public void setSettlePlan(Integer settlePlan) {
+    public void setSettlePlan(Long settlePlan) {
         this.settlePlan = settlePlan;
     }
 
