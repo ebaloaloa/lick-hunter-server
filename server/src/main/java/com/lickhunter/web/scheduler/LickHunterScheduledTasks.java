@@ -10,6 +10,7 @@ import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
+import com.lickhunter.web.services.TradeService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
@@ -32,6 +33,7 @@ public class LickHunterScheduledTasks {
     private final AccountService accountService;
     private final FileService fileService;
     private final PositionRepository positionRepository;
+    private final TradeService tradeService;
 
     //TODO refactor this after dependency from varPairs is removed
     @Scheduled(fixedDelay = 1000 * 3)

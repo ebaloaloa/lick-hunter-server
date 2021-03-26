@@ -33,7 +33,7 @@ public class WebApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void initProcess() throws Exception {
 		//TODO Major bug for websockets. Always disconnects. Data loss
-		applicationController.subscribeUserData();
+//		applicationController.subscribeUserData();
 //		applicationController.subscribeCandleStickData();
 //		applicationController.subscribeMarkPrice();
 
