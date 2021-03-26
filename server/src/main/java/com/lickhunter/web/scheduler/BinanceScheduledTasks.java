@@ -3,6 +3,7 @@ package com.lickhunter.web.scheduler;
 import com.binance.client.model.enums.CandlestickInterval;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.MarketService;
+import com.lickhunter.web.services.TradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,10 +16,16 @@ public class BinanceScheduledTasks {
 
     private final AccountService accountService;
     private final MarketService marketService;
+    private final TradeService tradeService;
 
     @Scheduled(fixedDelay = 1000 * 5)
     public void getAccountInformation() throws Exception {
         accountService.getAccountInformation();
+    }
+
+    @Scheduled(fixedDelay = 1000 * 5)
+    public void changeMarginType() throws Exception {
+        tradeService.changeAllMarginType();
     }
 
     @Scheduled(fixedDelay = 1000 * 60)
