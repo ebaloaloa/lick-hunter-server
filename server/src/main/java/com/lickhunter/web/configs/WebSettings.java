@@ -11,7 +11,8 @@ import java.util.Map;
         "openOrderIsolationPercentage",
         "longOffset",
         "shortOffset",
-        "lickValue"
+        "lickValue",
+        "marginType"
 })
 public class WebSettings {
 
@@ -27,6 +28,8 @@ public class WebSettings {
     private Integer lickValue;
     @JsonProperty("marginPercentNotification")
     private Integer marginPercentNotification;
+    @JsonProperty("marginType")
+    private String marginType;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -88,6 +91,16 @@ public class WebSettings {
     @JsonProperty("marginPercentNotification")
     public void setMarginPercentNotification(Integer marginPercentNotification) {
         this.marginPercentNotification = marginPercentNotification;
+    }
+
+    @JsonProperty("marginType")
+    public String getMarginType() {
+        return marginType;
+    }
+
+    @JsonProperty("marginType")
+    public void setMarginType(String marginType) {
+        this.marginType = marginType;
     }
 
     @JsonAnyGetter
