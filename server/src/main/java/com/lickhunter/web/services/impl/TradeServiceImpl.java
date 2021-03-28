@@ -47,10 +47,10 @@ public class TradeServiceImpl implements TradeService {
         AtomicReference<Boolean> changed = new AtomicReference<>(false);
         positionRecordList.stream()
             .filter(positionRecord -> positionRecord.getSymbol().matches("^.*USDT$"))
+                .filter(positionRecord -> positionRecord.getInitialMargin() == 0.0)
                 .forEach(p -> {
-                    if(p.getInitialMargin() == 0.0 &&
-                            ((webSettings.getMarginType().equalsIgnoreCase(TradeConstants.ISOLATED.getValue()) && !p.getIsolated())
-                                || (webSettings.getMarginType().equalsIgnoreCase(TradeConstants.CROSSED.getValue()) && p.getIsolated()))) {
+                    if((webSettings.getMarginType().equalsIgnoreCase(TradeConstants.ISOLATED.getValue()) && !p.getIsolated())
+                                || (webSettings.getMarginType().equalsIgnoreCase(TradeConstants.CROSSED.getValue()) && p.getIsolated())) {
                         try {
                             this.marginType(p.getSymbol(), webSettings.getMarginType().toUpperCase());
                             log.info(String.format("Successfully changed margin type of %s to %s", p.getSymbol(), webSettings.getMarginType().toUpperCase()));
@@ -65,8 +65,30 @@ public class TradeServiceImpl implements TradeService {
         }
     }
 
+    public void changeAllLeverage() throws Exception {
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
+        List<PositionRecord> positionRecordList = positionRepository.findByAccountId(settings.getKey());
+        AtomicReference<Boolean> changed = new AtomicReference<>(false);
+        positionRecordList.stream()
+                .filter(positionRecord -> positionRecord.getSymbol().matches("^.*USDT$"))
+                .filter(positionRecord -> positionRecord.getLeverage() != webSettings.getLeverage().doubleValue())
+                .forEach(p -> {
+                    try {
+                        this.changeInitialLeverage(p.getSymbol(), webSettings.getLeverage());
+                        log.info(String.format("Successfully changed leverage of %s to %s", p.getSymbol(), webSettings.getLeverage()));
+                        changed.set(true);
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                    }
+                });
+        if(changed.get()) {
+            accountService.getAccountInformation();
+        }
+    }
 
     public Leverage changeInitialLeverage(String symbol, int leverage) throws Exception {
+        Leverage result = new Leverage();
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         return syncRequestClient.changeInitialLeverage(symbol, leverage);
