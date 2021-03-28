@@ -12,24 +12,27 @@ import java.util.Map;
         "longOffset",
         "shortOffset",
         "lickValue",
-        "marginType"
+        "marginType",
+        "leverage"
 })
 public class WebSettings {
 
     @JsonProperty("maxOpen")
     private Integer maxOpen;
     @JsonProperty("openOrderIsolationPercentage")
-    private Integer openOrderIsolationPercentage;
+    private Double openOrderIsolationPercentage;
     @JsonProperty("longOffset")
-    private Integer longOffset;
+    private Double longOffset;
     @JsonProperty("shortOffset")
-    private Integer shortOffset;
+    private Double shortOffset;
     @JsonProperty("lickValue")
     private Integer lickValue;
     @JsonProperty("marginPercentNotification")
     private Integer marginPercentNotification;
     @JsonProperty("marginType")
     private String marginType;
+    @JsonProperty("leverage")
+    private Integer leverage;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -44,32 +47,32 @@ public class WebSettings {
     }
 
     @JsonProperty("openOrderIsolationPercentage")
-    public Integer getOpenOrderIsolationPercentage() {
+    public Double getOpenOrderIsolationPercentage() {
         return openOrderIsolationPercentage;
     }
 
     @JsonProperty("openOrderIsolationPercentage")
-    public void setOpenOrderIsolationPercentage(Integer openOrderIsolationPercentage) {
+    public void setOpenOrderIsolationPercentage(Double openOrderIsolationPercentage) {
         this.openOrderIsolationPercentage = openOrderIsolationPercentage;
     }
 
     @JsonProperty("longOffset")
-    public Integer getLongOffset() {
+    public Double getLongOffset() {
         return longOffset;
     }
 
     @JsonProperty("longOffset")
-    public void setLongOffset(Integer longOffset) {
+    public void setLongOffset(Double longOffset) {
         this.longOffset = longOffset;
     }
 
     @JsonProperty("shortOffset")
-    public Integer getShortOffset() {
+    public Double getShortOffset() {
         return shortOffset;
     }
 
     @JsonProperty("shortOffset")
-    public void setShortOffset(Integer shortOffset) {
+    public void setShortOffset(Double shortOffset) {
         this.shortOffset = shortOffset;
     }
 
@@ -101,6 +104,16 @@ public class WebSettings {
     @JsonProperty("marginType")
     public void setMarginType(String marginType) {
         this.marginType = marginType;
+    }
+
+    @JsonProperty("leverage")
+    public Integer getLeverage() {
+        return leverage;
+    }
+
+    @JsonProperty("leverage")
+    public void setLeverage(Integer leverage) {
+        this.leverage = leverage;
     }
 
     @JsonAnyGetter

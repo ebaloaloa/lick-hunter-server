@@ -28,6 +28,11 @@ public class BinanceScheduledTasks {
         tradeService.changeAllMarginType();
     }
 
+    @Scheduled(fixedDelay = 1000 * 5)
+    public void changeLeverage() throws Exception {
+        tradeService.changeAllLeverage();
+    }
+
     @Scheduled(fixedDelay = 1000 * 60)
     public void getMarkPriceData() throws Exception {
         marketService.getMarkPriceData();
