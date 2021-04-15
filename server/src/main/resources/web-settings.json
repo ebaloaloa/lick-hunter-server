@@ -5,5 +5,6 @@
   "shortOffset": 3,
   "lickValue": 1000,
   "marginPercentNotification":30,
-  "marginType": "crossed"
+  "marginType": "crossed",
+  "leverage": 20
 }
