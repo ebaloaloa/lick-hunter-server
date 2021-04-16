@@ -80,9 +80,9 @@
 
         <!-- binance -->
         <dependency>
-            <groupId>com.binance.sdk</groupId>
-            <artifactId>binance-client</artifactId>
-            <version>1.0.8-SNAPSHOT</version>
+            <groupId>com.lickhunter</groupId>
+            <artifactId>binance-sdk</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
