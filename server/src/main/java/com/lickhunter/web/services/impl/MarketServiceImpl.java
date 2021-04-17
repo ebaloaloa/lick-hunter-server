@@ -1,5 +1,6 @@
 package com.lickhunter.web.services.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.constant.BinanceApiConstants;
 import com.binance.client.model.enums.CandlestickInterval;
@@ -12,16 +13,19 @@ import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.public_.tables.records.CandlestickRecord;
 import com.lickhunter.web.entities.public_.tables.records.SymbolRecord;
 import com.lickhunter.web.exceptions.ServiceException;
+import com.lickhunter.web.models.Liquidations;
 import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.models.market.Symbol;
+import com.lickhunter.web.properties.ApplicationConfig;
 import com.lickhunter.web.repositories.CandlestickRepository;
+import com.lickhunter.web.repositories.CoinsRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,6 +54,8 @@ public class MarketServiceImpl implements MarketService {
     private final FileService fileService;
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
+    private final ApplicationConfig applicationConfig;
+    private final CoinsRepository coinsRepository;
 
     /**
      * {@inheritDoc}
@@ -137,6 +143,24 @@ public class MarketServiceImpl implements MarketService {
                 .forEach(symbolRepository::insert);
         log.info("Successfully retrieved Mark Price data");
         return symbolRepository.findAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void getLiquidations() throws Exception {
+        log.info("Retrieving liquidation data.");
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("user-agent", "PostmanRuntime/7.26.8");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<Liquidations> liquidations = restTemplate.exchange(applicationConfig.getLiquidation(), HttpMethod.GET, entity, Liquidations.class);
+        liquidations.getBody().getData()
+                .forEach(d -> {
+                    coinsRepository.insert(d.getSymbol(), Double.valueOf(d.getMedianUsdt()));
+                });
+        log.info("Successfully retrieved liquidation data.");
     }
 
     private Predicate<PriceChangeTicker> isNearThreshHoldAllTimeHigh(Long threshHold, List<SymbolRecord> markPrices) {

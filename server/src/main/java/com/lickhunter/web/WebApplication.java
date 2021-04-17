@@ -43,9 +43,5 @@ public class WebApplication {
 		accountService.getAccountInformation();
 		marketService.getCandleStickData(CandlestickInterval.DAILY, 500);
 		marketService.getMarkPriceData();
-
-
-
-//		lickHunterScheduledTasks.writeToCoinsJson();
 	}
 }

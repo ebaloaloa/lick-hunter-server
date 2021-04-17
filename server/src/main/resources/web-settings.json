@@ -1,10 +1,11 @@
 {
-  "maxOpen":3,
+  "maxOpen":10,
   "openOrderIsolationPercentage":5,
   "longOffset": 3,
   "shortOffset": 3,
   "lickValue": 1000,
   "marginPercentNotification":30,
   "marginType": "crossed",
-  "leverage": 20
+  "leverage": 4,
+  "autoLickValue": true
 }

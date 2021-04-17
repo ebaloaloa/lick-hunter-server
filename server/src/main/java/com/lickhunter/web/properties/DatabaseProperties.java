@@ -20,13 +20,13 @@ public class DatabaseProperties {
     private DB db;
     private Jooq jooq;
 
-    private class DB {
+    public class DB {
         private String url;
         private String username;
         private String password;
     }
 
-    private class Jooq {
+    public class Jooq {
         private Sql sql;
 
         public class Sql {

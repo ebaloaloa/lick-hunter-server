@@ -5,10 +5,7 @@ import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,5 +20,11 @@ public class MarketController {
     public ResponseEntity<?> getTickerByQuery(@RequestBody TickerQueryTO query) throws Exception {
         List<PriceChangeTicker> priceChangeTickerList = marketService.getTickerByQuery(query);
         return ResponseEntity.ok(priceChangeTickerList);
+    }
+
+    @GetMapping("/liquidation")
+    public ResponseEntity<?> getLiquidation() throws Exception {
+        marketService.getLiquidations();
+        return ResponseEntity.ok(null);
     }
 }
