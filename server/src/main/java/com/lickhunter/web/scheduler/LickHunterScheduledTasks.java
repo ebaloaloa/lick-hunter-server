@@ -6,6 +6,7 @@ import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
 import com.lickhunter.web.models.Coins;
+import com.lickhunter.web.repositories.CoinsRepository;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -34,6 +36,7 @@ public class LickHunterScheduledTasks {
     private final FileService fileService;
     private final PositionRepository positionRepository;
     private final TradeService tradeService;
+    private final CoinsRepository coinsRepository;
 
     //TODO refactor this after dependency from varPairs is removed
     @Scheduled(fixedDelay = 1000 * 3)
@@ -50,7 +53,11 @@ public class LickHunterScheduledTasks {
                     .forEach(p -> {
                         Coins coins = new Coins();
                         coins.setSymbol(p.getSymbol().replace("USDT",""));
-                        coins.setLickvalue(webSettings.getLickValue().toString());
+                        if(Objects.nonNull(webSettings.getAutoLickValue()) && webSettings.getAutoLickValue()) {
+                            coins.setLickvalue(coinsRepository.findBySymbol(coins.getSymbol()).get().getLickValue().toString());
+                        } else {
+                            coins.setLickvalue(webSettings.getLickValue().toString());
+                        }
                         coins.setLongoffset(webSettings.getLongOffset().toString());
                         coins.setShortoffset(webSettings.getShortOffset().toString());
                         coinsList.add(coins);
@@ -63,7 +70,11 @@ public class LickHunterScheduledTasks {
                     .forEach(priceChangeTicker -> {
                         Coins coins = new Coins();
                         coins.setSymbol(priceChangeTicker.getSymbol().replace("USDT",""));
-                        coins.setLickvalue(webSettings.getLickValue().toString());
+                        if(Objects.nonNull(webSettings.getAutoLickValue()) && webSettings.getAutoLickValue()) {
+                            coins.setLickvalue(coinsRepository.findBySymbol(coins.getSymbol()).get().getLickValue().toString());
+                        } else {
+                            coins.setLickvalue(webSettings.getLickValue().toString());
+                        }
                         coins.setLongoffset(webSettings.getLongOffset().toString());
                         coins.setShortoffset(webSettings.getShortOffset().toString());
                         coinsList.add(coins);

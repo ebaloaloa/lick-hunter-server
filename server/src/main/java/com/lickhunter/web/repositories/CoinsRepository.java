@@ -28,4 +28,12 @@ public class CoinsRepository {
                 .where(COINS.SYMBOL.eq(symbol))
                 .fetchOptional();
     }
+
+    public void insert(String symbol, Double lickValue) {
+        dsl.insertInto(COINS)
+                .set(COINS.SYMBOL, symbol)
+                .onDuplicateKeyUpdate()
+                .set(COINS.LICK_VALUE, lickValue)
+                .execute();
+    }
 }

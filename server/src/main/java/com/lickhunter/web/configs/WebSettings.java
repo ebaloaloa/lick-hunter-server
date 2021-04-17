@@ -13,7 +13,8 @@ import java.util.Map;
         "shortOffset",
         "lickValue",
         "marginType",
-        "leverage"
+        "leverage",
+        "autoLickValue"
 })
 public class WebSettings {
 
@@ -33,6 +34,8 @@ public class WebSettings {
     private String marginType;
     @JsonProperty("leverage")
     private Integer leverage;
+    @JsonProperty("autoLickValue")
+    private Boolean autoLickValue;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -114,6 +117,16 @@ public class WebSettings {
     @JsonProperty("leverage")
     public void setLeverage(Integer leverage) {
         this.leverage = leverage;
+    }
+
+    @JsonProperty("autoLickValue")
+    public Boolean getAutoLickValue() {
+        return autoLickValue;
+    }
+
+    @JsonProperty("autoLickValue")
+    public void setAutoLickValue(Boolean autoLickValue) {
+        this.autoLickValue = autoLickValue;
     }
 
     @JsonAnyGetter
