@@ -160,12 +160,16 @@ To get a local copy up and running follow these simple steps.
   "longOffset": 3,
   "shortOffset": 3,
   "lickValue": 1000,
-  "marginPercentNotification":30
+  "marginPercentNotification":30,
+  "marginType": "crossed",
+  "leverage": 4,
+  "autoLickValue": true
 }
 ````  
 * **maxOpen:** Maximum allowed positions at a time
 * **openOrderIsolationPercentage:** New positions will not be opened when percentage of total balance is reached
-* **marginPercentNotification:** Discord notification when margin reached a percentage of total balance    
+* **marginPercentNotification:** Discord notification when margin reached a percentage of total balance  
+* **autoLickValue:** Enables retrieving of liquidation value from liquidation.wtf  
 
 ###Sample API Requests (WIP will update soon)  
 **Save income history into database**   
