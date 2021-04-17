@@ -57,4 +57,10 @@ public interface MarketService {
      * @throws ServiceException
      */
     List<SymbolRecord> getMarkPriceData() throws Exception;
+
+    /**
+     * Retrieves Liquidation Data
+     * @throws Exception
+     */
+    void getLiquidations() throws Exception;
 }
