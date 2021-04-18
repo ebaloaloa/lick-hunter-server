@@ -80,6 +80,9 @@ public class MarketServiceImpl implements MarketService {
 
         result = syncRequestClient.get24hrTickerPriceChange(null).stream()
                 .filter(t -> symbols.stream().anyMatch(s -> s.getSymbol().contains(t.getSymbol())))
+                .filter(Objects.nonNull(query.getExclude()) ?
+                        t -> query.getExclude().stream().noneMatch(e -> t.getSymbol().contains(e)) :
+                        t -> true)
                 .filter(Objects.nonNull(query.getMaxPriceChangePercent()) ?
                         t-> t.getPriceChangePercent().abs().compareTo(query.getMaxPriceChangePercent()) < 0 :
                         t -> true)

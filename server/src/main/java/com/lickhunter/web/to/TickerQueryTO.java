@@ -9,6 +9,7 @@ import lombok.With;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * A representation of the Ticker query object
@@ -51,4 +52,9 @@ public class TickerQueryTO extends AbstractTO {
      */
     @Min(value = 0, message = "Percentage From All Time High should not be less than 0")
     private Long percentageFromAllTimeHigh;
+
+    /**
+     * Exclude symbols from query
+     */
+    private List<String> exclude;
 }
