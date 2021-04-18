@@ -135,7 +135,7 @@ To get a local copy up and running follow these simple steps.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-###query.json
+###query.json  
 ````
 {
   "symbol": null,       
@@ -143,7 +143,8 @@ To get a local copy up and running follow these simple steps.
   "volumeUpperLimit":300000000,
   "volumeLowerLimit":0,
   "minimumTradingAge":30,
-  "percentageFromAllTimeHigh":5
+  "percentageFromAllTimeHigh":5,
+  "exclude":["DOGE","BTC","ETH","XRP"]
 }
 ````
 * **symbol:** Specifies the symbol pair to search. Example: ``BTCUSDT``
@@ -152,6 +153,7 @@ To get a local copy up and running follow these simple steps.
 * **volumeLowerLimit:** Minimum volume limit within 24H
 * **minimumTradingAge:** Minimum trading age required for coins
 * **percentageFromAllTimeHigh:** Coins will not be traded when this threshold(+/-)   is reached  
+* **exclude:** Coins in this list will not be included in coins.json  
 ###web-settings.json  
 ````
 {
