@@ -40,8 +40,11 @@ public class WebApplication {
 		/**
 		 * BinanceScheduledTasks
 		 */
+		marketService.getLiquidations();
+		marketService.getMarkPriceData();
 		accountService.getAccountInformation();
 		marketService.getCandleStickData(CandlestickInterval.DAILY, 500);
-		marketService.getMarkPriceData();
+
+
 	}
 }

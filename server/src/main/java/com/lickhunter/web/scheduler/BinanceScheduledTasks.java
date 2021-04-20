@@ -38,9 +38,9 @@ public class BinanceScheduledTasks {
         marketService.getMarkPriceData();
     }
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60 * 24)
+    @Scheduled(fixedDelay = 1000 * 60 * 60)
     public void getCandleStickData() throws Exception {
-        marketService.getCandleStickData(CandlestickInterval.DAILY, 5);
+        marketService.getCandleStickData(CandlestickInterval.HOURLY, 5);
     }
 
     @Scheduled(fixedDelay = 1000 * 60 * 60)
