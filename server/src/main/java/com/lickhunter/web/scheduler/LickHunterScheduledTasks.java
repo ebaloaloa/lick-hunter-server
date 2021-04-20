@@ -4,6 +4,7 @@ import com.binance.client.model.market.PriceChangeTicker;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.entities.public_.tables.records.CoinsRecord;
 import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
 import com.lickhunter.web.models.Coins;
 import com.lickhunter.web.repositories.CoinsRepository;
@@ -20,10 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -35,7 +33,6 @@ public class LickHunterScheduledTasks {
     private final AccountService accountService;
     private final FileService fileService;
     private final PositionRepository positionRepository;
-    private final TradeService tradeService;
     private final CoinsRepository coinsRepository;
 
     //TODO refactor this after dependency from varPairs is removed
@@ -53,8 +50,12 @@ public class LickHunterScheduledTasks {
                     .forEach(p -> {
                         Coins coins = new Coins();
                         coins.setSymbol(p.getSymbol().replace("USDT",""));
-                        if(Objects.nonNull(webSettings.getAutoLickValue()) && webSettings.getAutoLickValue()) {
-                            coins.setLickvalue(coinsRepository.findBySymbol(coins.getSymbol()).get().getLickValue().toString());
+                        Optional<CoinsRecord> coinsRecord = coinsRepository.findBySymbol(coins.getSymbol());
+                        if(Objects.nonNull(webSettings.getAutoLickValue()) &&
+                                webSettings.getAutoLickValue() &&
+                                coinsRecord.isPresent() &&
+                                Objects.nonNull(coinsRecord.get().getLickValue())) {
+                            coins.setLickvalue(coinsRecord.get().getLickValue().toString());
                         } else {
                             coins.setLickvalue(webSettings.getLickValue().toString());
                         }
@@ -70,8 +71,12 @@ public class LickHunterScheduledTasks {
                     .forEach(priceChangeTicker -> {
                         Coins coins = new Coins();
                         coins.setSymbol(priceChangeTicker.getSymbol().replace("USDT",""));
-                        if(Objects.nonNull(webSettings.getAutoLickValue()) && webSettings.getAutoLickValue()) {
-                            coins.setLickvalue(coinsRepository.findBySymbol(coins.getSymbol()).get().getLickValue().toString());
+                        Optional<CoinsRecord> coinsRecord = coinsRepository.findBySymbol(coins.getSymbol());
+                        if(Objects.nonNull(webSettings.getAutoLickValue()) &&
+                                webSettings.getAutoLickValue() &&
+                                coinsRecord.isPresent() &&
+                                Objects.nonNull(coinsRecord.get().getLickValue())) {
+                            coins.setLickvalue(coinsRecord.get().getLickValue().toString());
                         } else {
                             coins.setLickvalue(webSettings.getLickValue().toString());
                         }

@@ -1,6 +1,5 @@
 package com.lickhunter.web.services.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.constant.BinanceApiConstants;
 import com.binance.client.model.enums.CandlestickInterval;
@@ -170,8 +169,8 @@ public class MarketServiceImpl implements MarketService {
         return priceChangeTicker -> {
             Optional<Double> markPrice = markPrices.stream()
                     .filter(m -> m.getSymbol().contains(priceChangeTicker.getSymbol()))
-                    .filter(Objects::nonNull)
                     .map(SymbolRecord::getMarkPrice)
+                    .filter(Objects::nonNull)
                     .findAny();
             if(markPrice.isPresent()) {
                 List<CandlestickRecord> candlestickRecords = candlestickRepository.getCandleStickBySymbol(priceChangeTicker.getSymbol());
