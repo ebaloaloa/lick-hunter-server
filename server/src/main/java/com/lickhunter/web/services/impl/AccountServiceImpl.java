@@ -39,10 +39,13 @@ public class AccountServiceImpl implements AccountService {
         return accountInformation;
     }
 
-    public Boolean isOpenOrderIsolationActive(String key, Double isolationPercentage) {
+    public Boolean isOpenOrderIsolationActive(String key, Double isolationPercentage) throws Exception {
         Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(key);
         isolationPercentage = Objects.nonNull(isolationPercentage) ? isolationPercentage : 0.0;
         if(accountRecord.isPresent()) {
+            if(accountRecord.get().getTotalMarginBalance() == 0.0) {
+                throw new Exception("Account Balance is 0. Make sure you have enough balance!");
+            }
             return BigDecimal.valueOf(accountRecord.get().getTotalPositionInitialMargin())
                         .divide(BigDecimal.valueOf(accountRecord.get().getTotalMarginBalance()), 2, RoundingMode.HALF_DOWN)
                         .multiply(BigDecimal.valueOf(100))
