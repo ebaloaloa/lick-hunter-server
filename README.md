@@ -77,6 +77,7 @@
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
+    <li><a href="#donations">Donations</a></li>
   </ol>
 </details>
 
@@ -125,16 +126,16 @@ To get a local copy up and running follow these simple steps.
 2. Copy the contents of server-0.0.1-SNAPSHOT directory to root directory of LickHunterPRO
 3. Execute command. This will generate ``coins.json``
    ```sh
-   java -jar server-0.0.1-SNAPSHOT.jar
+   java -XX:+UseParallelGC -jar server-0.0.1-SNAPSHOT.jar
    ```
    OR
    ```java 
    sh start.sh
    ```
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
+<!-- USAGE EXAMPLES -->  
+## Usage  
+  
 ###query.json  
 ````
 {
@@ -143,17 +144,18 @@ To get a local copy up and running follow these simple steps.
   "volumeUpperLimit":300000000,
   "volumeLowerLimit":0,
   "minimumTradingAge":30,
-  "percentageFromAllTimeHigh":5,
+  "percentageFromAllTimeHigh":10,
   "exclude":["DOGE","BTC","ETH","XRP"]
 }
 ````
-* **symbol:** Specifies the symbol pair to search. Example: ``BTCUSDT``
-* **maxPriceChangePercentage:** Identifies the maximum allowed percentage change(-/+) for the past 24H.
+* **symbol:** Specifies the symbol pair to search. Example: ``BTCUSDT``  
+* **maxPriceChangePercentage:** Identifies the maximum allowed percentage change(-/+) for the past 24H.  
 * **volumeUpperLimit:** Maximum volume limit for the past 24H
 * **volumeLowerLimit:** Minimum volume limit within 24H
 * **minimumTradingAge:** Minimum trading age required for coins
 * **percentageFromAllTimeHigh:** Coins will not be traded when this threshold(+/-)   is reached  
 * **exclude:** Coins in this list will not be included in coins.json  
+
 ###web-settings.json  
 ````
 {
@@ -236,6 +238,14 @@ Project Link: [https://github.com/ebaloaloa/lick-hunter-admin](https://github.co
 * [Daisy's LHPControl](https://github.com/daisy613/LHPControl)
 * [LickHunterPRO](https://github.com/CryptoGnome/LickHunterPRO)
 * [doosjenever](https://github.com/doosjenever/Scripts)
+
+<!-- DONATIONS -->
+## Donations
+
+* USDT (ERC20): 0xe1eb10322d33f768c29b3c56e16beca6e1b888a7
+* USDT (TRC20): TF6zmQxCP5hT4f9r4nLe1pYaC3daEmAVuQ
+* BTC: 1N7gtMygqxKMzo1jhzBdG7WnbNpoCB87pa
+
 
 
 
