@@ -12,7 +12,6 @@ import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
-import com.lickhunter.web.services.TradeService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
@@ -43,6 +42,7 @@ public class LickHunterScheduledTasks {
         TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
         List<Coins> coinsList = new ArrayList<>();
+        List<PriceChangeTicker> priceChangeTickers = marketService.getTickerByQuery(tickerQueryTO);
         if(accountService.isMaxOpenActive(settings.getKey(), Long.valueOf(webSettings.getMaxOpen()))
                 || accountService.isOpenOrderIsolationActive(settings.getKey(), Double.valueOf(webSettings.getOpenOrderIsolationPercentage()))) {
             List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
@@ -64,7 +64,6 @@ public class LickHunterScheduledTasks {
                         coinsList.add(coins);
                     });
         } else {
-            List<PriceChangeTicker> priceChangeTickers = marketService.getTickerByQuery(tickerQueryTO);
             priceChangeTickers
                     .stream()
                     .sorted(Comparator.comparing(PriceChangeTicker::getSymbol))
@@ -85,6 +84,15 @@ public class LickHunterScheduledTasks {
                         coinsList.add(coins);
                     });
         }
+        //Auto Exclude
+        if (Objects.nonNull(tickerQueryTO.getAutoExclude()) && tickerQueryTO.getAutoExclude()) {
+            priceChangeTickers.forEach(priceChangeTicker -> {
+                if(priceChangeTicker.getPriceChangePercent().abs().compareTo(tickerQueryTO.getAutoExcludePercentage()) > 0) {
+                    tickerQueryTO.getExclude().add(priceChangeTicker.getSymbol().replace("USDT",""));
+                }
+            });
+        }
         fileService.writeToFile("./", ApplicationConstants.COINS.getValue(), coinsList);
+        fileService.writeToFile("./", ApplicationConstants.TICKER_QUERY.getValue(), tickerQueryTO);
     }
 }
