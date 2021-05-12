@@ -57,4 +57,14 @@ public class TickerQueryTO extends AbstractTO {
      * Exclude symbols from query
      */
     private List<String> exclude;
+
+    /**
+     * Enables automatic exclusion of coins based on percentage change within 24H.
+     */
+    private Boolean autoExclude;
+
+    /**
+     * Sets the percentage change for automatic exclusion.
+     */
+    private BigDecimal autoExcludePercentage;
 }

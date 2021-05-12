@@ -126,7 +126,7 @@ To get a local copy up and running follow these simple steps.
 2. Copy the contents of server-0.0.1-SNAPSHOT directory to root directory of LickHunterPRO
 3. Execute command. This will generate ``coins.json``
    ```sh
-   java -XX:+UseParallelGC -jar server-0.0.1-SNAPSHOT.jar
+   java -XX:+UseParallelGC -Xms512m -Xmx2000m -jar server-0.0.1-SNAPSHOT.jar
    ```
    OR
    ```java 
@@ -141,11 +141,13 @@ To get a local copy up and running follow these simple steps.
 {
   "symbol": null,       
   "maxPriceChangePercent":null,
-  "volumeUpperLimit":300000000,
+  "volumeUpperLimit":3000000000,
   "volumeLowerLimit":0,
   "minimumTradingAge":30,
   "percentageFromAllTimeHigh":10,
-  "exclude":["DOGE","BTC","ETH","XRP"]
+  "exclude":["DOGE","BTC","ETH","XRP"],
+  "autoExclude" : true,
+  "autoExcludePercentage" : 70
 }
 ````
 * **symbol:** Specifies the symbol pair to search. Example: ``BTCUSDT``  
@@ -155,6 +157,8 @@ To get a local copy up and running follow these simple steps.
 * **minimumTradingAge:** Minimum trading age required for coins
 * **percentageFromAllTimeHigh:** Coins will not be traded when this threshold(+/-)   is reached  
 * **exclude:** Coins in this list will not be included in coins.json  
+* **autoExclude:** Enables automatic exclusion of coins based on percentage change within 24H.  
+* **autoExcludePercentage:** Sets the percentage change for automatic exclusion.  
 
 ###web-settings.json  
 ````

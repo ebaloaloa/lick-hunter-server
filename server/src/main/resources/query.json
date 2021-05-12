@@ -1,9 +1,11 @@
 {
   "symbol": null,
   "maxPriceChangePercent":null,
-  "volumeUpperLimit":300000000,
+  "volumeUpperLimit":3000000000,
   "volumeLowerLimit":0,
   "minimumTradingAge":30,
   "percentageFromAllTimeHigh":5,
-  "exclude":["DOGE","BTC","ETH","XRP"]
+  "exclude":["DOGE","BTC","ETH","XRP"],
+  "autoExclude": true,
+  "autoExcludePercentage": 70
 }
