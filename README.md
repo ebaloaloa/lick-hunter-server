@@ -107,7 +107,7 @@ To get a local copy up and running follow these simple steps.
   
 1. Install [Maven](https://maven.apache.org/)  
 2. Install [JDK 8](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)  
-3. Instal JRE8 for Windows [JRE 8](https://www.oracle.com/java/technologies/javase-jre8-downloads.html)  
+3. Install JRE8 for Windows [JRE 8](https://www.oracle.com/java/technologies/javase-jre8-downloads.html)  
 
 ### Build  
 Note: This is only required if you want to build the project. To install the server on your machine, proceed with Installation steps.  
