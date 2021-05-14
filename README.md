@@ -158,7 +158,7 @@ Note: This is only required if you want to build the project. To install the ser
 * **minimumTradingAge:** Minimum trading age required for coins
 * **percentageFromAllTimeHigh:** Coins near all time high will not be traded.
 * **exclude:** Coins in this list will not be included in coins.json  
-* **autoExclude:** Allows permanent banning of coins when they reached certain percentage for the past 24H.
+* **autoExclude:** (true/false) Allows permanent banning of coins when they reached certain percentage for the past 24H.
 * **autoExcludePercentage:** Sets the percentage amount for automatic exclusion.  
 
 ### web-settings.json  
@@ -178,7 +178,8 @@ Note: This is only required if you want to build the project. To install the ser
 * **maxOpen:** Maximum allowed positions at a time
 * **openOrderIsolationPercentage:** New positions will not be opened when percentage of total balance is reached
 * **marginPercentNotification:** Discord notification when margin reached a percentage of total balance  
-* **autoLickValue:** Enables retrieving of liquidation value from liquidation.wtf  
+* **autoLickValue:** (true/false) Enables retrieving of liquidation value from liquidation.wtf  
+* * **marginType:** (crossed/isolated) Allows changing of margin type    
 
 ###Sample API Requests (WIP will update soon)  
 **Save income history into database**   
