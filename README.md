@@ -137,7 +137,7 @@ Note: This is only required if you want to build the project. To install the ser
 <!-- USAGE EXAMPLES -->  
 ## Usage  
   
-###query.json  
+### query.json  
 ````
 {
   "symbol": null,       
@@ -161,7 +161,7 @@ Note: This is only required if you want to build the project. To install the ser
 * **autoExclude:** Allows permanent banning of coins when they reached certain percentage for the past 24H.
 * **autoExcludePercentage:** Sets the percentage amount for automatic exclusion.  
 
-###web-settings.json  
+### web-settings.json  
 ````
 {
   "maxOpen":3,
