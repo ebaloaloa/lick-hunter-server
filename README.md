@@ -178,8 +178,8 @@ Note: This is only required if you want to build the project. To install the ser
 * **maxOpen:** Maximum allowed positions at a time
 * **openOrderIsolationPercentage:** New positions will not be opened when percentage of total balance is reached
 * **marginPercentNotification:** Discord notification when margin reached a percentage of total balance  
-* **autoLickValue:** (true/false) Enables retrieving of liquidation value from liquidation.wtf  
-* * **marginType:** (crossed/isolated) Allows changing of margin type    
+* **autoLickValue:** (true/false) If true, enables retrieving of liquidation value from liquidation.wtf. Otherwise, lickValue will be used.
+* **marginType:** (crossed/isolated) Allows changing of margin type    
 
 ###Sample API Requests (WIP will update soon)  
 **Save income history into database**   
