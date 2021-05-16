@@ -69,6 +69,7 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#telegram">Setup Telegram Bot</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -131,7 +132,30 @@ To get a local copy up and running follow these simple steps.
    OR
    ```java 
    sh start.sh
+   ```  
+
+### Telegram  
+
+1. Search for @BotFather in Telegram to create a new bot.  
+2. Type command ``/newbot`` to create a new bot.  
+3. Choose a name for your new bot.  
+4. Choose a username for your new bot.  
+6. After you have successfully created a new bot, go to ```/mybots``` to edit your newly created bot.  
+7. Select the new bot from the list.  
+8. Select API Token then copy/paste the token to ``telegram.token`` inside the application.properties.  
+9. Return to previous menu > Edit Bot > Edit Commands.  
+   Copy/Paste the following to create new commands:  
    ```
+   startprofit - Start Lickhunter Profit
+   stopprofit - Stop Lickhunter Profit
+   startwebsocket - Start Lickhunter Websocket
+   stopwebsocket - Stop Lickhunter Websocket
+   balance - Check balance
+   ```  
+10. Open application.properties and change the following values:  
+* **telegram.bot** - Name of the bot you created   
+* **telegram.username** - Your telegram username. Bots created in Telegram are public, this is to ensure that only you can see your commands.  
+* **telegram.enable** - Set to ``true`` to enable the bot. Otherwise, telegram bot will not run.  
 
 <!-- USAGE EXAMPLES -->  
 ## Usage  

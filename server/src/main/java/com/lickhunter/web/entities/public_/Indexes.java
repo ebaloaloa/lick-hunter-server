@@ -4,12 +4,19 @@
 package com.lickhunter.web.entities.public_;
 
 
-import com.lickhunter.web.entities.public_.tables.*;
+import com.lickhunter.web.entities.public_.tables.Account;
+import com.lickhunter.web.entities.public_.tables.Asset;
+import com.lickhunter.web.entities.public_.tables.Candlestick;
+import com.lickhunter.web.entities.public_.tables.Coins;
+import com.lickhunter.web.entities.public_.tables.IncomeHistory;
+import com.lickhunter.web.entities.public_.tables.Position;
+import com.lickhunter.web.entities.public_.tables.Symbol;
+
+import javax.annotation.Generated;
+
 import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.Internal;
-
-import javax.annotation.Generated;
 
 
 /**

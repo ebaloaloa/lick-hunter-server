@@ -4,14 +4,27 @@
 package com.lickhunter.web.entities.public_;
 
 
-import com.lickhunter.web.entities.public_.tables.*;
-import com.lickhunter.web.entities.public_.tables.records.*;
+import com.lickhunter.web.entities.public_.tables.Account;
+import com.lickhunter.web.entities.public_.tables.Asset;
+import com.lickhunter.web.entities.public_.tables.Candlestick;
+import com.lickhunter.web.entities.public_.tables.Coins;
+import com.lickhunter.web.entities.public_.tables.IncomeHistory;
+import com.lickhunter.web.entities.public_.tables.Position;
+import com.lickhunter.web.entities.public_.tables.Symbol;
+import com.lickhunter.web.entities.public_.tables.records.AccountRecord;
+import com.lickhunter.web.entities.public_.tables.records.AssetRecord;
+import com.lickhunter.web.entities.public_.tables.records.CandlestickRecord;
+import com.lickhunter.web.entities.public_.tables.records.CoinsRecord;
+import com.lickhunter.web.entities.public_.tables.records.IncomeHistoryRecord;
+import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
+import com.lickhunter.web.entities.public_.tables.records.SymbolRecord;
+
+import javax.annotation.Generated;
+
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
-
-import javax.annotation.Generated;
 
 
 /**
