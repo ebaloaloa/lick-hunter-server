@@ -19,4 +19,10 @@ import org.springframework.context.annotation.PropertySources;
 @RequiredArgsConstructor
 public class MessageProperties {
     private String marginThreshold;
+    private String balance;
+    private String startProfit;
+    private String stopProfit;
+    private String startWebsocket;
+    private String stopWebsocket;
+    private String telegramCommands;
 }
