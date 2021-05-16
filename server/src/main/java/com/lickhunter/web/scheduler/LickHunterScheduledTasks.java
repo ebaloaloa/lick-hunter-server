@@ -35,7 +35,7 @@ public class LickHunterScheduledTasks {
     private final CoinsRepository coinsRepository;
 
     //TODO refactor this after dependency from varPairs is removed
-    @Scheduled(fixedDelay = 1000 * 3)
+    @Scheduled(fixedRateString = "${scheduler.write-coins}")
     @Synchronized
     public void writeToCoinsJson() throws Exception {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);

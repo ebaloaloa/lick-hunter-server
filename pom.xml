@@ -19,4 +19,11 @@
 	<name>web</name>
 	<description>Web Application for Lick Hunter</description>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub OWNER Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/ebaloaloa/lick-hunter-server</url>
+		</repository>
+	</distributionManagement>
 </project>

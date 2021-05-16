@@ -5,23 +5,15 @@ package com.lickhunter.web.entities.public_;
 
 
 import com.lickhunter.web.entities.DefaultCatalog;
-import com.lickhunter.web.entities.public_.tables.Account;
-import com.lickhunter.web.entities.public_.tables.Asset;
-import com.lickhunter.web.entities.public_.tables.Candlestick;
-import com.lickhunter.web.entities.public_.tables.Coins;
-import com.lickhunter.web.entities.public_.tables.IncomeHistory;
-import com.lickhunter.web.entities.public_.tables.Position;
-import com.lickhunter.web.entities.public_.tables.Symbol;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Generated;
-
+import com.lickhunter.web.entities.public_.tables.*;
 import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
+
+import javax.annotation.Generated;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
