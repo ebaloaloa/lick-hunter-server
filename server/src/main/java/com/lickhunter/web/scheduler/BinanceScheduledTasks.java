@@ -18,32 +18,32 @@ public class BinanceScheduledTasks {
     private final MarketService marketService;
     private final TradeService tradeService;
 
-    @Scheduled(fixedDelay = 1000 * 5)
+    @Scheduled(fixedRateString = "${scheduler.account-information}")
     public void getAccountInformation() throws Exception {
         accountService.getAccountInformation();
     }
 
-    @Scheduled(fixedDelay = 1000 * 5)
+    @Scheduled(fixedRateString = "${scheduler.margin}")
     public void changeMarginType() throws Exception {
         tradeService.changeAllMarginType();
     }
 
-    @Scheduled(fixedDelay = 1000 * 5)
+    @Scheduled(fixedRateString = "${scheduler.leverage}")
     public void changeLeverage() throws Exception {
         tradeService.changeAllLeverage();
     }
 
-    @Scheduled(fixedDelay = 1000 * 60)
+    @Scheduled(fixedRateString = "${scheduler.mark-price}")
     public void getMarkPriceData() throws Exception {
         marketService.getMarkPriceData();
     }
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60)
+    @Scheduled(fixedRateString = "${scheduler.candlestick}")
     public void getCandleStickData() throws Exception {
         marketService.getCandleStickData(CandlestickInterval.HOURLY, 5);
     }
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60)
+    @Scheduled(fixedRateString = "${scheduler.liquidation}")
     public void getLiquidationData() throws Exception {
         marketService.getLiquidations();
     }
