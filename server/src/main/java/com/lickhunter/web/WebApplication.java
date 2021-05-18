@@ -11,6 +11,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
 @SpringBootApplication
 public class WebApplication {
 
@@ -43,8 +48,15 @@ public class WebApplication {
 		marketService.getLiquidations();
 		marketService.getMarkPriceData();
 		accountService.getAccountInformation();
+		accountService.getIncomeHistory(null,
+				null,
+				LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+						.atZone(ZoneId.systemDefault())
+						.toEpochSecond(),
+				LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
+						.atZone(ZoneId.systemDefault())
+						.toEpochSecond(),
+				null);
 		marketService.getCandleStickData(CandlestickInterval.DAILY, 500);
-
-
 	}
 }

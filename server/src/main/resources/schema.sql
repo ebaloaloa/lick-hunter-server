@@ -88,14 +88,14 @@ CREATE TABLE coins (
 );
 
 CREATE TABLE income_history (
-    ID          IDENTITY     NOT NULL,
-    TRX_ID      DOUBLE       NOT NULL,
-    SYMBOL      VARCHAR(20)  NULL,
-    INCOME_TYPE VARCHAR(20)  NULL,
-    INCOME      DOUBLE       NULL,
-    ASSET       VARCHAR(20)  NULL,
-    TIME        DOUBLE       NULL,
-    ACCOUNT_ID  VARCHAR(255) NOT NULL,
+    ID          IDENTITY      NOT NULL,
+    TRX_ID      BIGINT        NOT NULL,
+    SYMBOL      VARCHAR(20)   NULL,
+    INCOME_TYPE VARCHAR(20)   NULL,
+    INCOME      DECIMAL(20,8) NULL,
+    ASSET       VARCHAR(20)   NULL,
+    TIME        BIGINT        NULL,
+    ACCOUNT_ID  VARCHAR(255)  NOT NULL,
 
     CONSTRAINT pk_income_history PRIMARY KEY (ID),
 );
