@@ -1,6 +1,7 @@
 package com.lickhunter.web.scheduler;
 
 import com.binance.client.model.enums.CandlestickInterval;
+import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.services.TradeService;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -55,14 +57,17 @@ public class BinanceScheduledTasks {
 
     @Scheduled(fixedRateString = "${scheduler.income-history}")
     public void getIncomeHistory() throws Exception {
-        accountService.getIncomeHistory(null,
-                null,
-                LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
-                        .atZone(ZoneId.systemDefault())
-                        .toEpochSecond(),
-                LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
-                        .atZone(ZoneId.systemDefault())
-                        .toEpochSecond(),
-                50);
+        Arrays.stream(IncomeType.values())
+                .forEach(incomeType -> {
+                    try {
+                        accountService.getIncomeHistory(null,
+                                incomeType,
+                                null,
+                                null,
+                                50);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 }
