@@ -154,7 +154,7 @@ To get a local copy up and running follow these simple steps.
    ```  
 10. Open application.properties and change the following values:  
 * **telegram.bot** - Name of the bot you created   
-* **telegram.username** - Your telegram username. Bots created in Telegram are public, this is to ensure that only you can see your commands.  
+* **telegram.username** - List of allowed telegram usernames to have access on your bot. Bots created in Telegram are public, this is to ensure that only you can see your commands.  
 * **telegram.enable** - Set to ``true`` to enable the bot. Otherwise, telegram bot will not run.  
 
 <!-- USAGE EXAMPLES -->  

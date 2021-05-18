@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 @ConditionalOnProperty(prefix = "telegram", name ="enable", havingValue = "true")
@@ -38,7 +39,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botUserName;
 
     @Value("${telegram.username}")
-    private String userName;
+    private String[] userName;
 
     private final MessageProperties messageProperties;
     private final AccountRepository accountRepository;
@@ -61,7 +62,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         // We check if the update has a message and the message has text
-        if (update.hasMessage() && update.getMessage().hasText() && userName.equals(update.getMessage().getFrom().getUserName())) {
+        if (update.hasMessage() && update.getMessage().hasText() &&
+                Stream.of(userName)
+                        .anyMatch(u -> u.equals(update.getMessage().getFrom().getUserName()))) {
             // Set variables
             SendMessage message = new SendMessage(); // Create a message object object
             Long chat_id = update.getMessage().getChatId();
