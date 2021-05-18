@@ -5,14 +5,16 @@ package com.lickhunter.web.entities.public_.tables.records;
 
 
 import com.lickhunter.web.entities.public_.tables.IncomeHistory;
+
+import java.math.BigDecimal;
+
+import javax.annotation.Generated;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record8;
 import org.jooq.Row8;
 import org.jooq.impl.UpdatableRecordImpl;
-
-import javax.annotation.Generated;
-import java.math.BigDecimal;
 
 
 /**
