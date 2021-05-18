@@ -6,13 +6,15 @@ package com.lickhunter.web.entities;
 
 import com.lickhunter.web.entities.information_schema.InformationSchema;
 import com.lickhunter.web.entities.public_.Public;
-import org.jooq.Schema;
-import org.jooq.impl.CatalogImpl;
 
-import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Generated;
+
+import org.jooq.Schema;
+import org.jooq.impl.CatalogImpl;
 
 
 /**

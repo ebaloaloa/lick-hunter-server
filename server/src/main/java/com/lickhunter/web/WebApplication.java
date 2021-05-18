@@ -1,6 +1,7 @@
 package com.lickhunter.web;
 
 import com.binance.client.model.enums.CandlestickInterval;
+import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.controllers.ApplicationController;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 
 @SpringBootApplication
 public class WebApplication {
@@ -48,15 +50,18 @@ public class WebApplication {
 		marketService.getLiquidations();
 		marketService.getMarkPriceData();
 		accountService.getAccountInformation();
-		accountService.getIncomeHistory(null,
-				null,
-				LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
-						.atZone(ZoneId.systemDefault())
-						.toEpochSecond(),
-				LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
-						.atZone(ZoneId.systemDefault())
-						.toEpochSecond(),
-				null);
+		Arrays.stream(IncomeType.values())
+				.forEach(incomeType -> {
+					try {
+						accountService.getIncomeHistory(null,
+								incomeType,
+								null,
+								null,
+								1000);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				});
 		marketService.getCandleStickData(CandlestickInterval.DAILY, 500);
 	}
 }
