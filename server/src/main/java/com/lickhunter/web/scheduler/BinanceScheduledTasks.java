@@ -9,6 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -48,5 +53,16 @@ public class BinanceScheduledTasks {
         marketService.getLiquidations();
     }
 
-
+    @Scheduled(fixedRateString = "${scheduler.income-history}")
+    public void getIncomeHistory() throws Exception {
+        accountService.getIncomeHistory(null,
+                null,
+                LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+                        .atZone(ZoneId.systemDefault())
+                        .toEpochSecond(),
+                LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
+                        .atZone(ZoneId.systemDefault())
+                        .toEpochSecond(),
+                50);
+    }
 }

@@ -8,25 +8,14 @@ import com.lickhunter.web.entities.public_.Indexes;
 import com.lickhunter.web.entities.public_.Keys;
 import com.lickhunter.web.entities.public_.Public;
 import com.lickhunter.web.entities.public_.tables.records.IncomeHistoryRecord;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Generated;
-
-import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.Identity;
-import org.jooq.Index;
-import org.jooq.Name;
-import org.jooq.Record;
-import org.jooq.Row8;
-import org.jooq.Schema;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
+
+import javax.annotation.Generated;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -42,7 +31,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class IncomeHistory extends TableImpl<IncomeHistoryRecord> {
 
-    private static final long serialVersionUID = -750723112;
+    private static final long serialVersionUID = 2106401252;
 
     /**
      * The reference instance of <code>PUBLIC.INCOME_HISTORY</code>
@@ -65,7 +54,7 @@ public class IncomeHistory extends TableImpl<IncomeHistoryRecord> {
     /**
      * The column <code>PUBLIC.INCOME_HISTORY.TRX_ID</code>.
      */
-    public final TableField<IncomeHistoryRecord, Double> TRX_ID = createField(DSL.name("TRX_ID"), org.jooq.impl.SQLDataType.DOUBLE.nullable(false), this, "");
+    public final TableField<IncomeHistoryRecord, Long> TRX_ID = createField(DSL.name("TRX_ID"), org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.INCOME_HISTORY.SYMBOL</code>.
@@ -80,7 +69,7 @@ public class IncomeHistory extends TableImpl<IncomeHistoryRecord> {
     /**
      * The column <code>PUBLIC.INCOME_HISTORY.INCOME</code>.
      */
-    public final TableField<IncomeHistoryRecord, Double> INCOME = createField(DSL.name("INCOME"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<IncomeHistoryRecord, BigDecimal> INCOME = createField(DSL.name("INCOME"), org.jooq.impl.SQLDataType.DECIMAL(20, 8), this, "");
 
     /**
      * The column <code>PUBLIC.INCOME_HISTORY.ASSET</code>.
@@ -90,7 +79,7 @@ public class IncomeHistory extends TableImpl<IncomeHistoryRecord> {
     /**
      * The column <code>PUBLIC.INCOME_HISTORY.TIME</code>.
      */
-    public final TableField<IncomeHistoryRecord, Double> TIME = createField(DSL.name("TIME"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<IncomeHistoryRecord, Long> TIME = createField(DSL.name("TIME"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>PUBLIC.INCOME_HISTORY.ACCOUNT_ID</code>.
@@ -186,7 +175,7 @@ public class IncomeHistory extends TableImpl<IncomeHistoryRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<Long, Double, String, String, Double, String, Double, String> fieldsRow() {
+    public Row8<Long, Long, String, String, BigDecimal, String, Long, String> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 }
