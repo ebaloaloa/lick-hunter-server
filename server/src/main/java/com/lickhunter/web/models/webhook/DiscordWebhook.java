@@ -7,12 +7,15 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+        "webhook",
         "content",
         "username",
         "avatar_url"
 })
 public class DiscordWebhook {
 
+    @JsonProperty("webhook")
+    private String webhook;
     @JsonProperty("content")
     private String content;
     @JsonProperty("username")
@@ -21,6 +24,16 @@ public class DiscordWebhook {
     private String avatarUrl;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    @JsonProperty("webhook")
+    public String getWebhook() {
+        return webhook;
+    }
+
+    @JsonProperty("webhook")
+    public void setWebhook(String webhook) {
+        this.webhook = webhook;
+    }
 
     @JsonProperty("content")
     public String getContent() {
@@ -50,6 +63,10 @@ public class DiscordWebhook {
     @JsonProperty("avatar_url")
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     @JsonAnyGetter

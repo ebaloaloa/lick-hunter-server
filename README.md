@@ -50,7 +50,6 @@
     ·
     <a href="https://github.com/ebaloaloa/lick-hunter-server/issues">Request Feature</a>
   </p>
-</p>
 
 
 
@@ -147,11 +146,14 @@ Note: This is only required if you want to build the project. To install the ser
 9. Return to previous menu > Edit Bot > Edit Commands.  
    Copy/Paste the following to create new commands:  
    ```
+   balance - Check balance  
+   disablerestart - Disables scheduled restart of lickhunter  
+   enablerestart - Enables scheduled restart of lickhunter  
    startprofit - Start Lickhunter Profit
    stopprofit - Stop Lickhunter Profit
    startwebsocket - Start Lickhunter Websocket
-   stopwebsocket - Stop Lickhunter Websocket
-   balance - Check balance
+   stopwebsocket - Stop Lickhunter Websocket  
+   settings - Change active settings from user defined settings  
    ```  
 10. Open application.properties and change the following values:  
 * **telegram.bot** - Name of the bot you created   
@@ -188,17 +190,43 @@ Note: This is only required if you want to build the project. To install the ser
 ### web-settings.json  
 ````
 {
-  "maxOpen":3,
-  "openOrderIsolationPercentage":5,
-  "longOffset": 3,
-  "shortOffset": 3,
-  "lickValue": 1000,
-  "marginPercentNotification":30,
-  "marginType": "crossed",
-  "leverage": 4,
-  "autoLickValue": true
+  "active":"settings1",
+  "defaultSettings":"settings1",
+  "safe":"settings2",
+  "userDefinedSettings":{
+    "settings1":{
+      "maxOpen":10,
+      "openOrderIsolationPercentage":5,
+      "longOffset":3,
+      "shortOffset":3,
+      "lickValue":1000,
+      "marginPercentNotification":30,
+      "marginType":"crossed",
+      "leverage":4,
+      "autoLickValue":true
+    },
+    "settings2":{
+      "maxOpen":5,
+      "openOrderIsolationPercentage":3,
+      "longOffset":10,
+      "shortOffset":3,
+      "lickValue":1000,
+      "marginPercentNotification":30,
+      "marginType":"crossed",
+      "leverage":4,
+      "autoLickValue":true
+    }
+  }
 }
 ````  
+* **active:** Identifies the current active settings from the user-defined settings.  
+* **defaultSettings:** Identifies the default settings from the user-defined settings. This will be active if volatility of bitcoin is less than 
+  the specified volatility amount.  
+* **safe:** Identifies the safe settings from the user-defined settings. Safe settings will be active if bitcoin
+  reaches certain volatility. Volatility Indicator can be found here https://lunarcrush.com/developers/tradingview.
+  See application.properties to change volatility settings.  
+* **userDefinedSettings:** Users can create multiple settings. Settings in ``active`` property will be used. Users
+  can also change settings through Telegram bot. See application.properties to setup Telegram Bot.  
 * **maxOpen:** Maximum allowed positions at a time
 * **openOrderIsolationPercentage:** New positions will not be opened when percentage of total balance is reached
 * **marginPercentNotification:** Discord notification when margin reached a percentage of total balance  

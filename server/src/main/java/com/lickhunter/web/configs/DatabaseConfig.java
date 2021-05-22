@@ -1,4 +1,4 @@
-package com.lickhunter.web.properties;
+package com.lickhunter.web.configs;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.PropertySources;
 @ConfigurationProperties
 @Getter
 @Setter
-public class DatabaseProperties {
+public class DatabaseConfig {
 
     private DB db;
     private Jooq jooq;
