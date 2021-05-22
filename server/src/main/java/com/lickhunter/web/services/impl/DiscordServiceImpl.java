@@ -32,7 +32,7 @@ public class DiscordServiceImpl implements NotificationService<DiscordWebhook> {
         headers.add("user-agent", "PostmanRuntime/7.26.8");
         HttpEntity<String> entity = new HttpEntity<>(JSON.toJSONString(webhook), headers);
         if(Objects.nonNull(settings.getDiscordwebhook())) {
-            restTemplate.exchange(settings.getDiscordwebhook(), HttpMethod.POST, entity, String.class);
+            restTemplate.exchange(webhook.getWebhook(), HttpMethod.POST, entity, String.class);
         }
     }
 }

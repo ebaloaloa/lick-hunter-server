@@ -1,4 +1,4 @@
-package com.lickhunter.web.properties;
+package com.lickhunter.web.configs;
 
 import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,7 +17,7 @@ import org.springframework.context.annotation.PropertySources;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class MessageProperties {
+public class MessageConfig {
     private String marginThreshold;
     private String balance;
     private String startProfit;
@@ -25,4 +25,6 @@ public class MessageProperties {
     private String startWebsocket;
     private String stopWebsocket;
     private String telegramCommands;
+    private String socialVolumeAlerts;
+    private String twitterVolumeAlerts;
 }

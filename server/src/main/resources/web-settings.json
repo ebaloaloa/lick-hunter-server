@@ -1,11 +1,29 @@
 {
-  "maxOpen":10,
-  "openOrderIsolationPercentage":5,
-  "longOffset": 3,
-  "shortOffset": 3,
-  "lickValue": 1000,
-  "marginPercentNotification":30,
-  "marginType": "crossed",
-  "leverage": 4,
-  "autoLickValue": true
+  "active":"settings1",
+  "defaultSettings":"settings1",
+  "safe":"settings2",
+  "userDefinedSettings":{
+    "settings1":{
+      "maxOpen":10,
+      "openOrderIsolationPercentage":5,
+      "longOffset":3,
+      "shortOffset":3,
+      "lickValue":1000,
+      "marginPercentNotification":30,
+      "marginType":"crossed",
+      "leverage":4,
+      "autoLickValue":true
+    },
+    "settings2":{
+      "maxOpen":5,
+      "openOrderIsolationPercentage":3,
+      "longOffset":10,
+      "shortOffset":3,
+      "lickValue":1000,
+      "marginPercentNotification":30,
+      "marginType":"crossed",
+      "leverage":4,
+      "autoLickValue":true
+    }
+  }
 }

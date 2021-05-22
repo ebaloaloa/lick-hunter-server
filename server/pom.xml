@@ -302,6 +302,7 @@
         <jackson.version>2.12.2</jackson.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <spring.batch.version>4.3.0</spring.batch.version>
     </properties>
 
 </project>

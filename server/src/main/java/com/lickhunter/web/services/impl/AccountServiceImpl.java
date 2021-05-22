@@ -32,11 +32,11 @@ import java.util.Optional;
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final PositionRepository positionRepository;
-    private final FileService fileService;
+    private final FileService<Settings, ?> fileService;
     private final IncomeHistoryRepository incomeHistoryRepository;
 
     public AccountInformation getAccountInformation() throws Exception {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         AccountInformation accountInformation = syncRequestClient.getAccountInformation();
         accountRepository.insertOrUpdate(accountInformation, settings.getKey());
@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public List<Income> getIncomeHistory(String symbol, IncomeType incomeType, Long startTime, Long endTime, Integer limit) throws Exception {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<Income> incomeList = syncRequestClient.getIncomeHistory(symbol, incomeType, startTime, endTime, limit);
         incomeList.forEach(i -> {

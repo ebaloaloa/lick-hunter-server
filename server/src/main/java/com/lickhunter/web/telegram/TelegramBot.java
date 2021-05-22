@@ -1,14 +1,17 @@
 package com.lickhunter.web.telegram;
 
+import com.lickhunter.web.configs.MessageConfig;
 import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.public_.tables.records.AccountRecord;
 import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
-import com.lickhunter.web.properties.MessageProperties;
 import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.PositionRepository;
+import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
+import com.lickhunter.web.services.LickHunterService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +44,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Value("${telegram.username}")
     private String[] userName;
 
-    private final MessageProperties messageProperties;
+    private final MessageConfig messageProperties;
     private final AccountRepository accountRepository;
     private final PositionRepository positionRepository;
     private final FileService fileService;
     private final AccountService accountService;
+    private final LickHunterService lickHunterService;
 
     @Override
     public String getBotUsername() {
@@ -69,45 +73,67 @@ public class TelegramBot extends TelegramLongPollingBot {
             SendMessage message = new SendMessage(); // Create a message object object
             Long chat_id = update.getMessage().getChatId();
             message.setChatId(chat_id.toString());
-            if (update.getMessage().getText().equals("/start")) {
+            if (update.getMessage().getText().equals(Commands.startCommand)) {
                 message.setText(messageProperties.getTelegramCommands());
             }
             if (update.getMessage().getText().equals("/balance")) {
                 Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(settings.getKey());
                 List<PositionRecord> positionRecords = positionRepository.findByAccountId(settings.getKey());
-                if(accountRecord.isPresent()) {
-                    message.setText(String.format(messageProperties.getBalance(),
-                            BigDecimal.valueOf(accountRecord.get().getTotalWalletBalance()).setScale(2, RoundingMode.HALF_UP),
-                            BigDecimal.valueOf(accountRecord.get().getTotalUnrealizedProfit()).setScale(2, RoundingMode.HALF_UP),
-                            BigDecimal.valueOf(accountRecord.get().getTotalMaintenanceMargin())
-                                    .divide(BigDecimal.valueOf(accountRecord.get().getTotalMarginBalance()), 2)
-                                    .multiply(BigDecimal.valueOf(100))
-                                    .setScale(2, RoundingMode.HALF_UP),
-                            positionRecords.stream()
-                                    .filter(position -> position.getInitialMargin().compareTo(0.0) != 0)
-                                    .count(),
-                            accountService.getDailyPnl().setScale(2, RoundingMode.HALF_UP),
-                            accountService.getDailyPnl()
-                                    .divide(BigDecimal.valueOf(accountRecord.get().getTotalWalletBalance()), 2)
-                                    .multiply(BigDecimal.valueOf(100))
-                                    .setScale(2, RoundingMode.HALF_UP)));
-                }
+                accountRecord.ifPresent(record -> message.setText(String.format(messageProperties.getBalance(),
+                        BigDecimal.valueOf(record.getTotalWalletBalance()).setScale(2, RoundingMode.HALF_UP),
+                        BigDecimal.valueOf(record.getTotalUnrealizedProfit()).setScale(2, RoundingMode.HALF_UP),
+                        BigDecimal.valueOf(record.getTotalMaintenanceMargin())
+                                .divide(BigDecimal.valueOf(record.getTotalMarginBalance()), 2)
+                                .multiply(BigDecimal.valueOf(100))
+                                .setScale(2, RoundingMode.HALF_UP),
+                        positionRecords.stream()
+                                .filter(position -> position.getInitialMargin().compareTo(0.0) != 0)
+                                .count(),
+                        accountService.getDailyPnl().setScale(2, RoundingMode.HALF_UP),
+                        accountService.getDailyPnl()
+                                .divide(BigDecimal.valueOf(record.getTotalWalletBalance()), 2)
+                                .multiply(BigDecimal.valueOf(100))
+                                .setScale(2, RoundingMode.HALF_UP))));
             }
-            if (update.getMessage().getText().equals("/startprofit")) {
-                Runtime.getRuntime().exec("Start Profit.cmd");
+            if (update.getMessage().getText().equals(Commands.START_PROFIT)) {
+                lickHunterService.startProfit();
                 message.setText(messageProperties.getStartProfit());
             }
-            if (update.getMessage().getText().equals("/stopprofit")) {
-                Runtime.getRuntime().exec("Stop Profit.cmd");
+            if (update.getMessage().getText().equals(Commands.STOP_PROFIT)) {
+                lickHunterService.stopProfit();
                 message.setText(messageProperties.getStopProfit());
             }
-            if (update.getMessage().getText().equals("/startwebsocket")) {
-                Runtime.getRuntime().exec("Start Websocket.cmd");
+            if (update.getMessage().getText().equals(Commands.START_WEBSOCKET)) {
+                lickHunterService.startWebsocket();
                 message.setText(messageProperties.getStartWebsocket());
             }
-            if (update.getMessage().getText().equals("/stopwebsocket")) {
-                Runtime.getRuntime().exec("Stop Websocket.cmd");
+            if (update.getMessage().getText().equals(Commands.STOP_WEBSOCKET)) {
+                lickHunterService.stopWebsocket();
                 message.setText(messageProperties.getStopWebsocket());
+            }
+            if (update.getMessage().getText().equals(Commands.ENABLE_RESTART)) {
+                LickHunterScheduledTasks.restartEnabled.set(true);
+                message.setText("LickHunter scheduled restart enabled.");
+            }
+            if (update.getMessage().getText().equals(Commands.DISABLE_RESTART)) {
+                LickHunterScheduledTasks.restartEnabled.set(false);
+                message.setText("LickHunter scheduled restart disabled.");
+            }
+            if (update.getMessage().getText().contains(Commands.SETTINGS)) {
+                message.setText("Settings not found.");
+                WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
+                webSettings.getUserDefinedSettings().forEach((s, userDefinedSettings) -> {
+                    if(s.equals(update.getMessage().getText().split(" ")[1])) {
+                        webSettings.setActive(s);
+                        try {
+                            fileService.writeToFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), webSettings);
+                            message.setText("Successfully changed settings to " + s.toString());
+                        } catch (Exception e) {
+                            message.setText("Error encountered writing new settings.");
+                            log.error("Error writing settings. " + e.getMessage());
+                        }
+                    }
+                });
             }
             try {
                 execute(message); // Sending our message object to user
