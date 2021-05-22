@@ -4,6 +4,7 @@ import com.binance.client.SyncRequestClient;
 import com.binance.client.model.ResponseResult;
 import com.binance.client.model.trade.Leverage;
 import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.TradeConstants;
@@ -43,17 +44,18 @@ public class TradeServiceImpl implements TradeService {
     public void changeAllMarginType() throws Exception {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
+        UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
         List<PositionRecord> positionRecordList = positionRepository.findByAccountId(settings.getKey());
         AtomicReference<Boolean> changed = new AtomicReference<>(false);
         positionRecordList.stream()
             .filter(positionRecord -> positionRecord.getSymbol().matches("^.*USDT$"))
                 .filter(positionRecord -> positionRecord.getInitialMargin() == 0.0)
                 .forEach(p -> {
-                    if((webSettings.getMarginType().equalsIgnoreCase(TradeConstants.ISOLATED.getValue()) && !p.getIsolated())
-                                || (webSettings.getMarginType().equalsIgnoreCase(TradeConstants.CROSSED.getValue()) && p.getIsolated())) {
+                    if((activeSettings.getMarginType().equalsIgnoreCase(TradeConstants.ISOLATED.getValue()) && !p.getIsolated())
+                                || (activeSettings.getMarginType().equalsIgnoreCase(TradeConstants.CROSSED.getValue()) && p.getIsolated())) {
                         try {
-                            this.marginType(p.getSymbol(), webSettings.getMarginType().toUpperCase());
-                            log.info(String.format("Successfully changed margin type of %s to %s", p.getSymbol(), webSettings.getMarginType().toUpperCase()));
+                            this.marginType(p.getSymbol(), activeSettings.getMarginType().toUpperCase());
+                            log.info(String.format("Successfully changed margin type of %s to %s", p.getSymbol(), activeSettings.getMarginType().toUpperCase()));
                             changed.set(true);
                         } catch (Exception e) {
                             log.error(e.getMessage());
@@ -68,15 +70,16 @@ public class TradeServiceImpl implements TradeService {
     public void changeAllLeverage() throws Exception {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
+        UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
         List<PositionRecord> positionRecordList = positionRepository.findByAccountId(settings.getKey());
         AtomicReference<Boolean> changed = new AtomicReference<>(false);
         positionRecordList.stream()
                 .filter(positionRecord -> positionRecord.getSymbol().matches("^.*USDT$"))
-                .filter(positionRecord -> positionRecord.getLeverage() != webSettings.getLeverage().doubleValue())
+                .filter(positionRecord -> positionRecord.getLeverage() != activeSettings.getLeverage().doubleValue())
                 .forEach(p -> {
                     try {
-                        this.changeInitialLeverage(p.getSymbol(), webSettings.getLeverage());
-                        log.info(String.format("Successfully changed leverage of %s to %s", p.getSymbol(), webSettings.getLeverage()));
+                        this.changeInitialLeverage(p.getSymbol(), activeSettings.getLeverage());
+                        log.info(String.format("Successfully changed leverage of %s to %s", p.getSymbol(), activeSettings.getLeverage()));
                         changed.set(true);
                     } catch (Exception e) {
                         log.error(e.getMessage());

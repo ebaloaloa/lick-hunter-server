@@ -7,15 +7,14 @@ import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.PriceChangeTicker;
 import com.jcabi.aspects.Cacheable;
 import com.jcabi.aspects.RetryOnFailure;
+import com.lickhunter.web.configs.ApplicationConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.public_.tables.records.CandlestickRecord;
 import com.lickhunter.web.entities.public_.tables.records.SymbolRecord;
-import com.lickhunter.web.exceptions.ServiceException;
 import com.lickhunter.web.models.Liquidations;
 import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.models.market.Symbol;
-import com.lickhunter.web.properties.ApplicationConfig;
 import com.lickhunter.web.repositories.CandlestickRepository;
 import com.lickhunter.web.repositories.CoinsRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
@@ -50,7 +49,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MarketServiceImpl implements MarketService {
 
-    private final FileService fileService;
+    private final FileService<Settings, ?> fileService;
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
     private final ApplicationConfig applicationConfig;
@@ -62,7 +61,7 @@ public class MarketServiceImpl implements MarketService {
     @Cacheable(lifetime = 1, unit = TimeUnit.MINUTES)
     public List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws Exception {
         log.debug(String.format("Retrieving Symbols using input: %s", query));
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<PriceChangeTicker> result;
         if(Objects.nonNull(query.getSymbol())) {
@@ -106,7 +105,7 @@ public class MarketServiceImpl implements MarketService {
      * {@inheritDoc}
      */
     @Cacheable(lifetime = 5, unit = TimeUnit.MINUTES)
-    public ExchangeInformation getExchangeInformation() throws ServiceException {
+    public ExchangeInformation getExchangeInformation() {
         log.debug("Retrieving Exchange Information");
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ExchangeInformation> result = restTemplate.getForEntity(BinanceApiConstants.API_BASE_URL + "/fapi/v1/exchangeInfo", ExchangeInformation.class);
@@ -119,7 +118,7 @@ public class MarketServiceImpl implements MarketService {
     @RetryOnFailure(attempts = 5, delay = 5, unit = TimeUnit.SECONDS)
     public void getCandleStickData(CandlestickInterval interval, int limit) throws Exception {
         log.info("Retrieving candlesticks data");
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         this.getExchangeInformation().getSymbols()
                 .forEach(s -> {
@@ -139,7 +138,7 @@ public class MarketServiceImpl implements MarketService {
     @Cacheable(lifetime = 1, unit = TimeUnit.MINUTES)
     public List<SymbolRecord> getMarkPriceData() throws Exception {
         log.info("Retrieving Mark Price data");
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         syncRequestClient.getMarkPrice("")
                 .forEach(symbolRepository::insert);
@@ -150,7 +149,7 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    public void getLiquidations() throws Exception {
+    public void getLiquidations() {
         log.info("Retrieving liquidation data.");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -158,10 +157,8 @@ public class MarketServiceImpl implements MarketService {
         headers.add("user-agent", "PostmanRuntime/7.26.8");
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<Liquidations> liquidations = restTemplate.exchange(applicationConfig.getLiquidation(), HttpMethod.GET, entity, Liquidations.class);
-        liquidations.getBody().getData()
-                .forEach(d -> {
-                    coinsRepository.insert(d.getSymbol(), Double.valueOf(d.getMedianUsdt()));
-                });
+        Objects.requireNonNull(liquidations.getBody()).getData()
+                .forEach(d -> coinsRepository.insert(d.getSymbol(), Double.valueOf(d.getMedianUsdt())));
         log.info("Successfully retrieved liquidation data.");
     }
 
