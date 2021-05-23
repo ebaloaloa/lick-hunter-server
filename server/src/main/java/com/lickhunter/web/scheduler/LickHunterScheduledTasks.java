@@ -50,7 +50,8 @@ public class LickHunterScheduledTasks {
     private final NotificationService<DiscordWebhook> notificationService;
     public static AtomicBoolean restartEnabled = new AtomicBoolean(true);
     private AtomicBoolean isBotPaused = new AtomicBoolean(false);
-    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private AtomicBoolean pauseOnCloseActive = new AtomicBoolean(false);
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Future<?> future;
 
     @Scheduled(fixedRateString = "${scheduler.write-coins}")
@@ -62,9 +63,13 @@ public class LickHunterScheduledTasks {
         UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
         List<Coins> coinsList = new ArrayList<>();
         List<PriceChangeTicker> priceChangeTickers = marketService.getTickerByQuery(tickerQueryTO);
+        List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
+        if(pauseOnCloseActive.get() && positionRecords.isEmpty()) {
+            pauseBot();
+        }
         if(accountService.isMaxOpenActive(settings.getKey(), Long.valueOf(activeSettings.getMaxOpen()))
-                || accountService.isOpenOrderIsolationActive(settings.getKey(), activeSettings.getOpenOrderIsolationPercentage())) {
-            List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
+                || accountService.isOpenOrderIsolationActive(settings.getKey(), activeSettings.getOpenOrderIsolationPercentage())
+                || pauseOnCloseActive.get()) {
             positionRecords
                     .forEach(p -> {
                         Coins coins = new Coins();
@@ -162,7 +167,7 @@ public class LickHunterScheduledTasks {
                         "Bitcoin (BTC)",
                         applicationConfig.getSocialVolumePercentage()));
                 sendSentimentsDiscordNotification(webhook);
-                pauseBot();
+                pauseOnCloseActive.set(true);
             }
         }
     }
@@ -186,7 +191,7 @@ public class LickHunterScheduledTasks {
                         "Bitcoin (BTC)",
                         applicationConfig.getTwitterVolumePercentage()));
                 sendSentimentsDiscordNotification(webhook);
-                pauseBot();
+                pauseOnCloseActive.set(true);
             }
         }
     }
@@ -206,6 +211,7 @@ public class LickHunterScheduledTasks {
                 lickHunterService.startProfit();
                 lickHunterService.startWebsocket();
                 isBotPaused.set(false);
+                pauseOnCloseActive.set(false);
                 log.info("Bot is now resumed.");
             }, applicationConfig.getPauseBotHours(), TimeUnit.HOURS);
         }
