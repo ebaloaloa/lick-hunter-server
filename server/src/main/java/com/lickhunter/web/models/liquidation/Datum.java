@@ -1,5 +1,5 @@
 
-package com.lickhunter.web.models;
+package com.lickhunter.web.models.liquidation;
 
 import com.fasterxml.jackson.annotation.*;
 
