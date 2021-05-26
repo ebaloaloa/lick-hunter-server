@@ -2,8 +2,8 @@ package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.Asset;
 import com.binance.client.model.user.AccountUpdate;
-import com.lickhunter.web.entities.public_.tables.records.AssetRecord;
-import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
+import com.lickhunter.web.entities.tables.records.AssetRecord;
+import com.lickhunter.web.entities.tables.records.PositionRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.lickhunter.web.entities.public_.tables.Asset.ASSET;
+import static com.lickhunter.web.entities.tables.Asset.ASSET;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")

@@ -1,7 +1,7 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.Income;
-import com.lickhunter.web.entities.public_.tables.records.IncomeHistoryRecord;
+import com.lickhunter.web.entities.tables.records.IncomeHistoryRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
-import static com.lickhunter.web.entities.public_.tables.IncomeHistory.INCOME_HISTORY;
+import static com.lickhunter.web.entities.tables.IncomeHistory.INCOME_HISTORY;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")
@@ -39,7 +40,7 @@ public class IncomeHistoryRepository {
         dsl.update(INCOME_HISTORY)
                 .set(INCOME_HISTORY.SYMBOL, income.getSymbol())
                 .set(INCOME_HISTORY.INCOME_TYPE, income.getIncomeType())
-                .set(INCOME_HISTORY.INCOME, income.getIncome())
+                .set(INCOME_HISTORY.INCOME, income.getIncome().doubleValue())
                 .set(INCOME_HISTORY.ASSET, income.getAsset())
                 .set(INCOME_HISTORY.TIME, income.getTime())
                 .where(INCOME_HISTORY.TRX_ID.eq(Long.valueOf(income.getTranId())))
@@ -53,7 +54,7 @@ public class IncomeHistoryRepository {
                 .set(INCOME_HISTORY.TRX_ID, Long.valueOf(income.getTranId()))
                 .set(INCOME_HISTORY.SYMBOL, income.getSymbol())
                 .set(INCOME_HISTORY.INCOME_TYPE, income.getIncomeType())
-                .set(INCOME_HISTORY.INCOME, income.getIncome())
+                .set(INCOME_HISTORY.INCOME, income.getIncome().doubleValue())
                 .set(INCOME_HISTORY.ASSET, income.getAsset())
                 .set(INCOME_HISTORY.TIME, income.getTime())
                 .set(INCOME_HISTORY.ACCOUNT_ID, accountId)
