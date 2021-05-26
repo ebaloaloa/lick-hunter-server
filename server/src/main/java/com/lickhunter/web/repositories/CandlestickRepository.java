@@ -1,7 +1,7 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.market.Candlestick;
-import com.lickhunter.web.entities.public_.tables.records.CandlestickRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.CandlestickRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.lickhunter.web.entities.public_.tables.Candlestick.CANDLESTICK;
+import static com.lickhunter.web.entities.lickhunterdb.tables.Candlestick.CANDLESTICK;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")

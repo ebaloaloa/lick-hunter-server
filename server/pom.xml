@@ -25,9 +25,9 @@
 
         <!-- Database Access -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Spring -->
@@ -207,9 +207,9 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>${h2.version}</version>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>8.0.25</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -236,6 +236,12 @@
                                     <directory>src/main/java</directory>
                                 </target>
                                 <database>
+                                    <forcedTypes>
+                                        <forcedType>
+                                            <name>BOOLEAN</name>
+                                            <includeTypes>(?i:TINYINT\(1\))</includeTypes>
+                                        </forcedType>
+                                    </forcedTypes>
                                     <inputCatalog/>
                                     <inputSchema/>
                                 </database>
@@ -298,11 +304,9 @@
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
         <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-        <h2.version>1.4.198</h2.version>
         <jackson.version>2.12.2</jackson.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <spring.batch.version>4.3.0</spring.batch.version>
     </properties>
 
 </project>

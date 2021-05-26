@@ -1,8 +1,8 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.AccountInformation;
-import com.lickhunter.web.entities.public_.tables.records.AccountRecord;
-import com.lickhunter.web.entities.public_.tables.records.AssetRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.AccountRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.AssetRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.lickhunter.web.entities.public_.tables.Account.ACCOUNT;
+import static com.lickhunter.web.entities.lickhunterdb.tables.Account.ACCOUNT;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")

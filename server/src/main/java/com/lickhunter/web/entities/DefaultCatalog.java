@@ -5,7 +5,7 @@ package com.lickhunter.web.entities;
 
 
 import com.lickhunter.web.entities.information_schema.InformationSchema;
-import com.lickhunter.web.entities.public_.Public;
+import com.lickhunter.web.entities.lickhunterdb.Lickhunterdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ import org.jooq.impl.CatalogImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DefaultCatalog extends CatalogImpl {
 
-    private static final long serialVersionUID = 1505571155;
+    private static final long serialVersionUID = -1775796611;
 
     /**
      * The reference instance of <code></code>
@@ -38,14 +38,14 @@ public class DefaultCatalog extends CatalogImpl {
     public static final DefaultCatalog DEFAULT_CATALOG = new DefaultCatalog();
 
     /**
-     * The schema <code>INFORMATION_SCHEMA</code>.
+     * The schema <code>information_schema</code>.
      */
     public final InformationSchema INFORMATION_SCHEMA = com.lickhunter.web.entities.information_schema.InformationSchema.INFORMATION_SCHEMA;
 
     /**
-     * The schema <code>PUBLIC</code>.
+     * The schema <code>lickhunterdb</code>.
      */
-    public final Public PUBLIC = com.lickhunter.web.entities.public_.Public.PUBLIC;
+    public final Lickhunterdb LICKHUNTERDB = com.lickhunter.web.entities.lickhunterdb.Lickhunterdb.LICKHUNTERDB;
 
     /**
      * No further instances allowed
@@ -64,6 +64,6 @@ public class DefaultCatalog extends CatalogImpl {
     private final List<Schema> getSchemas0() {
         return Arrays.<Schema>asList(
             InformationSchema.INFORMATION_SCHEMA,
-            Public.PUBLIC);
+            Lickhunterdb.LICKHUNTERDB);
     }
 }

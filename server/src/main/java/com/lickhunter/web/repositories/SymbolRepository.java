@@ -1,7 +1,7 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.market.MarkPrice;
-import com.lickhunter.web.entities.public_.tables.records.SymbolRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.SymbolRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.lickhunter.web.entities.public_.tables.Symbol.SYMBOL;
+import static com.lickhunter.web.entities.lickhunterdb.tables.Symbol.SYMBOL;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")

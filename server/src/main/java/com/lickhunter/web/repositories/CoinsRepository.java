@@ -1,6 +1,6 @@
 package com.lickhunter.web.repositories;
 
-import com.lickhunter.web.entities.public_.tables.records.CoinsRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.CoinsRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.lickhunter.web.entities.public_.tables.Coins.COINS;
+import static com.lickhunter.web.entities.lickhunterdb.tables.Coins.COINS;
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")
 @Component

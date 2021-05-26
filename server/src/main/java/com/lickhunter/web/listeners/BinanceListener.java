@@ -6,7 +6,7 @@ import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.UserDataEventConstants;
-import com.lickhunter.web.entities.public_.tables.records.AccountRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.AccountRecord;
 import com.lickhunter.web.events.BinanceEvents;
 import com.lickhunter.web.models.webhook.DiscordWebhook;
 import com.lickhunter.web.repositories.AccountRepository;

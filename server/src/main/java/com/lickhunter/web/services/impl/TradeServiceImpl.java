@@ -8,7 +8,7 @@ import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.TradeConstants;
-import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.PositionRecord;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;

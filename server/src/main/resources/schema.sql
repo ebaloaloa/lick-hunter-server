@@ -1,15 +1,15 @@
 DROP TABLE IF EXISTS candlestick, symbol, account, asset, position, coins, income_history;
 
-CREATE TABLE candlestick (
-    ID                     INTEGER      NOT NULL IDENTITY(1,1),
+CREATE TABLE IF NOT EXISTS candlestick (
+    ID                     INTEGER      NOT NULL AUTO_INCREMENT,
     SYMBOL                 VARCHAR(20)  NOT NULL,
-    OPEN_TIME              NUMBER(13)   NOT NULL,
+    OPEN_TIME              BIGINT       NOT NULL,
     OPEN                   DOUBLE       NOT NULL,
     HIGH                   DOUBLE       NOT NULL,
     LOW                    DOUBLE       NOT NULL,
     CLOSE                  DOUBLE       NOT NULL,
     VOLUME                 DOUBLE       NOT NULL,
-    CLOSE_TIME             NUMBER(13)   NOT NULL,
+    CLOSE_TIME             BIGINT       NOT NULL,
     QUOTE_ASSET_VOLUME     DOUBLE       NOT NULL,
     NUMBER_OF_TRADES       INTEGER      NOT NULL,
     TAKER_BUY_BASE_VOLUME  DOUBLE       NOT NULL,
@@ -18,20 +18,20 @@ CREATE TABLE candlestick (
     CONSTRAINT pk_candlestick      PRIMARY KEY (id)
 );
 
-CREATE TABLE symbol (
-    SYMBOL            VARCHAR(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS symbol (
+    SYMBOL            VARCHAR(20)  NOT NULL,
     MARK_PRICE        DOUBLE       NULL,
     LAST_FUNDING_RATE DOUBLE       NULL,
     NEXT_FUNDING_TIME DOUBLE       NULL,
-    TIME              NUMBER(13)   NULL,
+    TIME              BIGINT       NULL,
 
-    CONSTRAINT pk_symbol          PRIMARY KEY (symbol)
+    CONSTRAINT pk_symbol           PRIMARY KEY (symbol)
 );
 
-CREATE TABLE account (
+CREATE TABLE IF NOT EXISTS account (
     ID                              VARCHAR(255) NOT NULL,
-    CAN_TRADE                       BOOLEAN      NOT NULL,
-    CAN_WITHDRAW                    BOOLEAN      NOT NULL,
+    CAN_TRADE                       TINYINT(1)   NOT NULL,
+    CAN_WITHDRAW                    TINYINT(1)   NOT NULL,
     FEE_TIER                        DOUBLE       NOT NULL,
     MAX_WITHDRAW_AMOUNT             DOUBLE       NOT NULL,
     TOTAL_INITIAL_MARGIN            DOUBLE       NOT NULL,
@@ -41,12 +41,12 @@ CREATE TABLE account (
     TOTAL_POSITION_INITIAL_MARGIN   DOUBLE       NOT NULL,
     TOTAL_UNREALIZED_PROFIT         DOUBLE       NOT NULL,
     TOTAL_WALLET_BALANCE            DOUBLE       NOT NULL,
-    UPDATE_TIME                     NUMBER(13)   NOT NULL,
+    UPDATE_TIME                     BIGINT       NOT NULL,
 
     CONSTRAINT pk_account      PRIMARY KEY (id)
 );
 
-CREATE TABLE asset (
+CREATE TABLE IF NOT EXISTS asset (
     ASSET                     VARCHAR(20)  NOT NULL,
     INITIAL_MARGIN            DOUBLE       NOT NULL,
     MAINT_MARGIN              DOUBLE       NOT NULL,
@@ -56,12 +56,13 @@ CREATE TABLE asset (
     POSITION_INITIAL_MARGIN   DOUBLE       NOT NULL,
     UNREALIZED_PROFIT         DOUBLE       NOT NULL,
     ACCOUNT_ID                VARCHAR(255) NOT NULL,
+
     CONSTRAINT pk_asset       PRIMARY KEY (ASSET),
-    CONSTRAINT fk_asset_account_id  FOREIGN KEY (ACCOUNT_ID)    REFERENCES account(id),
+    CONSTRAINT fk_asset_account_id  FOREIGN KEY (ACCOUNT_ID)    REFERENCES account(id)
 );
 
-CREATE TABLE position (
-    ISOLATED                  BOOLEAN      NULL,
+CREATE TABLE IF NOT EXISTS position (
+    ISOLATED                  TINYINT(1)   NULL,
     LEVERAGE                  DOUBLE       NULL,
     INITIAL_MARGIN            DOUBLE       NOT NULL,
     MAINT_MARGIN              DOUBLE       NULL,
@@ -75,10 +76,10 @@ CREATE TABLE position (
     ACCOUNT_ID                VARCHAR(255) NOT NULL,
 
     CONSTRAINT pk_position             PRIMARY KEY (SYMBOL),
-    CONSTRAINT fk_position_account_id  FOREIGN KEY (ACCOUNT_ID)    REFERENCES account(id),
+    CONSTRAINT fk_position_account_id  FOREIGN KEY (ACCOUNT_ID)    REFERENCES account(id)
 );
 
-CREATE TABLE coins (
+CREATE TABLE IF NOT EXISTS coins (
     SYMBOL       VARCHAR(20) NOT NULL,
     LONG_OFFSET  DOUBLE      NULL,
     SHORT_OFFSET DOUBLE      NULL,
@@ -87,8 +88,8 @@ CREATE TABLE coins (
     CONSTRAINT pk_coins PRIMARY KEY (SYMBOL)
 );
 
-CREATE TABLE income_history (
-    ID          IDENTITY      NOT NULL,
+CREATE TABLE IF NOT EXISTS income_history (
+    ID          INT           NOT NULL AUTO_INCREMENT,
     TRX_ID      BIGINT        NOT NULL,
     SYMBOL      VARCHAR(20)   NULL,
     INCOME_TYPE VARCHAR(20)   NULL,
@@ -97,9 +98,9 @@ CREATE TABLE income_history (
     TIME        BIGINT        NULL,
     ACCOUNT_ID  VARCHAR(255)  NOT NULL,
 
-    CONSTRAINT pk_income_history PRIMARY KEY (ID),
+    CONSTRAINT pk_income_history PRIMARY KEY (ID)
 );
---INDEX
+
 CREATE INDEX idx_candlestick_symbol
 ON candlestick (symbol);
 CREATE INDEX idx_income_history_symbol

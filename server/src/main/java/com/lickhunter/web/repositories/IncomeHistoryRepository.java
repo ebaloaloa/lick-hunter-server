@@ -1,7 +1,7 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.Income;
-import com.lickhunter.web.entities.public_.tables.records.IncomeHistoryRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.IncomeHistoryRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
-import static com.lickhunter.web.entities.public_.tables.IncomeHistory.INCOME_HISTORY;
+import static com.lickhunter.web.entities.lickhunterdb.tables.IncomeHistory.INCOME_HISTORY;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")

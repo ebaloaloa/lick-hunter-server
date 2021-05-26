@@ -2,7 +2,7 @@ package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.Position;
 import com.binance.client.model.user.PositionUpdate;
-import com.lickhunter.web.entities.public_.tables.records.PositionRecord;
+import com.lickhunter.web.entities.lickhunterdb.tables.records.PositionRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static com.lickhunter.web.entities.public_.tables.Position.POSITION;
+import static com.lickhunter.web.entities.lickhunterdb.tables.Position.POSITION;
 
 @RequiredArgsConstructor
 @Transactional(transactionManager = "transactionManager")
