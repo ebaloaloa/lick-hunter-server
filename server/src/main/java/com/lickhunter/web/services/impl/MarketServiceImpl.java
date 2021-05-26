@@ -10,9 +10,9 @@ import com.jcabi.aspects.RetryOnFailure;
 import com.lickhunter.web.configs.ApplicationConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
-import com.lickhunter.web.entities.public_.tables.records.CandlestickRecord;
-import com.lickhunter.web.entities.public_.tables.records.SymbolRecord;
-import com.lickhunter.web.models.Liquidations;
+import com.lickhunter.web.entities.tables.records.CandlestickRecord;
+import com.lickhunter.web.entities.tables.records.SymbolRecord;
+import com.lickhunter.web.models.liquidation.Liquidations;
 import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.models.market.Symbol;
 import com.lickhunter.web.repositories.CandlestickRepository;
@@ -141,7 +141,7 @@ public class MarketServiceImpl implements MarketService {
         Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         syncRequestClient.getMarkPrice("")
-                .forEach(symbolRepository::insert);
+                .forEach(symbolRepository::insertOrUpdate);
         log.info("Successfully retrieved Mark Price data");
         return symbolRepository.findAll();
     }

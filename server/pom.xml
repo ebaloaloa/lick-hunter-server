@@ -25,9 +25,9 @@
 
         <!-- Database Access -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>${sqlite.version}</version>
         </dependency>
 
         <!-- Spring -->
@@ -40,6 +40,10 @@
                     <groupId>commons-logging</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -157,9 +161,9 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${project.parent.basedir}/data</directory>
+                            <directory>${project.parent.basedir}</directory>
                             <includes>
-                                <include>**</include>
+                                <include>lickhunter.db</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
@@ -185,35 +189,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>sql-maven-plugin</artifactId>
-                <version>${sql-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <driver>${db.driver}</driver>
-                            <url>${db.url}</url>
-                            <username>${db.username}</username>
-                            <password>${db.password}</password>
-                            <srcFiles>
-                                <srcFile>src/main/resources/schema.sql</srcFile>
-                            </srcFiles>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>${h2.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
                 <version>${org.jooq.version}</version>
@@ -236,13 +211,37 @@
                                     <directory>src/main/java</directory>
                                 </target>
                                 <database>
-                                    <inputCatalog/>
-                                    <inputSchema/>
+                                    <name>org.jooq.meta.extensions.ddl.DDLDatabase</name>
+                                    <properties>
+                                        <property>
+                                            <key>scripts</key>
+                                            <value>src/main/resources/schema.sql</value>
+                                        </property>
+                                        <property>
+                                            <key>sort</key>
+                                            <value>semantic</value>
+                                        </property>
+                                        <property>
+                                            <key>unqualifiedSchema</key>
+                                            <value>none</value>
+                                        </property>
+                                        <property>
+                                            <key>defaultNameCase</key>
+                                            <value>as_is</value>
+                                        </property>
+                                    </properties>
                                 </database>
                             </generator>
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta-extensions</artifactId>
+                        <version>${org.jooq.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>com.jcabi</groupId>
@@ -294,15 +293,13 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <org.jooq.version>3.12.4</org.jooq.version>
+        <org.jooq.version>3.14.11</org.jooq.version>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
         <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-        <h2.version>1.4.198</h2.version>
         <jackson.version>2.12.2</jackson.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <spring.batch.version>4.3.0</spring.batch.version>
+        <sqlite.version>3.16.1</sqlite.version>
     </properties>
-
 </project>

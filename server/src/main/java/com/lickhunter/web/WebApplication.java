@@ -9,9 +9,8 @@ import com.lickhunter.web.services.MarketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
 @SpringBootApplication
@@ -33,7 +32,7 @@ public class WebApplication {
 		SpringApplication.run(WebApplication.class, args);
 	}
 
-	@EventListener(ApplicationReadyEvent.class)
+	@PostConstruct
 	public void initProcess() throws Exception {
 		//TODO Major bug for websockets. Always disconnects. Data loss
 //		applicationController.subscribeUserData();
@@ -43,9 +42,9 @@ public class WebApplication {
 		/**
 		 * BinanceScheduledTasks
 		 */
-		marketService.getLiquidations();
-		marketService.getMarkPriceData();
 		accountService.getAccountInformation();
+		marketService.getMarkPriceData();
+		marketService.getLiquidations();
 		Arrays.stream(IncomeType.values())
 				.forEach(incomeType -> {
 					try {

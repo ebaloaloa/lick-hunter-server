@@ -6,8 +6,8 @@ import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Income;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
-import com.lickhunter.web.entities.public_.tables.records.AccountRecord;
-import com.lickhunter.web.entities.public_.tables.records.IncomeHistoryRecord;
+import com.lickhunter.web.entities.tables.records.AccountRecord;
+import com.lickhunter.web.entities.tables.records.IncomeHistoryRecord;
 import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.IncomeHistoryRepository;
 import com.lickhunter.web.repositories.PositionRepository;
@@ -79,8 +79,8 @@ public class AccountServiceImpl implements AccountService {
         LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
         LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
         List<IncomeHistoryRecord> incomeHistoryRecords = incomeHistoryRepository.findByFromAndToDate(startOfDay, endOfDay);
-        return incomeHistoryRecords.stream()
+        return BigDecimal.valueOf(incomeHistoryRecords.stream()
                 .map(IncomeHistoryRecord::getIncome)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(0.0, Double::sum));
     }
 }

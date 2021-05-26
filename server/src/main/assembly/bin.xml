@@ -7,8 +7,11 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.parent.basedir}/data</directory>
-            <outputDirectory>data</outputDirectory>
+            <directory>${project.parent.basedir}</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>lickhunter.db</include>
+            </includes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/classes/scripts</directory>
