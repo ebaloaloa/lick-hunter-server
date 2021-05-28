@@ -64,7 +64,7 @@ public class LickHunterScheduledTasks {
         List<Coins> coinsList = new ArrayList<>();
         List<PriceChangeTicker> priceChangeTickers = marketService.getTickerByQuery(tickerQueryTO);
         List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
-        if(pauseOnCloseActive.get() && positionRecords.isEmpty()) {
+        if(pauseOnCloseActive.get() && positionRecords.isEmpty() && !isBotPaused.get()) {
             pauseBot();
         }
         if(accountService.isMaxOpenActive(settings.getKey(), Long.valueOf(activeSettings.getMaxOpen()))
@@ -167,6 +167,7 @@ public class LickHunterScheduledTasks {
                         "Bitcoin (BTC)",
                         applicationConfig.getSocialVolumePercentage()));
                 sendSentimentsDiscordNotification(webhook);
+                isBotPaused.set(false);
                 pauseOnCloseActive.set(true);
             }
         }
@@ -191,6 +192,7 @@ public class LickHunterScheduledTasks {
                         "Bitcoin (BTC)",
                         applicationConfig.getTwitterVolumePercentage()));
                 sendSentimentsDiscordNotification(webhook);
+                isBotPaused.set(false);
                 pauseOnCloseActive.set(true);
             }
         }

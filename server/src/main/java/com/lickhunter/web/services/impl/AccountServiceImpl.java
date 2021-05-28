@@ -80,6 +80,7 @@ public class AccountServiceImpl implements AccountService {
         LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
         List<IncomeHistoryRecord> incomeHistoryRecords = incomeHistoryRepository.findByFromAndToDate(startOfDay, endOfDay);
         return BigDecimal.valueOf(incomeHistoryRecords.stream()
+                .filter(incomeHistoryRecord -> !incomeHistoryRecord.getIncomeType().equals(IncomeType.TRANSFER.toString()))
                 .map(IncomeHistoryRecord::getIncome)
                 .reduce(0.0, Double::sum));
     }
