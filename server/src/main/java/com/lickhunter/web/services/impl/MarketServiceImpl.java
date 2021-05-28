@@ -158,7 +158,7 @@ public class MarketServiceImpl implements MarketService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<Liquidations> liquidations = restTemplate.exchange(applicationConfig.getLiquidation(), HttpMethod.GET, entity, Liquidations.class);
         Objects.requireNonNull(liquidations.getBody()).getData()
-                .forEach(d -> coinsRepository.insert(d.getSymbol(), Double.valueOf(d.getMedianUsdt())));
+                .forEach(d -> coinsRepository.insertOrUpdate(d.getSymbol(), Double.valueOf(d.getMedianUsdt())));
         log.info("Successfully retrieved liquidation data.");
     }
 
