@@ -45,12 +45,9 @@ public class CoinsRepository {
                 .execute();
     }
     public void insert(String symbol, Double lickValue) {
-        Optional<CoinsRecord> coinsRecord = findBySymbol(symbol);
-        if(!coinsRecord.isPresent()) {
-            dsl.insertInto(COINS)
-                .set(COINS.SYMBOL, symbol)
-                .set(COINS.LICK_VALUE, lickValue)
-                .execute();
-        }
+        dsl.insertInto(COINS)
+            .set(COINS.SYMBOL, symbol)
+            .set(COINS.LICK_VALUE, lickValue)
+            .execute();
     }
 }
