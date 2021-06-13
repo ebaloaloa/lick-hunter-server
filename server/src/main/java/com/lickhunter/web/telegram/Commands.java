@@ -10,5 +10,7 @@ public class Commands {
     public static final String ENABLE_RESTART = commandInitChar + "enablerestart";
     public static final String DISABLE_RESTART = commandInitChar + "disablerestart";
     public static final String SETTINGS = commandInitChar + "settings";
+    public static final String PAUSE_BOT = commandInitChar + "pause";
+    public static final String RESUME_BOT = commandInitChar + "resume";
 
 }

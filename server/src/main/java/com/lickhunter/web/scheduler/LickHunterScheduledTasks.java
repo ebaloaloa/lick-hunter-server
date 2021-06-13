@@ -25,10 +25,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
@@ -52,7 +49,7 @@ public class LickHunterScheduledTasks {
     private AtomicBoolean isBotPaused = new AtomicBoolean(false);
     private AtomicBoolean pauseOnCloseActive = new AtomicBoolean(false);
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private Future<?> future;
+    private ScheduledFuture<?> future;
 
     @Scheduled(fixedRateString = "${scheduler.write-coins}")
     @Synchronized
@@ -148,6 +145,21 @@ public class LickHunterScheduledTasks {
         }
     }
 
+    public void pauseOnClose() {
+        isBotPaused.set(false);
+        pauseOnCloseActive.set(true);
+        log.info("Bot will pause after all positions are closed.");
+    }
+
+    public void resumeBot() {
+        restartEnabled.set(true);
+        lickHunterService.startProfit();
+        lickHunterService.startWebsocket();
+        isBotPaused.set(false);
+        pauseOnCloseActive.set(false);
+        log.info("Bot is now resumed.");
+    }
+
     private void socialVolumeAlert(SentimentsAsset sentimentsAsset) throws Exception {
         TimeSeries current = sentimentsAsset.getData().get(0).getTimeSeries().get(0);
         TimeSeries previous = sentimentsAsset.getData().get(0).getTimeSeries().get(1);
@@ -207,15 +219,8 @@ public class LickHunterScheduledTasks {
             lickHunterService.stopProfit();
             lickHunterService.stopWebsocket();
             isBotPaused.set(true);
-            log.info(String.format("Bot paused. It will resume after %s hours", applicationConfig.getPauseBotHours()));
-            future = executorService.schedule(() -> {
-                restartEnabled.set(true);
-                lickHunterService.startProfit();
-                lickHunterService.startWebsocket();
-                isBotPaused.set(false);
-                pauseOnCloseActive.set(false);
-                log.info("Bot is now resumed.");
-            }, applicationConfig.getPauseBotHours(), TimeUnit.HOURS);
+            log.info(String.format("Bot is now paused. It will resume after %s hours", applicationConfig.getPauseBotHours()));
+            future = executorService.schedule(this::resumeBot, applicationConfig.getPauseBotHours().longValue(), TimeUnit.HOURS);
         }
     }
 
@@ -225,8 +230,10 @@ public class LickHunterScheduledTasks {
             if(sentimentsAsset.getData().get(0).getVolatility()
                     .compareTo(applicationConfig.getChangeSettingsVolatility())  >= 0) {
                 webSettings.setActive(webSettings.getSafe());
+                log.info("Changed to safe settings: " + webSettings.getSafe());
             } else {
                 webSettings.setActive(webSettings.getDefaultSettings());
+                log.info("Changed to default settings: " + webSettings.getDefaultSettings());
             }
             fileService.writeToFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), webSettings);
         }

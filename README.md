@@ -154,6 +154,8 @@ Note: This is only required if you want to build the project. To install the ser
    startwebsocket - Start Lickhunter Websocket
    stopwebsocket - Stop Lickhunter Websocket  
    settings - Change active settings from user defined settings  
+   pause - Pause bot after all positions are closed  
+   resume - Resume bot  
    ```  
 10. Open application.properties and change the following values:  
 * **telegram.bot** - Name of the bot you created   
