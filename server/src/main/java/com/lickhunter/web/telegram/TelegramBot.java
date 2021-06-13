@@ -50,6 +50,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final FileService fileService;
     private final AccountService accountService;
     private final LickHunterService lickHunterService;
+    private final LickHunterScheduledTasks lickHunterScheduledTasks;
 
     @Override
     public String getBotUsername() {
@@ -118,6 +119,14 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (update.getMessage().getText().equals(Commands.DISABLE_RESTART)) {
                 LickHunterScheduledTasks.restartEnabled.set(false);
                 message.setText("LickHunter scheduled restart disabled.");
+            }
+            if (update.getMessage().getText().equals(Commands.PAUSE_BOT)) {
+                lickHunterScheduledTasks.pauseOnClose();
+                message.setText("LickHunter will pause after all positions are closed.");
+            }
+            if (update.getMessage().getText().equals(Commands.RESUME_BOT)) {
+                lickHunterScheduledTasks.resumeBot();
+                message.setText("LickHunter will resume trading.");
             }
             if (update.getMessage().getText().contains(Commands.SETTINGS)) {
                 message.setText("Settings not found.");
