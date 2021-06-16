@@ -134,6 +134,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 webSettings.getUserDefinedSettings().forEach((s, userDefinedSettings) -> {
                     if(s.equals(update.getMessage().getText().split(" ")[1])) {
                         webSettings.setActive(s);
+                        webSettings.setDefaultSettings(s);
                         try {
                             fileService.writeToFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), webSettings);
                             message.setText("Successfully changed settings to " + s);

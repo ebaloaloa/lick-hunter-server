@@ -65,7 +65,7 @@ public class BinanceSubscription {
                                 candlestick.setNumTrades(event.getNumTrades().intValue());
                                 candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
                                 candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
-                                candlestickRepository.insert(s.getSymbol(), candlestick);
+                                candlestickRepository.insert(s.getSymbol(), candlestick, CandlestickInterval.FIFTEEN_MINUTES);
                                 startTime.set(candlestick.getOpenTime());
                             }
                         }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage())));

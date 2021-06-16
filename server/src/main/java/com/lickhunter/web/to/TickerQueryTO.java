@@ -67,4 +67,9 @@ public class TickerQueryTO extends AbstractTO {
      * Sets the percentage change for automatic exclusion.
      */
     private BigDecimal autoExcludePercentage;
+
+    /**
+     * Enables the Bollinger Bands Strategy
+     */
+    private Boolean bbStrategy;
 }

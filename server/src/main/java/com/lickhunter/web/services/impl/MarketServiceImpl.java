@@ -20,12 +20,15 @@ import com.lickhunter.web.repositories.CoinsRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
+import com.lickhunter.web.services.TechnicalIndicatorService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.ta4j.core.BarSeries;
+import org.ta4j.core.Strategy;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -54,6 +57,7 @@ public class MarketServiceImpl implements MarketService {
     private final SymbolRepository symbolRepository;
     private final ApplicationConfig applicationConfig;
     private final CoinsRepository coinsRepository;
+    private final TechnicalIndicatorService technicalIndicatorService;
 
     /**
      * {@inheritDoc}
@@ -98,6 +102,20 @@ public class MarketServiceImpl implements MarketService {
                             .negate())
                     .collect(Collectors.toList());
         }
+        //Bollinger Bands
+        if(Objects.nonNull(query.getBbStrategy()) && query.getBbStrategy()) {
+            result = result.stream()
+                    .filter(t -> {
+                        Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(t.getSymbol());
+                        if(symbolRecord.isPresent()) {
+                            BarSeries barSeries = technicalIndicatorService.getBarSeries(symbolRecord.get().getSymbol(), CandlestickInterval.FIFTEEN_MINUTES);
+                            Strategy strategy = technicalIndicatorService.bollingerBandsStrategy(barSeries, symbolRecord.get().getMarkPrice());
+                            return strategy.getEntryRule().isSatisfied(barSeries.getEndIndex());
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
         return result;
     }
 
@@ -127,7 +145,7 @@ public class MarketServiceImpl implements MarketService {
                     candleStickList.stream()
                             .filter(c -> candlestickRecords.stream()
                                     .noneMatch(cr -> c.getOpenTime().compareTo((cr.getOpenTime())) == 0))
-                            .forEach(c -> candlestickRepository.insert(s.getSymbol(), c));
+                            .forEach(c -> candlestickRepository.insert(s.getSymbol(), c, interval));
                 });
         log.info("Successfully retrieved Candlestick data");
     }
