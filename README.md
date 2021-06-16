@@ -101,15 +101,16 @@ Front-end development is in progress. [front-end repo](https://github.com/ebaloa
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+To get a local copy up and running follow these simple steps.  
+  
+### Prerequisites  
+  
+1. Install [Maven](https://maven.apache.org/)  
+2. Install [JDK 8](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)  
+3. Install JRE8 for Windows [JRE 8](https://www.oracle.com/java/technologies/javase-jre8-downloads.html)  
 
-### Prerequisites
-
-1. Install [Maven](https://maven.apache.org/)
-2. Install [JDK](https://www.oracle.com/sg/java/technologies/javase-downloads.html)
-3. Set JAVA_HOME environment variable to JDK installation folder
-
-### Build
+### Build  
+Note: This is only required if you want to build the project. To install the server on your machine, proceed with Installation steps.  
 
 1. Clone the repo
    ```sh
@@ -121,8 +122,8 @@ To get a local copy up and running follow these simple steps.
    ```
    
 ### Installation
-
-1. Unzip server-0.0.1-SNAPSHOT-distribution.zip from the ``server/target`` directory
+1. Get the latest version from releases. https://github.com/ebaloaloa/lick-hunter-server/releases
+1. Unzip server-0.0.1-SNAPSHOT-distribution.zip directory
 2. Copy the contents of server-0.0.1-SNAPSHOT directory to root directory of LickHunterPRO
 3. Execute command. This will generate ``coins.json``
    ```sh
@@ -164,7 +165,7 @@ To get a local copy up and running follow these simple steps.
 <!-- USAGE EXAMPLES -->  
 ## Usage  
   
-###query.json  
+### query.json  
 ````
 {
   "symbol": null,       
@@ -178,17 +179,17 @@ To get a local copy up and running follow these simple steps.
   "autoExcludePercentage" : 70
 }
 ````
-* **symbol:** Specifies the symbol pair to search. Example: ``BTCUSDT``  
+* **symbol:** Specifies the symbol pair to search. Set to 'null' to query all available coins from Binance. Example: ``BTCUSDT``  
 * **maxPriceChangePercentage:** Identifies the maximum allowed percentage change(-/+) for the past 24H.  
 * **volumeUpperLimit:** Maximum volume limit for the past 24H
 * **volumeLowerLimit:** Minimum volume limit within 24H
 * **minimumTradingAge:** Minimum trading age required for coins
-* **percentageFromAllTimeHigh:** Coins will not be traded when this threshold(+/-)   is reached  
+* **percentageFromAllTimeHigh:** Coins near all time high will not be traded.
 * **exclude:** Coins in this list will not be included in coins.json  
-* **autoExclude:** Enables automatic exclusion of coins based on percentage change within 24H.  
-* **autoExcludePercentage:** Sets the percentage change for automatic exclusion.  
+* **autoExclude:** (true/false) Allows permanent banning of coins when they reached certain percentage for the past 24H.
+* **autoExcludePercentage:** Sets the percentage amount for automatic exclusion.  
 
-###web-settings.json  
+### web-settings.json  
 ````
 {
   "active":"settings1",
@@ -231,7 +232,8 @@ To get a local copy up and running follow these simple steps.
 * **maxOpen:** Maximum allowed positions at a time
 * **openOrderIsolationPercentage:** New positions will not be opened when percentage of total balance is reached
 * **marginPercentNotification:** Discord notification when margin reached a percentage of total balance  
-* **autoLickValue:** Enables retrieving of liquidation value from liquidation.wtf  
+* **autoLickValue:** (true/false) If true, enables retrieving of liquidation value from liquidation.wtf. Otherwise, lickValue will be used.
+* **marginType:** (crossed/isolated) Allows changing of margin type    
 
 ###Sample API Requests (WIP will update soon)  
 **Save income history into database**   
