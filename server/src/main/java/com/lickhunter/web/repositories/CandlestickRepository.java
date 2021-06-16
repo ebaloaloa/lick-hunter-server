@@ -1,5 +1,6 @@
 package com.lickhunter.web.repositories;
 
+import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.market.Candlestick;
 import com.lickhunter.web.entities.tables.records.CandlestickRecord;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class CandlestickRepository {
 
     private final DSLContext dsl;
 
-    public void insert(String symbol, Candlestick candlestick) {
+    public void insert(String symbol, Candlestick candlestick, CandlestickInterval candlestickInterval) {
         dsl.insertInto(CANDLESTICK)
                 .set(CANDLESTICK.SYMBOL, symbol)
                 .set(CANDLESTICK.OPEN_TIME, candlestick.getOpenTime())
@@ -32,12 +33,20 @@ public class CandlestickRepository {
                 .set(CANDLESTICK.NUMBER_OF_TRADES, candlestick.getNumTrades())
                 .set(CANDLESTICK.TAKER_BUY_BASE_VOLUME, candlestick.getTakerBuyBaseAssetVolume().doubleValue())
                 .set(CANDLESTICK.TAKER_BUY_QUOTE_VOLUME, candlestick.getTakerBuyQuoteAssetVolume().doubleValue())
+                .set(CANDLESTICK.TIMEFRAME, candlestickInterval.name())
                 .execute();
     }
 
     public List<CandlestickRecord> getCandleStickBySymbol(String symbol) {
         return dsl.selectFrom(CANDLESTICK)
                 .where(CANDLESTICK.SYMBOL.eq(symbol))
+                .fetch();
+    }
+
+    public List<CandlestickRecord> getCandleStickBySymbolAndTimeframe(String symbol, CandlestickInterval timeframe) {
+        return dsl.selectFrom(CANDLESTICK)
+                .where(CANDLESTICK.SYMBOL.eq(symbol))
+                .and(CANDLESTICK.TIMEFRAME.eq(timeframe.name()))
                 .fetch();
     }
 }

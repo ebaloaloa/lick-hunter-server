@@ -43,7 +43,7 @@ public class BinanceScheduledTasks {
 
     @Scheduled(fixedRateString = "${scheduler.candlestick}")
     public void getCandleStickData() throws Exception {
-        marketService.getCandleStickData(CandlestickInterval.HOURLY, 5);
+        marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
     }
 
     @Scheduled(fixedRateString = "${scheduler.liquidation}")

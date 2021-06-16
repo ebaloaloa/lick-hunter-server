@@ -7,5 +7,6 @@
   "percentageFromAllTimeHigh":5,
   "exclude":["DOGE","BTC","ETH","XRP"],
   "autoExclude": true,
-  "autoExcludePercentage": 70
+  "autoExcludePercentage": 70,
+  "bbStrategy": false
 }

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 
 import static com.lickhunter.web.entities.tables.IncomeHistory.INCOME_HISTORY;
 
