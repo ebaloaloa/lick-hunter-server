@@ -1129,7 +1129,6 @@ class RestApiRequestImpl {
                 element.setIncome(item.getBigDecimal("income"));
                 element.setAsset(item.getString("asset"));
                 element.setTime(item.getLong("time"));
-                element.setTranId(item.getString("tranId"));
                 result.add(element);
             });
             return result;

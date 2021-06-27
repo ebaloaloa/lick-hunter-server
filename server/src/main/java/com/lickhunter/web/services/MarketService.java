@@ -20,15 +20,20 @@ public interface MarketService {
      * @return List of PriceChangeTicker
      * @throws ServiceException
      */
-    List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws ServiceException, Exception;
+    List<SymbolRecord> getTickerByQuery(TickerQueryTO query) throws Exception;
 
     /**
      * Current exchange trading rules and symbol information
      * @return ExchangeInformation
      * @throws ServiceException
      */
-    ExchangeInformation getExchangeInformation() throws ServiceException;
+    void getExchangeInformation() throws ServiceException;
 
+    /**
+     * Retrieves the rolling 24h price ticker
+     * @throws ServiceException
+     */
+    void get24hrTickerPriceChange() throws Exception;
     /**
      * Manually retrieve candlestick data
      * @param interval

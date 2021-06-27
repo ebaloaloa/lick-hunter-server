@@ -21,7 +21,6 @@ public class BatchCancelOrders {
         JSONArray orderIds = new JSONArray();
         orderIds.add(180L);
         orderIds.add(181L);
-        System.out.println(syncRequestClient.batchCancelOrders("BTCUSDT", orderIds.toJSONString(), null));
 
         // batch cancel by client order ids
 //        JSONArray origClientOrderIds = new JSONArray();

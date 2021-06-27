@@ -1,14 +1,19 @@
 package com.lickhunter.web.scheduler;
 
+import com.binance.client.constant.BinanceApiConstants;
 import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.enums.IncomeType;
+import com.lickhunter.web.exceptions.ServiceException;
+import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.services.TradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
@@ -36,19 +41,19 @@ public class BinanceScheduledTasks {
         tradeService.changeAllLeverage();
     }
 
-    @Scheduled(fixedRateString = "${scheduler.mark-price}")
-    public void getMarkPriceData() throws Exception {
-        marketService.getMarkPriceData();
-    }
-
-    @Scheduled(fixedRateString = "${scheduler.candlestick}")
-    public void getCandleStickData() throws Exception {
-        marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
-    }
-
     @Scheduled(fixedRateString = "${scheduler.liquidation}")
     public void getLiquidationData() throws Exception {
         marketService.getLiquidations();
+    }
+
+    @Scheduled(fixedRateString = "${scheduler.exchange-information}")
+    public void getExchangeInformation() throws ServiceException {
+        marketService.getExchangeInformation();
+    }
+
+    @Scheduled(fixedRateString = "${scheduler.ticker-price-change}")
+    public void get24hrTickerPriceChange() throws Exception {
+        marketService.get24hrTickerPriceChange();
     }
 
     @Scheduled(fixedRateString = "${scheduler.income-history}")

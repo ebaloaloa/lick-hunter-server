@@ -10,6 +10,5 @@ public class GetAggregateTrades {
         RequestOptions options = new RequestOptions();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(PrivateConfig.API_KEY, PrivateConfig.SECRET_KEY,
                 options);
-        System.out.println(syncRequestClient.getAggregateTrades("BTCUSDT", null, null, null, 5));
     }
 }
