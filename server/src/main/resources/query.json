@@ -9,5 +9,9 @@
   "autoExclude": true,
   "autoExcludePercentage": 70,
   "bbStrategy": false,
-  "bbBarCount": 20
+  "bbTimeframe": "15m",
+  "bbBarCount": 20,
+  "cciStrategy": false,
+  "cciBarCount": 20,
+  "cciTimeframe": "15m"
 }

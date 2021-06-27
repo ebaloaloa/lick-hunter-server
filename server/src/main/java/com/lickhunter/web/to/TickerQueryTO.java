@@ -74,7 +74,27 @@ public class TickerQueryTO extends AbstractTO {
     private Boolean bbStrategy;
 
     /**
+     * Timeframe to be used for Bollinger Bands
+     */
+    private String bbTimeframe;
+
+    /**
      * Length or number of bars for Bollinger Bands
      */
     private int bbBarCount;
+
+    /**
+     * Enables the CCI Correction Strategy
+     */
+    private Boolean cciStrategy;
+
+    /**
+     * Length or number of bars for CCI
+     */
+    private int cciBarCount;
+
+    /**
+     * Timeframe to be used for CCI
+     */
+    private String cciTimeframe;
 }
