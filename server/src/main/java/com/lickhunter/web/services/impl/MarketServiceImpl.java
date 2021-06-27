@@ -5,6 +5,7 @@ import com.binance.client.constant.BinanceApiConstants;
 import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.PriceChangeTicker;
+import com.jcabi.aspects.Async;
 import com.jcabi.aspects.Cacheable;
 import com.jcabi.aspects.RetryOnFailure;
 import com.lickhunter.web.configs.ApplicationConfig;
@@ -12,6 +13,7 @@ import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.tables.records.CandlestickRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
+import com.lickhunter.web.exceptions.ServiceException;
 import com.lickhunter.web.models.liquidation.Liquidations;
 import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.models.market.Symbol;
@@ -62,43 +64,38 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    @Cacheable(lifetime = 1, unit = TimeUnit.MINUTES)
-    public List<PriceChangeTicker> getTickerByQuery(TickerQueryTO query) throws Exception {
+    public List<SymbolRecord> getTickerByQuery(TickerQueryTO query) throws Exception {
         log.debug(String.format("Retrieving Symbols using input: %s", query));
-        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
-        List<PriceChangeTicker> result;
+        List<SymbolRecord> result;
         if(Objects.nonNull(query.getSymbol())) {
-            return syncRequestClient.get24hrTickerPriceChange(query.getSymbol());
+            return symbolRepository.findBySymbols(query.getSymbol());
         }
-        //TODO save to database
-        ExchangeInformation exchangeInformation = this.getExchangeInformation();
+        List<SymbolRecord> symbolRecords = symbolRepository.findAll();
 
         //get symbols by trading age
-        List<Symbol> symbols = exchangeInformation.getSymbols().stream()
+        List<SymbolRecord> symbols = symbolRecords.stream()
                 .filter(s -> s.getSymbol().matches("^.*USDT$"))
-                .filter(s -> ChronoUnit.DAYS.between(Instant.ofEpochMilli(s.getOnboardDate().longValue()).atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now()) > query.getMinimumTradingAge())
+                .filter(s -> ChronoUnit.DAYS.between(Instant.ofEpochMilli(s.getOnboardDate()).atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now()) > query.getMinimumTradingAge())
                 .collect(Collectors.toList());
 
-        result = syncRequestClient.get24hrTickerPriceChange(null).stream()
+        result = symbolRepository.findAll().stream()
                 .filter(t -> symbols.stream().anyMatch(s -> s.getSymbol().contains(t.getSymbol())))
                 .filter(Objects.nonNull(query.getExclude()) ?
                         t -> query.getExclude().stream().noneMatch(e -> t.getSymbol().contains(e)) :
                         t -> true)
                 .filter(Objects.nonNull(query.getMaxPriceChangePercent()) ?
-                        t-> t.getPriceChangePercent().abs().compareTo(query.getMaxPriceChangePercent()) < 0 :
+                        t-> BigDecimal.valueOf(t.getPriceChangePercent()).abs().compareTo(query.getMaxPriceChangePercent()) < 0 :
                         t -> true)
                 .filter(Objects.nonNull(query.getVolumeLowerLimit()) && Objects.nonNull(query.getVolumeUpperLimit()) ?
-                        t -> t.getQuoteVolume().compareTo(query.getVolumeLowerLimit()) > 0 &&
-                            t.getQuoteVolume().compareTo(query.getVolumeUpperLimit()) < 0
+                        t -> t.getQuoteVolume().compareTo(query.getVolumeLowerLimit().doubleValue()) > 0 &&
+                            t.getQuoteVolume().compareTo(query.getVolumeUpperLimit().doubleValue()) < 0
                         : t -> true)
                 .collect(Collectors.toList());
 
         //all time high
-        List<SymbolRecord> markPrices = symbolRepository.findAll();
         if(Objects.nonNull(query.getPercentageFromAllTimeHigh())) {
             result = result.stream()
-                    .filter(isNearThreshHoldAllTimeHigh(query.getPercentageFromAllTimeHigh(), markPrices)
+                    .filter(isNearThreshHoldAllTimeHigh(query.getPercentageFromAllTimeHigh(), symbolRecords)
                             .negate())
                     .collect(Collectors.toList());
         }
@@ -109,7 +106,7 @@ public class MarketServiceImpl implements MarketService {
                         Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(t.getSymbol());
                         if(symbolRecord.isPresent()) {
                             BarSeries barSeries = technicalIndicatorService.getBarSeries(symbolRecord.get().getSymbol(), CandlestickInterval.FIFTEEN_MINUTES);
-                            Strategy strategy = technicalIndicatorService.bollingerBandsStrategy(barSeries, symbolRecord.get().getMarkPrice());
+                            Strategy strategy = technicalIndicatorService.bollingerBandsStrategy(barSeries, symbolRecord.get().getMarkPrice(), query.getBbBarCount());
                             return strategy.getEntryRule().isSatisfied(barSeries.getEndIndex());
                         }
                         return true;
@@ -122,12 +119,19 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    @Cacheable(lifetime = 5, unit = TimeUnit.MINUTES)
-    public ExchangeInformation getExchangeInformation() {
+    public void getExchangeInformation() {
         log.debug("Retrieving Exchange Information");
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ExchangeInformation> result = restTemplate.getForEntity(BinanceApiConstants.API_BASE_URL + "/fapi/v1/exchangeInfo", ExchangeInformation.class);
-        return result.getBody();
+        Objects.requireNonNull(result.getBody()).getSymbols().forEach(symbolRepository::insertOrUpdate);
+    }
+
+    public void get24hrTickerPriceChange() throws Exception {
+        log.info("Retrieving 24h Ticker Price Change");
+        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        List<PriceChangeTicker> priceChangeTickers = syncRequestClient.get24hrTickerPriceChange(null);
+        priceChangeTickers.forEach(symbolRepository::insertOrUpdate);
     }
 
     /**
@@ -138,7 +142,9 @@ public class MarketServiceImpl implements MarketService {
         log.info("Retrieving candlesticks data");
         Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
-        this.getExchangeInformation().getSymbols()
+        symbolRepository.findAll()
+                .stream()
+                .filter(symbolRecord -> symbolRecord.getSymbol().matches("^.*USDT$"))
                 .forEach(s -> {
                     List<CandlestickRecord> candlestickRecords = candlestickRepository.getCandleStickBySymbol(s.getSymbol());
                     List<Candlestick> candleStickList = syncRequestClient.getCandlestick(s.getSymbol(), interval, null, null, limit);
@@ -167,6 +173,7 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
+    @Async
     public void getLiquidations() {
         log.info("Retrieving liquidation data.");
         RestTemplate restTemplate = new RestTemplate();
@@ -180,7 +187,7 @@ public class MarketServiceImpl implements MarketService {
         log.info("Successfully retrieved liquidation data.");
     }
 
-    private Predicate<PriceChangeTicker> isNearThreshHoldAllTimeHigh(Long threshHold, List<SymbolRecord> markPrices) {
+    private Predicate<SymbolRecord> isNearThreshHoldAllTimeHigh(Long threshHold, List<SymbolRecord> markPrices) {
         return priceChangeTicker -> {
             Optional<Double> markPrice = markPrices.stream()
                     .filter(m -> m.getSymbol().contains(priceChangeTicker.getSymbol()))

@@ -10,6 +10,5 @@ public class GetFundingRate {
         RequestOptions options = new RequestOptions();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(PrivateConfig.API_KEY, PrivateConfig.SECRET_KEY,
                 options);
-        System.out.println(syncRequestClient.getFundingRate("BTCUSDT", null, null, null));
     }
 }

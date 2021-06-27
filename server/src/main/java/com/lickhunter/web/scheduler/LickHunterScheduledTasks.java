@@ -5,6 +5,7 @@ import com.lickhunter.web.configs.*;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.tables.records.CoinsRecord;
 import com.lickhunter.web.entities.tables.records.PositionRecord;
+import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.models.Coins;
 import com.lickhunter.web.models.sentiments.SentimentsAsset;
 import com.lickhunter.web.models.sentiments.TimeSeries;
@@ -62,7 +63,7 @@ public class LickHunterScheduledTasks {
         WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
         UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
         List<Coins> coinsList = new ArrayList<>();
-        List<PriceChangeTicker> priceChangeTickers = marketService.getTickerByQuery(tickerQueryTO);
+        List<SymbolRecord> symbolRecords = marketService.getTickerByQuery(tickerQueryTO);
         List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
         if(pauseOnCloseActive.get() && positionRecords.isEmpty() && !isBotPaused.get()) {
             pauseBot();
@@ -88,12 +89,12 @@ public class LickHunterScheduledTasks {
                         coinsList.add(coins);
                     });
         } else {
-            priceChangeTickers
+            symbolRecords
                     .stream()
-                    .sorted(Comparator.comparing(PriceChangeTicker::getSymbol))
-                    .forEach(priceChangeTicker -> {
+                    .sorted(Comparator.comparing(SymbolRecord::getSymbol))
+                    .forEach(symbolRecord -> {
                         Coins coins = new Coins();
-                        coins.setSymbol(priceChangeTicker.getSymbol().replace("USDT",""));
+                        coins.setSymbol(symbolRecord.getSymbol().replace("USDT",""));
                         Optional<CoinsRecord> coinsRecord = coinsRepository.findBySymbol(coins.getSymbol());
                         if(Objects.nonNull(activeSettings.getAutoLickValue()) &&
                                 activeSettings.getAutoLickValue() &&
@@ -110,8 +111,8 @@ public class LickHunterScheduledTasks {
         }
         //Auto Exclude
         if (Objects.nonNull(tickerQueryTO.getAutoExclude()) && tickerQueryTO.getAutoExclude()) {
-            priceChangeTickers.forEach(priceChangeTicker -> {
-                if(priceChangeTicker.getPriceChangePercent().abs().compareTo(tickerQueryTO.getAutoExcludePercentage()) > 0) {
+            symbolRecords.forEach(priceChangeTicker -> {
+                if(BigDecimal.valueOf(priceChangeTicker.getPriceChangePercent()).abs().compareTo(tickerQueryTO.getAutoExcludePercentage()) > 0) {
                     tickerQueryTO.getExclude().add(priceChangeTicker.getSymbol().replace("USDT",""));
                 }
             });

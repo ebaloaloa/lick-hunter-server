@@ -41,20 +41,19 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
             double low = candlestickRecord.getLow();
             double close = candlestickRecord.getClose();
             double volume = candlestickRecord.getVolume();
-
             series.addBar(date, open, high, low, close, volume);
         });
         return series;
     }
 
-    public Strategy bollingerBandsStrategy(BarSeries series, Double markPrice) {
+    public Strategy bollingerBandsStrategy(BarSeries series, Double markPrice, int barCount) {
         if (Objects.isNull(series)) {
             throw new IllegalArgumentException("Series cannot be null");
         }
         // Close price
         ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
-        SMAIndicator sma = new SMAIndicator(closePrice, 20);
-        StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, 20);
+        SMAIndicator sma = new SMAIndicator(closePrice, barCount);
+        StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, barCount);
 
         // Bollinger bands
         BollingerBandsMiddleIndicator middleBBand = new BollingerBandsMiddleIndicator(sma);
@@ -68,7 +67,6 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
                 .or(new OverIndicatorRule(upBBand, markPrice));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
-//        log.debug(String.format("Bar: %s, MarkPrice: %s, lowBBand: %s, upBBand: %s, satisfied: %s", series.getName(), markPrice, lowBBand.getValue(series.getEndIndex()), upBBand.getValue(series.getEndIndex()), entryRule.isSatisfied(series.getEndIndex())));
         return strategy;
     }
 }

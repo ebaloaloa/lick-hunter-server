@@ -26,11 +26,14 @@ CREATE TABLE IF NOT EXISTS candlestick (
 );
 
 CREATE TABLE IF NOT EXISTS symbol (
-    SYMBOL            VARCHAR(20)  NOT NULL,
-    MARK_PRICE        DOUBLE       NULL,
-    LAST_FUNDING_RATE DOUBLE       NULL,
-    NEXT_FUNDING_TIME DOUBLE       NULL,
-    TIME              BIGINT       NULL,
+    SYMBOL               VARCHAR(20)  NOT NULL,
+    MARK_PRICE           DOUBLE       NULL,
+    LAST_FUNDING_RATE    DOUBLE       NULL,
+    NEXT_FUNDING_TIME    DOUBLE       NULL,
+    TIME                 BIGINT       NULL,
+    ONBOARD_DATE         BIGINT       NULL,
+    PRICE_CHANGE_PERCENT DOUBLE       NULL,
+    QUOTE_VOLUME         DOUBLE       NULL,
 
     CONSTRAINT pk_symbol           PRIMARY KEY (symbol)
 );
@@ -97,7 +100,6 @@ CREATE TABLE IF NOT EXISTS coins (
 
 CREATE TABLE IF NOT EXISTS income_history (
     ID          INTEGER           NOT NULL,
-    TRX_ID      BIGINT        NOT NULL,
     SYMBOL      VARCHAR(20)   NULL,
     INCOME_TYPE VARCHAR(20)   NULL,
     INCOME      DOUBLE        NULL,
@@ -110,10 +112,10 @@ CREATE TABLE IF NOT EXISTS income_history (
 
 CREATE INDEX idx_candlestick_symbol
 ON candlestick (symbol);
+CREATE INDEX idx_candlestick_timeframe
+ON candlestick (timeframe);
 CREATE INDEX idx_income_history_symbol
 ON income_history (symbol);
 CREATE INDEX idx_income_history_income_type
 ON income_history (income_type);
-CREATE INDEX idx_income_history_trx_id
-ON income_history (trx_id);
 

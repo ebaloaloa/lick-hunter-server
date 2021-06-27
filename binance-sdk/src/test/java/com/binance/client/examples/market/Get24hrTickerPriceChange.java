@@ -10,7 +10,5 @@ public class Get24hrTickerPriceChange {
         RequestOptions options = new RequestOptions();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(PrivateConfig.API_KEY, PrivateConfig.SECRET_KEY,
                 options);
-        System.out.println(syncRequestClient.get24hrTickerPriceChange("BTCUSDT"));
-        // System.out.println(syncRequestClient.get24hrTickerPriceChange(null));
     }
 }

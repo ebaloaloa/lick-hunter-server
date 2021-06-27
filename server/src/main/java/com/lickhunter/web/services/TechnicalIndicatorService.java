@@ -6,5 +6,5 @@ import org.ta4j.core.Strategy;
 
 public interface TechnicalIndicatorService {
     BarSeries getBarSeries(String symbol, CandlestickInterval timeframe);
-    Strategy bollingerBandsStrategy(BarSeries series, Double markprice);
+    Strategy bollingerBandsStrategy(BarSeries series, Double markprice, int barCount);
 }

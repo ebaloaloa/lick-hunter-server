@@ -23,7 +23,7 @@ public class TickerQueryTO extends AbstractTO {
     /**
      * The symbol of the currency
      */
-    private String symbol;
+    private List<String> symbol;
 
     /**
      * The price percentage change of the symbol
@@ -72,4 +72,9 @@ public class TickerQueryTO extends AbstractTO {
      * Enables the Bollinger Bands Strategy
      */
     private Boolean bbStrategy;
+
+    /**
+     * Length or number of bars for Bollinger Bands
+     */
+    private int bbBarCount;
 }
