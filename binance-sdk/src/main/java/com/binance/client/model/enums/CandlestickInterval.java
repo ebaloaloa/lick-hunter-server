@@ -20,12 +20,24 @@ public enum CandlestickInterval {
     WEEKLY("1w"),
     MONTHLY("1M");
 
-    private final String code;
+    private String code;
 
     CandlestickInterval(String code) {
         this.code = code;
     }
 
+    public static CandlestickInterval of(String code) {
+        for(CandlestickInterval candlestickInterval: CandlestickInterval.values()) {
+            if(candlestickInterval.getCode().equalsIgnoreCase(code)) {
+                return candlestickInterval;
+            }
+        }
+        return null;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
     @Override
     public String toString() {
         return code;
