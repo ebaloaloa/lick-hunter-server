@@ -80,16 +80,43 @@ public class MarketServiceImpl implements MarketService {
 
         result = symbolRepository.findAll().stream()
                 .filter(t -> symbols.stream().anyMatch(s -> s.getSymbol().contains(t.getSymbol())))
+                //Exclude
                 .filter(Objects.nonNull(query.getExclude()) ?
                         t -> query.getExclude().stream().noneMatch(e -> t.getSymbol().contains(e)) :
                         t -> true)
+                //Price Change Percentage
                 .filter(Objects.nonNull(query.getMaxPriceChangePercent()) ?
                         t-> BigDecimal.valueOf(t.getPriceChangePercent()).abs().compareTo(query.getMaxPriceChangePercent()) < 0 :
                         t -> true)
+                //Volume Limit
                 .filter(Objects.nonNull(query.getVolumeLowerLimit()) && Objects.nonNull(query.getVolumeUpperLimit()) ?
                         t -> t.getQuoteVolume().compareTo(query.getVolumeLowerLimit().doubleValue()) > 0 &&
                             t.getQuoteVolume().compareTo(query.getVolumeUpperLimit().doubleValue()) < 0
                         : t -> true)
+                //Bollinger Bands Strategy
+                .filter(Objects.nonNull(query.getBbStrategy()) && query.getBbStrategy() ?
+                        t -> {
+                            Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(t.getSymbol());
+                            if(symbolRecord.isPresent()) {
+                                BarSeries barSeries = technicalIndicatorService.getBarSeries(symbolRecord.get().getSymbol(), CandlestickInterval.of(query.getBbTimeframe()));
+                                Strategy strategy = technicalIndicatorService.bollingerBandsStrategy(barSeries, symbolRecord.get().getMarkPrice(), query.getBbBarCount());
+                                return strategy.getEntryRule().isSatisfied(barSeries.getEndIndex());
+                            }
+                            return true;
+                        } :
+                        t -> true)
+                //CCI Correction Strategy
+                .filter(Objects.nonNull(query.getCciStrategy()) && query.getCciStrategy() ?
+                        t -> {
+                            Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(t.getSymbol());
+                            if(symbolRecord.isPresent()) {
+                                BarSeries barSeries = technicalIndicatorService.getBarSeries(symbolRecord.get().getSymbol(), CandlestickInterval.of(query.getCciTimeframe()));
+                                Strategy strategy = technicalIndicatorService.cciCorrectionStrategy(barSeries, query.getCciBarCount());
+                                return strategy.getEntryRule().isSatisfied(barSeries.getEndIndex());
+                            }
+                            return true;
+                        } :
+                        t -> true)
                 .collect(Collectors.toList());
 
         //all time high
@@ -97,20 +124,6 @@ public class MarketServiceImpl implements MarketService {
             result = result.stream()
                     .filter(isNearThreshHoldAllTimeHigh(query.getPercentageFromAllTimeHigh(), symbolRecords)
                             .negate())
-                    .collect(Collectors.toList());
-        }
-        //Bollinger Bands
-        if(Objects.nonNull(query.getBbStrategy()) && query.getBbStrategy()) {
-            result = result.stream()
-                    .filter(t -> {
-                        Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(t.getSymbol());
-                        if(symbolRecord.isPresent()) {
-                            BarSeries barSeries = technicalIndicatorService.getBarSeries(symbolRecord.get().getSymbol(), CandlestickInterval.FIFTEEN_MINUTES);
-                            Strategy strategy = technicalIndicatorService.bollingerBandsStrategy(barSeries, symbolRecord.get().getMarkPrice(), query.getBbBarCount());
-                            return strategy.getEntryRule().isSatisfied(barSeries.getEndIndex());
-                        }
-                        return true;
-                    })
                     .collect(Collectors.toList());
         }
         return result;

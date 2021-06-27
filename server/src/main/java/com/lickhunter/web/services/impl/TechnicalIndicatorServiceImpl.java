@@ -8,12 +8,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.*;
+import org.ta4j.core.indicators.CCIIndicator;
 import org.ta4j.core.indicators.SMAIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsLowerIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsMiddleIndicator;
 import org.ta4j.core.indicators.bollinger.BollingerBandsUpperIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.indicators.statistics.StandardDeviationIndicator;
+import org.ta4j.core.num.Num;
 import org.ta4j.core.rules.OverIndicatorRule;
 import org.ta4j.core.rules.UnderIndicatorRule;
 
@@ -67,6 +69,22 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
                 .or(new OverIndicatorRule(upBBand, markPrice));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
+        return strategy;
+    }
+
+    @Override
+    public Strategy cciCorrectionStrategy(BarSeries series, int barCount) {
+        CCIIndicator cci = new CCIIndicator(series, barCount);
+        Num plus100 = series.numOf(100);
+        Num minus100 = series.numOf(-100);
+        Rule entryRule = new OverIndicatorRule(cci, plus100)
+                .or(new UnderIndicatorRule(cci, minus100));
+
+        Rule exitRule = new UnderIndicatorRule(cci, plus100)
+                .and(new OverIndicatorRule(cci, minus100));
+
+        Strategy strategy = new BaseStrategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(5);
         return strategy;
     }
 }

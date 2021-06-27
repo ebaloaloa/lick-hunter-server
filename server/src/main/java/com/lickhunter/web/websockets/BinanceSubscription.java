@@ -60,7 +60,7 @@ public class BinanceSubscription {
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
         Arrays.stream(candlesticks).forEach(c -> {
-            subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.valueOf(c), ((event) -> {
+            subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
                 Candlestick candlestick = new Candlestick();
                 candlestick.setOpenTime(event.getStartTime());
                 candlestick.setOpen(event.getOpen());
@@ -73,7 +73,7 @@ public class BinanceSubscription {
                 candlestick.setNumTrades(event.getNumTrades().intValue());
                 candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
                 candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
-                candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.valueOf(c));
+                candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.of(c));
             }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage())));
         });
         log.info("Subscribed to Binance Candlestick data");
