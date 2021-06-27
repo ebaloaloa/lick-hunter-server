@@ -28,13 +28,7 @@ public class WebSocketStreamClientImpl implements SubscriptionClient {
 
     private final List<WebSocketConnection> connections = new LinkedList<>();
 
-    private final String apiKey;
-
-    private final String secretKey;
-
-    WebSocketStreamClientImpl(String apiKey, String secretKey, SubscriptionOptions options) {
-        this.apiKey = apiKey;
-        this.secretKey = secretKey;
+    WebSocketStreamClientImpl(SubscriptionOptions options) {
         this.watchDog = null;
         this.options = Objects.requireNonNull(options);
 
@@ -45,8 +39,7 @@ public class WebSocketStreamClientImpl implements SubscriptionClient {
         if (watchDog == null) {
             watchDog = new WebSocketWatchDog(options);
         }
-        WebSocketConnection connection = new WebSocketConnection(apiKey, secretKey, options, request, watchDog,
-                autoClose);
+        WebSocketConnection connection = new WebSocketConnection(request, watchDog, autoClose);
         if (autoClose == false) {
             connections.add(connection);
         }
@@ -83,7 +76,14 @@ public class WebSocketStreamClientImpl implements SubscriptionClient {
     }
 
     @Override
-    public void subscribeCandlestickEvent(String symbol, CandlestickInterval interval,
+    public void subscribeAllMarkPriceEvent(SubscriptionListener<List<MarkPriceEvent>> subscriptionListener,
+                                           SubscriptionErrorHandler errorHandler) {
+        createConnection(
+                requestImpl.subscribeAllMarkPriceEvent(subscriptionListener, errorHandler));
+    }
+
+    @Override
+    public void subscribeCandlestickEvent(List<String> symbol, CandlestickInterval interval,
             SubscriptionListener<CandlestickEvent> subscriptionListener, 
             SubscriptionErrorHandler errorHandler) {
         createConnection(

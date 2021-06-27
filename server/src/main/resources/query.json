@@ -8,5 +8,6 @@
   "exclude":["DOGE","BTC","ETH","XRP"],
   "autoExclude": true,
   "autoExcludePercentage": 70,
-  "bbStrategy": false
+  "bbStrategy": false,
+  "bbBarCount": 20
 }

@@ -23,7 +23,7 @@ public class IncomeHistoryRepository {
 
     public void insertOrUpdate(Income income, String accountId) {
         Optional<IncomeHistoryRecord> incomeHistoryRecordOptional = dsl.selectFrom(INCOME_HISTORY)
-                .where(INCOME_HISTORY.TRX_ID.eq(Long.valueOf(income.getTranId())))
+                .where(INCOME_HISTORY.TIME.eq(income.getTime()))
                 .and(INCOME_HISTORY.ACCOUNT_ID.eq(accountId))
                 .and(INCOME_HISTORY.INCOME_TYPE.eq(income.getIncomeType()))
         .fetchOptional();
@@ -42,7 +42,7 @@ public class IncomeHistoryRepository {
                 .set(INCOME_HISTORY.INCOME, income.getIncome().doubleValue())
                 .set(INCOME_HISTORY.ASSET, income.getAsset())
                 .set(INCOME_HISTORY.TIME, income.getTime())
-                .where(INCOME_HISTORY.TRX_ID.eq(Long.valueOf(income.getTranId())))
+                .where(INCOME_HISTORY.TIME.eq(income.getTime()))
                 .and(INCOME_HISTORY.ACCOUNT_ID.eq(accountId))
                 .and(INCOME_HISTORY.INCOME_TYPE.eq(income.getIncomeType()))
                 .execute();
@@ -50,7 +50,6 @@ public class IncomeHistoryRepository {
 
     public void insert(Income income, String accountId) {
         dsl.insertInto(INCOME_HISTORY)
-                .set(INCOME_HISTORY.TRX_ID, Long.valueOf(income.getTranId()))
                 .set(INCOME_HISTORY.SYMBOL, income.getSymbol())
                 .set(INCOME_HISTORY.INCOME_TYPE, income.getIncomeType())
                 .set(INCOME_HISTORY.INCOME, income.getIncome().doubleValue())

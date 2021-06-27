@@ -1,6 +1,7 @@
 package com.lickhunter.web.controllers;
 
 import com.binance.client.model.market.PriceChangeTicker;
+import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class MarketController {
 
     @PostMapping("/ticker")
     public ResponseEntity<?> getTickerByQuery(@RequestBody TickerQueryTO query) throws Exception {
-        List<PriceChangeTicker> priceChangeTickerList = marketService.getTickerByQuery(query);
+        List<SymbolRecord> priceChangeTickerList = marketService.getTickerByQuery(query);
         return ResponseEntity.ok(priceChangeTickerList);
     }
 

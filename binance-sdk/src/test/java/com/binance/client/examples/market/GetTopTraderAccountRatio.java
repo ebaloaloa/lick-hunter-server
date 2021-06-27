@@ -10,7 +10,6 @@ public class GetTopTraderAccountRatio {
         RequestOptions options = new RequestOptions();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(PrivateConfig.API_KEY, PrivateConfig.SECRET_KEY,
                 options);
-        System.out.println(syncRequestClient.getTopTraderAccountRatio("BTCUSDT", PeriodType._5m,null,null,10));
 
 
     }

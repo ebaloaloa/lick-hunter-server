@@ -5,6 +5,7 @@ import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.controllers.ApplicationController;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
+import com.lickhunter.web.services.LickHunterService;
 import com.lickhunter.web.services.MarketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -28,6 +29,9 @@ public class WebApplication {
 	@Autowired
 	private ApplicationController applicationController;
 
+	@Autowired
+	private LickHunterService lickHunterService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(WebApplication.class, args);
 	}
@@ -36,14 +40,15 @@ public class WebApplication {
 	public void initProcess() throws Exception {
 		//TODO Major bug for websockets. Always disconnects. Data loss
 //		applicationController.subscribeUserData();
-//		applicationController.subscribeCandleStickData();
-//		applicationController.subscribeMarkPrice();
+		applicationController.subscribeCandleStickData();
+		applicationController.subscribeMarkPrice();
 
 		/**
 		 * BinanceScheduledTasks
 		 */
 		accountService.getAccountInformation();
-		marketService.getMarkPriceData();
+		marketService.getExchangeInformation();
+		marketService.get24hrTickerPriceChange();
 		marketService.getLiquidations();
 		Arrays.stream(IncomeType.values())
 				.forEach(incomeType -> {
@@ -57,6 +62,9 @@ public class WebApplication {
 						e.printStackTrace();
 					}
 				});
-		marketService.getCandleStickData(CandlestickInterval.DAILY, 500);
+		marketService.getCandleStickData(CandlestickInterval.WEEKLY, 200);
+		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
+		lickHunterService.startWebsocket();
+		lickHunterService.startProfit();
 	}
 }

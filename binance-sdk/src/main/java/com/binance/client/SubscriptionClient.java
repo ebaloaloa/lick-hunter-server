@@ -27,32 +27,18 @@ public interface SubscriptionClient {
      * @return The instance of synchronous client.
      */
     static SubscriptionClient create() {
-        return create("", "", new SubscriptionOptions());
+        return create(new SubscriptionOptions());
     }
 
     /**
      * Create the subscription client to subscribe the update from server.
      *
-     * @param apiKey    The public key applied from Binance.
-     * @param secretKey The private key applied from Binance.
-     * @return The instance of synchronous client.
-     */
-    static SubscriptionClient create(String apiKey, String secretKey) {
-        return BinanceApiInternalFactory.getInstance().createSubscriptionClient(apiKey, secretKey,
-                new SubscriptionOptions());
-    }
-
-    /**
-     * Create the subscription client to subscribe the update from server.
-     *
-     * @param apiKey              The public key applied from Binance.
-     * @param secretKey           The private key applied from Binance.
      * @param subscriptionOptions The option of subscription connection, see
      *                            {@link SubscriptionOptions}
      * @return The instance of synchronous client.
      */
-    static SubscriptionClient create(String apiKey, String secretKey, SubscriptionOptions subscriptionOptions) {
-        return BinanceApiInternalFactory.getInstance().createSubscriptionClient(apiKey, secretKey, subscriptionOptions);
+    static SubscriptionClient create(SubscriptionOptions subscriptionOptions) {
+        return BinanceApiInternalFactory.getInstance().createSubscriptionClient(subscriptionOptions);
     }
 
     /**
@@ -86,6 +72,8 @@ public interface SubscriptionClient {
     void subscribeMarkPriceEvent(String symbol,
             SubscriptionListener<MarkPriceEvent> callback, SubscriptionErrorHandler errorHandler);
 
+    void subscribeAllMarkPriceEvent(SubscriptionListener<List<MarkPriceEvent>> callback, SubscriptionErrorHandler errorHandler);
+
     /**
      * Subscribe candlestick event. If the candlestick is updated,
      * server will send the data to client and onReceive in callback will be called.
@@ -97,7 +85,7 @@ public interface SubscriptionClient {
      * @param errorHandler The error handler will be called if subscription failed
      *                     or error happen between client and Binance server.
      */
-    void subscribeCandlestickEvent(String symbol, CandlestickInterval interval,
+    void subscribeCandlestickEvent(List<String> symbol, CandlestickInterval interval,
             SubscriptionListener<CandlestickEvent> callback, SubscriptionErrorHandler errorHandler);
 
     /**

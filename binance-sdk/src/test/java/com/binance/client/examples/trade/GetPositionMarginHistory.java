@@ -21,6 +21,5 @@ public class GetPositionMarginHistory {
         long endTime = System.currentTimeMillis();
         long startTime = endTime - (24 * 60 * 60 * 1000);
         int limit = 500;
-        System.out.println(syncRequestClient.getPositionMarginHistory("BTCUSDT", INCREASE_MARGIN_TYPE, startTime, endTime, limit));
     }
 }
