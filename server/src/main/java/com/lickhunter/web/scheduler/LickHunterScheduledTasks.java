@@ -1,23 +1,22 @@
 package com.lickhunter.web.scheduler;
 
-import com.binance.client.model.market.PriceChangeTicker;
 import com.lickhunter.web.configs.*;
 import com.lickhunter.web.constants.ApplicationConstants;
-import com.lickhunter.web.entities.tables.records.CoinsRecord;
 import com.lickhunter.web.entities.tables.records.PositionRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.models.Coins;
 import com.lickhunter.web.models.sentiments.SentimentsAsset;
 import com.lickhunter.web.models.sentiments.TimeSeries;
 import com.lickhunter.web.models.webhook.DiscordWebhook;
-import com.lickhunter.web.repositories.CoinsRepository;
 import com.lickhunter.web.repositories.PositionRepository;
+import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.services.*;
 import com.lickhunter.web.to.SentimentsTO;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,11 +41,11 @@ public class LickHunterScheduledTasks {
     private final AccountService accountService;
     private final FileService fileService;
     private final PositionRepository positionRepository;
-    private final CoinsRepository coinsRepository;
     private final LickHunterService lickHunterService;
     private final SentimentsService sentimentsService;
     private final ApplicationConfig applicationConfig;
     private final MessageConfig messageConfig;
+    private final SymbolRepository symbolRepository;
     @Qualifier("discordNotification")
     private final NotificationService<DiscordWebhook> notificationService;
     public static AtomicBoolean restartEnabled = new AtomicBoolean(true);
@@ -72,42 +71,12 @@ public class LickHunterScheduledTasks {
                 || accountService.isOpenOrderIsolationActive(settings.getKey(), activeSettings.getOpenOrderIsolationPercentage())
                 || pauseOnCloseActive.get()) {
             positionRecords
-                    .forEach(p -> {
-                        Coins coins = new Coins();
-                        coins.setSymbol(p.getSymbol().replace("USDT",""));
-                        Optional<CoinsRecord> coinsRecord = coinsRepository.findBySymbol(coins.getSymbol());
-                        if(Objects.nonNull(activeSettings.getAutoLickValue()) &&
-                                activeSettings.getAutoLickValue() &&
-                                coinsRecord.isPresent() &&
-                                Objects.nonNull(coinsRecord.get().getLickValue())) {
-                            coins.setLickvalue(coinsRecord.get().getLickValue().toString());
-                        } else {
-                            coins.setLickvalue(activeSettings.getLickValue().toString());
-                        }
-                        coins.setLongoffset(activeSettings.getLongOffset().toString());
-                        coins.setShortoffset(activeSettings.getShortOffset().toString());
-                        coinsList.add(coins);
-                    });
+                    .forEach(p -> coinsList.add(coinValue(p.getSymbol(), activeSettings)));
         } else {
             symbolRecords
                     .stream()
                     .sorted(Comparator.comparing(SymbolRecord::getSymbol))
-                    .forEach(symbolRecord -> {
-                        Coins coins = new Coins();
-                        coins.setSymbol(symbolRecord.getSymbol().replace("USDT",""));
-                        Optional<CoinsRecord> coinsRecord = coinsRepository.findBySymbol(coins.getSymbol());
-                        if(Objects.nonNull(activeSettings.getAutoLickValue()) &&
-                                activeSettings.getAutoLickValue() &&
-                                coinsRecord.isPresent() &&
-                                Objects.nonNull(coinsRecord.get().getLickValue())) {
-                            coins.setLickvalue(coinsRecord.get().getLickValue().toString());
-                        } else {
-                            coins.setLickvalue(activeSettings.getLickValue().toString());
-                        }
-                        coins.setLongoffset(activeSettings.getLongOffset().toString());
-                        coins.setShortoffset(activeSettings.getShortOffset().toString());
-                        coinsList.add(coins);
-                    });
+                    .forEach(s -> coinsList.add((coinValue(s.getSymbol(), activeSettings))));
         }
         //Auto Exclude
         if (Objects.nonNull(tickerQueryTO.getAutoExclude()) && tickerQueryTO.getAutoExclude()) {
@@ -134,18 +103,28 @@ public class LickHunterScheduledTasks {
     public void checkSentiments() throws Exception {
         if(applicationConfig.getSentimentsEnable()) {
             log.info("Checking sentiments information.");
-            SentimentsTO assets = new SentimentsTO()
+            SentimentsTO btc = new SentimentsTO()
                     .withEndpoint("assets")
                     .withChange("1h")
                     .withInterval("hour")
                     .withDataPoints(1)
                     .withSymbol("BTC");
-            SentimentsAsset sentimentsAsset = sentimentsService.getSentiments(assets);
+            SentimentsAsset sentimentsAsset = sentimentsService.getSentiments(btc);
             if(!sentimentsAsset.getData().isEmpty()) {
                 socialVolumeAlert(sentimentsAsset);
                 twitterVolumeAlert(sentimentsAsset);
                 changeSettings(sentimentsAsset);
             }
+            //retrieve all sentiments
+            symbolRepository.findAll().forEach(symbolRecord -> {
+                SentimentsTO asset = new SentimentsTO()
+                        .withEndpoint("assets")
+                        .withChange("1h")
+                        .withInterval("hour")
+                        .withDataPoints(1)
+                        .withSymbol(symbolRecord.getSymbol().replace("USDT", ""));
+                sentimentsService.getSentiments(asset);
+            });
         }
     }
 
@@ -247,5 +226,53 @@ public class LickHunterScheduledTasks {
         if(applicationConfig.getSentimentsDiscordEnable()) {
             notificationService.send(webhook);
         }
+    }
+
+    private Coins coinValue(String symbol, UserDefinedSettings activeSettings) {
+        Coins coins = new Coins();
+        coins.setSymbol(symbol.replace("USDT",""));
+        Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(symbol);
+        if(StringUtils.isNotBlank(activeSettings.getAutoLickValue()) && symbolRecord.isPresent()) {
+            if(activeSettings.getAutoLickValue().equalsIgnoreCase("median") &&
+                    Objects.nonNull(symbolRecord.get().getLickMedian()) ) {
+                coins.setLickvalue(symbolRecord.get().getLickMedian().toString());
+            }
+            if(activeSettings.getAutoLickValue().equalsIgnoreCase("average") &&
+                    Objects.nonNull(symbolRecord.get().getLickAverage())) {
+                coins.setLickvalue(symbolRecord.get().getLickAverage().toString());
+            }
+        } else {
+            coins.setLickvalue(activeSettings.getLickValue().toString());
+        }
+        if(activeSettings.getAutoOffset() && symbolRecord.isPresent() && Objects.nonNull(symbolRecord.get().getVolatility())) {
+            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) < 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) < 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
+                coins.setLongoffset(activeSettings.getLongOffset().toString());
+                coins.setShortoffset(activeSettings.getShortOffset().toString());
+            }
+            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) < 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
+                coins.setLongoffset(activeSettings.getOffsetOne().toString());
+                coins.setShortoffset(activeSettings.getOffsetOne().toString());
+            }
+            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) > 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
+                coins.setLongoffset(activeSettings.getOffsetTwo().toString());
+                coins.setShortoffset(activeSettings.getOffsetTwo().toString());
+            }
+            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) > 0
+                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) > 0) {
+                coins.setLongoffset(activeSettings.getOffsetThree().toString());
+                coins.setShortoffset(activeSettings.getOffsetThree().toString());
+            }
+        } else {
+            coins.setLongoffset(activeSettings.getLongOffset().toString());
+            coins.setShortoffset(activeSettings.getShortOffset().toString());
+        }
+        return coins;
     }
 }

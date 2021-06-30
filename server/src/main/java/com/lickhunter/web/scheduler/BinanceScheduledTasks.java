@@ -1,19 +1,14 @@
 package com.lickhunter.web.scheduler;
 
-import com.binance.client.constant.BinanceApiConstants;
-import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.exceptions.ServiceException;
-import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.services.TradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 

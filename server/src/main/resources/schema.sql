@@ -34,6 +34,9 @@ CREATE TABLE IF NOT EXISTS symbol (
     ONBOARD_DATE         BIGINT       NULL,
     PRICE_CHANGE_PERCENT DOUBLE       NULL,
     QUOTE_VOLUME         DOUBLE       NULL,
+    VOLATILITY           DOUBLE       NULL,
+    LICK_MEDIAN          DOUBLE       NULL,
+    LICK_AVERAGE         DOUBLE       NULL,
 
     CONSTRAINT pk_symbol           PRIMARY KEY (symbol)
 );
@@ -87,15 +90,6 @@ CREATE TABLE IF NOT EXISTS position (
 
     CONSTRAINT pk_position             PRIMARY KEY (SYMBOL),
     CONSTRAINT fk_position_account_id  FOREIGN KEY (ACCOUNT_ID)    REFERENCES account(id)
-);
-
-CREATE TABLE IF NOT EXISTS coins (
-    SYMBOL       VARCHAR(20) NOT NULL,
-    LONG_OFFSET  DOUBLE      NULL,
-    SHORT_OFFSET DOUBLE      NULL,
-    LICK_VALUE   DOUBLE      NULL,
-
-    CONSTRAINT pk_coins PRIMARY KEY (SYMBOL)
 );
 
 CREATE TABLE IF NOT EXISTS income_history (
