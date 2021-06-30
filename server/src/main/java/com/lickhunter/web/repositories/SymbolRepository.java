@@ -1,10 +1,11 @@
 package com.lickhunter.web.repositories;
 
-import com.binance.client.model.market.ExchangeInformation;
 import com.binance.client.model.market.MarkPrice;
 import com.binance.client.model.market.PriceChangeTicker;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
+import com.lickhunter.web.models.liquidation.Datum;
 import com.lickhunter.web.models.market.Symbol;
+import com.lickhunter.web.models.sentiments.SentimentsAsset;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,15 @@ public class SymbolRepository {
         }
     }
 
+    public void insertOrUpdate(Datum datum) {
+        Optional<SymbolRecord> symbolRecord = findBySymbol(datum.getSymbol().concat("USDT"));
+        if(symbolRecord.isPresent()) {
+            this.update(datum);
+        } else {
+            this.insert(datum);
+        }
+    }
+
     public void insertOrUpdate(PriceChangeTicker priceChangeTicker) {
         Optional<SymbolRecord> symbolRecord = findBySymbol(priceChangeTicker.getSymbol());
         if(symbolRecord.isPresent()) {
@@ -56,6 +66,14 @@ public class SymbolRepository {
                 .set(SYMBOL.LAST_FUNDING_RATE, markPrice.getLastFundingRate().doubleValue())
                 .set(SYMBOL.NEXT_FUNDING_TIME, markPrice.getNextFundingTime().doubleValue())
                 .set(SYMBOL.TIME, markPrice.getTime())
+                .execute();
+    }
+
+    public void insert(Datum datum) {
+        dsl.insertInto(SYMBOL)
+                .set(SYMBOL.SYMBOL_, datum.getSymbol().concat("USDT"))
+                .set(SYMBOL.LICK_MEDIAN, Double.valueOf(datum.getMedianUsdt()))
+                .set(SYMBOL.LICK_AVERAGE, Double.valueOf(datum.getAverageUsdt()))
                 .execute();
     }
 
@@ -84,10 +102,25 @@ public class SymbolRepository {
                 .execute();
     }
 
+    public void update(Datum datum) {
+        dsl.update(SYMBOL)
+                .set(SYMBOL.LICK_MEDIAN, Double.valueOf(datum.getMedianUsdt()))
+                .set(SYMBOL.LICK_AVERAGE, Double.valueOf(datum.getAverageUsdt()))
+                .where(SYMBOL.SYMBOL_.eq(datum.getSymbol().concat("USDT")))
+                .execute();
+    }
+
     public void update(Symbol symbol) {
         dsl.update(SYMBOL)
                 .set(SYMBOL.ONBOARD_DATE, symbol.getOnboardDate().longValue())
                 .where(SYMBOL.SYMBOL_.eq(symbol.getSymbol()))
+                .execute();
+    }
+
+    public void update(SentimentsAsset sentimentsAsset) {
+        dsl.update(SYMBOL)
+                .set(SYMBOL.VOLATILITY, sentimentsAsset.getData().get(0).getVolatility())
+                .where(SYMBOL.SYMBOL_.eq(sentimentsAsset.getData().get(0).getSymbol().concat("USDT")))
                 .execute();
     }
 

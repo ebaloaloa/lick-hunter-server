@@ -12,7 +12,14 @@
       "marginPercentNotification":30,
       "marginType":"crossed",
       "leverage":4,
-      "autoLickValue":true
+      "autoLickValue" : "median",
+      "autoOffset": true,
+      "offsetOne": 7.0,
+      "offsetVolatilityOne": 0.04,
+      "offsetTwo": 8.5,
+      "offsetVolatilityTwo": 0.05,
+      "offsetThree": 10.0,
+      "offsetVolatilityThree": 0.07
     },
     "settings2":{
       "maxOpen":5,
@@ -23,7 +30,14 @@
       "marginPercentNotification":30,
       "marginType":"crossed",
       "leverage":4,
-      "autoLickValue":true
+      "autoLickValue": "average",
+      "autoOffset": false,
+      "offsetOne": 7.0,
+      "offsetVolatilityOne": 0.04,
+      "offsetTwo": 8.5,
+      "offsetVolatilityTwo": 0.05,
+      "offsetThree": 10.0,
+      "offsetVolatilityThree": 0.07
     }
   }
 }

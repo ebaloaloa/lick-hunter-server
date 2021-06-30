@@ -28,5 +28,19 @@ public class UserDefinedSettings {
     @JsonProperty("leverage")
     private Integer leverage;
     @JsonProperty("autoLickValue")
-    private Boolean autoLickValue;
+    private String autoLickValue;
+    @JsonProperty("autoOffset")
+    private Boolean autoOffset;
+    @JsonProperty("offsetOne")
+    private Double offsetOne;
+    @JsonProperty("offsetVolatilityOne")
+    private Double offsetVolatilityOne;
+    @JsonProperty("offsetTwo")
+    private Double offsetTwo;
+    @JsonProperty("offsetVolatilityTwo")
+    private Double offsetVolatilityTwo;
+    @JsonProperty("offsetThree")
+    private Double offsetThree;
+    @JsonProperty("offsetVolatilityThree")
+    private Double offsetVolatilityThree;
 }

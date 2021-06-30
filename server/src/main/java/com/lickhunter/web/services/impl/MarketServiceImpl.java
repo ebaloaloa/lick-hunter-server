@@ -13,12 +13,9 @@ import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.tables.records.CandlestickRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
-import com.lickhunter.web.exceptions.ServiceException;
 import com.lickhunter.web.models.liquidation.Liquidations;
 import com.lickhunter.web.models.market.ExchangeInformation;
-import com.lickhunter.web.models.market.Symbol;
 import com.lickhunter.web.repositories.CandlestickRepository;
-import com.lickhunter.web.repositories.CoinsRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;
@@ -58,7 +55,6 @@ public class MarketServiceImpl implements MarketService {
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
     private final ApplicationConfig applicationConfig;
-    private final CoinsRepository coinsRepository;
     private final TechnicalIndicatorService technicalIndicatorService;
 
     /**
@@ -196,7 +192,7 @@ public class MarketServiceImpl implements MarketService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<Liquidations> liquidations = restTemplate.exchange(applicationConfig.getLiquidation(), HttpMethod.GET, entity, Liquidations.class);
         Objects.requireNonNull(liquidations.getBody()).getData()
-                .forEach(d -> coinsRepository.insertOrUpdate(d.getSymbol(), Double.valueOf(d.getMedianUsdt())));
+                .forEach(d -> symbolRepository.insertOrUpdate(d));
         log.info("Successfully retrieved liquidation data.");
     }
 
