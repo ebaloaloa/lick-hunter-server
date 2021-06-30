@@ -62,6 +62,7 @@ public class WebApplication {
 						e.printStackTrace();
 					}
 				});
+		lickHunterScheduledTasks.checkSentiments();
 		marketService.getCandleStickData(CandlestickInterval.WEEKLY, 200);
 		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
 		lickHunterService.startWebsocket();

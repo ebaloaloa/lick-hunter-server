@@ -11,7 +11,6 @@ import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.UserDataEventConstants;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.events.BinanceEvents;
-import com.lickhunter.web.models.market.Symbol;
 import com.lickhunter.web.repositories.*;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.MarketService;

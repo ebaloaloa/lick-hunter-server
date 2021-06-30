@@ -1,6 +1,5 @@
 package com.lickhunter.web.controllers;
 
-import com.binance.client.model.market.PriceChangeTicker;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.services.MarketService;
 import com.lickhunter.web.to.TickerQueryTO;

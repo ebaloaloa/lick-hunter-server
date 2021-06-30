@@ -1,10 +1,8 @@
 package com.lickhunter.web.services;
 
 import com.binance.client.model.enums.CandlestickInterval;
-import com.binance.client.model.market.PriceChangeTicker;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.exceptions.ServiceException;
-import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.to.TickerQueryTO;
 
 import java.util.List;
