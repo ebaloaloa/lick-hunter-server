@@ -18,7 +18,7 @@ public interface MarketService {
      * @return List of PriceChangeTicker
      * @throws ServiceException
      */
-    List<SymbolRecord> getTickerByQuery(TickerQueryTO query) throws Exception;
+    List<SymbolRecord> getTickerByQuery(TickerQueryTO query);
 
     /**
      * Current exchange trading rules and symbol information
