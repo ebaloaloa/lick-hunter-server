@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.retry.annotation.EnableRetry;
 
 @Configuration
 @PropertySources({
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.PropertySources;
         @PropertySource(value = "file:application.properties", ignoreResourceNotFound = true)
 })
 @Getter
+@EnableRetry
 public class ApplicationConfig {
     @Value("${server.port}")
     private String serverPort;
