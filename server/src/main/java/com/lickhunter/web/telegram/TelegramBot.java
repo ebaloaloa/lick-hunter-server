@@ -1,11 +1,10 @@
 package com.lickhunter.web.telegram;
 
+import com.binance.client.model.trade.AccountInformation;
 import com.lickhunter.web.configs.MessageConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
-import com.lickhunter.web.entities.tables.records.AccountRecord;
-import com.lickhunter.web.entities.tables.records.PositionRecord;
 import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
@@ -25,8 +24,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 @Component
@@ -78,23 +75,22 @@ public class TelegramBot extends TelegramLongPollingBot {
                 message.setText(messageProperties.getTelegramCommands());
             }
             if (update.getMessage().getText().equals("/balance")) {
-                Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(settings.getKey());
-                List<PositionRecord> positionRecords = positionRepository.findByAccountId(settings.getKey());
-                accountRecord.ifPresent(record -> message.setText(String.format(messageProperties.getBalance(),
-                        BigDecimal.valueOf(record.getTotalWalletBalance()).setScale(2, RoundingMode.HALF_UP),
-                        BigDecimal.valueOf(record.getTotalUnrealizedProfit()).setScale(2, RoundingMode.HALF_UP),
-                        BigDecimal.valueOf(record.getTotalMaintenanceMargin())
-                                .divide(BigDecimal.valueOf(record.getTotalMarginBalance()), 2)
+                AccountInformation accountInformation = accountService.getAccountInformation();
+                message.setText(String.format(messageProperties.getBalance(),
+                        accountInformation.getTotalWalletBalance().setScale(2, RoundingMode.HALF_UP),
+                        accountInformation.getTotalUnrealizedProfit().setScale(2, RoundingMode.HALF_UP),
+                        accountInformation.getTotalMaintMargin()
+                                .divide(accountInformation.getTotalMarginBalance(), 2)
                                 .multiply(BigDecimal.valueOf(100))
                                 .setScale(2, RoundingMode.HALF_UP),
-                        positionRecords.stream()
-                                .filter(position -> position.getInitialMargin().compareTo(0.0) != 0)
+                        accountInformation.getPositions().stream()
+                                .filter(position -> position.getInitialMargin().compareTo(BigDecimal.ZERO) != 0)
                                 .count(),
                         accountService.getDailyPnl().setScale(2, RoundingMode.HALF_UP),
                         accountService.getDailyPnl()
-                                .divide(BigDecimal.valueOf(record.getTotalWalletBalance()), 2)
+                                .divide(accountInformation.getTotalWalletBalance(), 2)
                                 .multiply(BigDecimal.valueOf(100))
-                                .setScale(2, RoundingMode.HALF_UP))));
+                                .setScale(2, RoundingMode.HALF_UP)));
             }
             if (update.getMessage().getText().equals(Commands.START_PROFIT)) {
                 lickHunterService.startProfit();

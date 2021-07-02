@@ -14,6 +14,7 @@ import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,8 @@ public class AccountServiceImpl implements AccountService {
     private final FileService<Settings, ?> fileService;
     private final IncomeHistoryRepository incomeHistoryRepository;
 
-    public AccountInformation getAccountInformation() throws Exception {
+    @SneakyThrows
+    public AccountInformation getAccountInformation() {
         Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         AccountInformation accountInformation = syncRequestClient.getAccountInformation();
@@ -43,7 +45,8 @@ public class AccountServiceImpl implements AccountService {
         return accountInformation;
     }
 
-    public Boolean isOpenOrderIsolationActive(String key, Double isolationPercentage) throws Exception {
+    @SneakyThrows
+    public Boolean isOpenOrderIsolationActive(String key, Double isolationPercentage) {
         Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(key);
         isolationPercentage = Objects.nonNull(isolationPercentage) ? isolationPercentage : 0.0;
         if(accountRecord.isPresent()) {
@@ -64,7 +67,8 @@ public class AccountServiceImpl implements AccountService {
         return positionRepository.findActivePositionsByAccountId(key).stream().count() >= maxOpen;
     }
 
-    public List<Income> getIncomeHistory(String symbol, IncomeType incomeType, Long startTime, Long endTime, Integer limit) throws Exception {
+    @SneakyThrows
+    public List<Income> getIncomeHistory(String symbol, IncomeType incomeType, Long startTime, Long endTime, Integer limit) {
         Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<Income> incomeList = syncRequestClient.getIncomeHistory(symbol, incomeType, startTime, endTime, limit);

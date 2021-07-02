@@ -7,9 +7,13 @@ import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.LickHunterService;
 import com.lickhunter.web.services.MarketService;
+import com.lickhunter.web.services.WatchService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
@@ -32,16 +36,18 @@ public class WebApplication {
 	@Autowired
 	private LickHunterService lickHunterService;
 
+	@Autowired
+	private WatchService watchService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(WebApplication.class, args);
 	}
 
 	@PostConstruct
 	public void initProcess() throws Exception {
-		//TODO Major bug for websockets. Always disconnects. Data loss
-//		applicationController.subscribeUserData();
 		applicationController.subscribeCandleStickData();
 		applicationController.subscribeMarkPrice();
+		applicationController.subscribeUserData();
 
 		/**
 		 * BinanceScheduledTasks
@@ -67,5 +73,11 @@ public class WebApplication {
 		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
 		lickHunterService.startWebsocket();
 		lickHunterService.startProfit();
+	}
+
+	@EventListener(ApplicationReadyEvent.class)
+	@SneakyThrows
+	public void startWatcher() {
+		watchService.fileWatcher();
 	}
 }

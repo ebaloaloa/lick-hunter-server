@@ -20,11 +20,7 @@ public class BinanceScheduledTasks {
     private final AccountService accountService;
     private final MarketService marketService;
     private final TradeService tradeService;
-
-    @Scheduled(fixedRateString = "${scheduler.account-information}")
-    public void getAccountInformation() throws Exception {
-        accountService.getAccountInformation();
-    }
+    private final LickHunterScheduledTasks lickHunterScheduledTasks;
 
     @Scheduled(fixedRateString = "${scheduler.margin}")
     public void changeMarginType() throws Exception {
@@ -39,6 +35,7 @@ public class BinanceScheduledTasks {
     @Scheduled(fixedRateString = "${scheduler.liquidation}")
     public void getLiquidationData() throws Exception {
         marketService.getLiquidations();
+        lickHunterScheduledTasks.writeToCoinsJson();
     }
 
     @Scheduled(fixedRateString = "${scheduler.exchange-information}")

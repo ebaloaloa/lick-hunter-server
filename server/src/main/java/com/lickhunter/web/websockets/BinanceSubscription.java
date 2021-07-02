@@ -11,10 +11,13 @@ import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.UserDataEventConstants;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.events.BinanceEvents;
-import com.lickhunter.web.repositories.*;
+import com.lickhunter.web.repositories.CandlestickRepository;
+import com.lickhunter.web.repositories.SymbolRepository;
+import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
+import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
-import com.lickhunter.web.services.MarketService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,14 +38,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @EnableAsync
 public class BinanceSubscription {
-    private final MarketService marketService;
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
-    private final AssetRepository assetRepository;
-    private final AccountRepository accountRepository;
-    private final PositionRepository positionRepository;
     private final FileService fileService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final AccountService accountService;
+    private final LickHunterScheduledTasks lickHunterScheduledTasks;
 
     @Value("${binance.candlesticks}")
     private String[] candlesticks;
@@ -79,7 +80,8 @@ public class BinanceSubscription {
     }
 
     @Async
-    public void subscribeUserData() throws Exception {
+    @SneakyThrows
+    public void subscribeUserData() {
         log.info("Subscribing to User Data");
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
@@ -93,11 +95,10 @@ public class BinanceSubscription {
         subscriptionClient.subscribeUserDataEvent(listenKey, ((event) -> {
                 switch(UserDataEventConstants.valueOf(event.getEventType())) {
                     case ACCOUNT_UPDATE:
-                        log.debug(event.toString());
                         //TODO find a way to update maintenance margin
-                        positionRepository.insertOrUpdate(event.getAccountUpdate().getPositions(), settings.getKey());
-                        assetRepository.updateFromPosition(event.getAccountUpdate(), settings.getKey());
-                        accountRepository.updateFromAsset(settings.getKey());
+//                        positionRepository.insertOrUpdate(event.getAccountUpdate().getPositions(), settings.getKey());
+//                        assetRepository.updateFromPosition(event.getAccountUpdate(), settings.getKey());
+//                        accountRepository.updateFromAsset(settings.getKey());
                         publishBinanceEvent(UserDataEventConstants.ACCOUNT_UPDATE.getValue());
                         break;
                     case MARGIN_CALL:
@@ -105,10 +106,22 @@ public class BinanceSubscription {
                         publishBinanceEvent(UserDataEventConstants.MARGIN_CALL.getValue());
                         break;
                     case ORDER_TRADE_UPDATE:
-                        //TODO implement position updates here. **HISTORICAL DATA**
-                        //  executionType=TRADE
-                        //  orderStatus=FILLED
-                        //  isReduceOnly=true
+                        //Update account information for new and closed positions
+                        if((event.getOrderUpdate().getType().equalsIgnoreCase("MARKET")
+                            && event.getOrderUpdate().getExecutionType().equalsIgnoreCase("TRADE")
+                            && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase("FILLED"))
+                            || (event.getOrderUpdate().getExecutionType().equalsIgnoreCase("TRADE")
+                                && event.getOrderUpdate().getType().equalsIgnoreCase("LIMIT")
+                                && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase("FILLED")
+                                && event.getOrderUpdate().getIsReduceOnly().equals(true))) {
+                            log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, avgPrice: %s, realizedProfit: %s",
+                                    event.getOrderUpdate().getSymbol(),
+                                    event.getOrderUpdate().getSide(),
+                                    event.getOrderUpdate().getAvgPrice(),
+                                    event.getOrderUpdate().getRealizedProfit()));
+                            accountService.getAccountInformation();
+                            lickHunterScheduledTasks.writeToCoinsJson();
+                        }
                         publishBinanceEvent(UserDataEventConstants.ORDER_TRADE_UPDATE.getValue());
                         break;
                     case ACCOUNT_CONFIG_UPDATE:

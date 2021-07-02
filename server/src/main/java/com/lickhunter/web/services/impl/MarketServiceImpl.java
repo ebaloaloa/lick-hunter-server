@@ -60,8 +60,8 @@ public class MarketServiceImpl implements MarketService {
     /**
      * {@inheritDoc}
      */
-    public List<SymbolRecord> getTickerByQuery(TickerQueryTO query) throws Exception {
-        log.debug(String.format("Retrieving Symbols using input: %s", query));
+    public List<SymbolRecord> getTickerByQuery(TickerQueryTO query) {
+        log.info(String.format("Retrieving Symbols using input: %s", query));
         List<SymbolRecord> result;
         if(Objects.nonNull(query.getSymbol())) {
             return symbolRepository.findBySymbols(query.getSymbol());
@@ -129,7 +129,7 @@ public class MarketServiceImpl implements MarketService {
      * {@inheritDoc}
      */
     public void getExchangeInformation() {
-        log.debug("Retrieving Exchange Information");
+        log.info("Retrieving Exchange Information");
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ExchangeInformation> result = restTemplate.getForEntity(BinanceApiConstants.API_BASE_URL + "/fapi/v1/exchangeInfo", ExchangeInformation.class);
         Objects.requireNonNull(result.getBody()).getSymbols().forEach(symbolRepository::insertOrUpdate);

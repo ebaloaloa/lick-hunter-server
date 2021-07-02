@@ -14,14 +14,18 @@ import com.lickhunter.web.services.*;
 import com.lickhunter.web.to.SentimentsTO;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -54,9 +58,10 @@ public class LickHunterScheduledTasks {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> future;
 
-    @Scheduled(fixedRateString = "${scheduler.write-coins}")
-    @Synchronized
-    public void writeToCoinsJson() throws Exception {
+    @SneakyThrows
+    @Retryable( value = UndeclaredThrowableException.class,
+            maxAttempts = Integer.MAX_VALUE, backoff = @Backoff(delay = 100))
+    public void writeToCoinsJson() {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
@@ -78,28 +83,38 @@ public class LickHunterScheduledTasks {
                     .sorted(Comparator.comparing(SymbolRecord::getSymbol))
                     .forEach(s -> coinsList.add((coinValue(s.getSymbol(), activeSettings))));
         }
-        //Auto Exclude
-        if (Objects.nonNull(tickerQueryTO.getAutoExclude()) && tickerQueryTO.getAutoExclude()) {
-            symbolRecords.forEach(priceChangeTicker -> {
-                if(BigDecimal.valueOf(priceChangeTicker.getPriceChangePercent()).abs().compareTo(tickerQueryTO.getAutoExcludePercentage()) > 0) {
-                    tickerQueryTO.getExclude().add(priceChangeTicker.getSymbol().replace("USDT",""));
-                }
-            });
-        }
         fileService.writeToFile("./", ApplicationConstants.COINS.getValue(), coinsList);
-        fileService.writeToFile("./", ApplicationConstants.TICKER_QUERY.getValue(), tickerQueryTO);
     }
 
     @Scheduled(cron = "${scheduler.lickhunter:-}")
-    @Synchronized
     public void restartLickHunter() {
         if(restartEnabled.get()) {
             lickHunterService.restart();
         }
     }
 
+    @Scheduled(fixedRateString = "${scheduler.exclude-coins}")
+    @SneakyThrows
+    public void excludeCoins() {
+        TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
+        List<SymbolRecord> symbolRecords = marketService.getTickerByQuery(tickerQueryTO);
+        //Auto Exclude
+        if (Objects.nonNull(tickerQueryTO.getAutoExclude()) && tickerQueryTO.getAutoExclude()) {
+            symbolRecords.forEach(priceChangeTicker -> {
+                if(BigDecimal.valueOf(priceChangeTicker.getPriceChangePercent()).abs().compareTo(tickerQueryTO.getAutoExcludePercentage()) > 0) {
+                    tickerQueryTO.getExclude().add(priceChangeTicker.getSymbol().replace("USDT",""));
+                    try {
+                        fileService.writeToFile("./", ApplicationConstants.TICKER_QUERY.getValue(), tickerQueryTO);
+                    } catch (Exception exception) {
+                        log.error("Error encountered during excluding of coins " + ApplicationConstants.TICKER_QUERY.getValue());
+                    }
+                }
+            });
+        }
+    }
+
     @Scheduled(cron = "${scheduler.sentiments:-}")
-    @Synchronized
+    @Async
     public void checkSentiments() throws Exception {
         if(applicationConfig.getSentimentsEnable()) {
             log.info("Checking sentiments information.");
@@ -125,6 +140,7 @@ public class LickHunterScheduledTasks {
                         .withSymbol(symbolRecord.getSymbol().replace("USDT", ""));
                 sentimentsService.getSentiments(asset);
             });
+            this.writeToCoinsJson();
         }
     }
 
@@ -207,7 +223,7 @@ public class LickHunterScheduledTasks {
         }
     }
 
-    private void changeSettings(SentimentsAsset sentimentsAsset) throws Exception {
+    private void changeSettings(SentimentsAsset sentimentsAsset) {
         if(applicationConfig.getSentimentsChangeSettingsEnable()) {
             WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
             if(sentimentsAsset.getData().get(0).getVolatility()
