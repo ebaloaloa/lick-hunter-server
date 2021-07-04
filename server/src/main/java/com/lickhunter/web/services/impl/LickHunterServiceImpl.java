@@ -1,6 +1,10 @@
 package com.lickhunter.web.services.impl;
 
 import com.lickhunter.web.configs.MessageConfig;
+import com.lickhunter.web.configs.UserDefinedSettings;
+import com.lickhunter.web.configs.WebSettings;
+import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.LickHunterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +18,7 @@ import java.io.IOException;
 public class LickHunterServiceImpl implements LickHunterService {
 
     private final MessageConfig messageConfig;
+    private final FileService fileService;
 
     public void startProfit() {
         try {
@@ -57,5 +62,11 @@ public class LickHunterServiceImpl implements LickHunterService {
         stopWebsocket();
         startProfit();
         startWebsocket();
+    }
+
+    @Override
+    public UserDefinedSettings getActiveSettings() {
+        WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
+        return webSettings.getUserDefinedSettings().get(webSettings.getActive());
     }
 }

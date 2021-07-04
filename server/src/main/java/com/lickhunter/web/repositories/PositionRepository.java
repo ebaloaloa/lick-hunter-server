@@ -117,6 +117,13 @@ public class PositionRepository {
                 .fetchOptional();
     }
 
+    public Optional<PositionRecord> findBySymbolAndAccountId(String symbol, String accountId) {
+        return dsl.selectFrom(POSITION)
+                .where(POSITION.ACCOUNT_ID.eq(accountId))
+                .and(POSITION.SYMBOL.eq(symbol))
+                .fetchOptional();
+    }
+
     public List<PositionRecord> findByAccountId(String accountId) {
         return dsl.selectFrom(POSITION)
                 .where(POSITION.ACCOUNT_ID.eq(accountId))

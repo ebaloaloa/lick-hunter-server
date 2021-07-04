@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
+import java.math.BigDecimal;
+
 @With
 @Data
 @NoArgsConstructor
@@ -43,4 +45,18 @@ public class UserDefinedSettings {
     private Double offsetThree;
     @JsonProperty("offsetVolatilityThree")
     private Double offsetVolatilityThree;
+    @JsonProperty("dcaStart")
+    private BigDecimal dcaStart;
+    @JsonProperty("rangeOne")
+    private DcaRange rangeOne;
+    @JsonProperty("rangeTwo")
+    private DcaRange rangeTwo;
+    @JsonProperty("rangeThree")
+    private DcaRange rangeThree;
+    @JsonProperty("rangeFour")
+    private DcaRange rangeFour;
+    @JsonProperty("rangeFive")
+    private DcaRange rangeFive;
+    @JsonProperty("rangeSix")
+    private DcaRange rangeSix;
 }

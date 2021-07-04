@@ -7,6 +7,8 @@ import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.MarkPrice;
 import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.configs.UserDefinedSettings;
+import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.UserDataEventConstants;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
@@ -16,6 +18,7 @@ import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
+import com.lickhunter.web.services.LickHunterService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -44,15 +47,17 @@ public class BinanceSubscription {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final AccountService accountService;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
+    private final LickHunterService lickHunterService;
 
     @Value("${binance.candlesticks}")
     private String[] candlesticks;
 
     @Async
-    public void subscribeCandleStickData() throws Exception {
+    public void subscribeCandleStickData() {
         log.info("Subscribing to Binance candlesticks data");
         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
         subscriptionOptions.setUri("wss://fstream.binance.com");
+        subscriptionOptions.setConnectionDelayOnFailure(3);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         List<String> symbols = symbolRepository.findAll().stream()
                 .map(SymbolRecord::getSymbol)
@@ -90,7 +95,9 @@ public class BinanceSubscription {
         Thread listenKeyKeepALive = new Thread(() -> syncRequestClient.keepUserDataStream(listenKey));
         executorService.scheduleWithFixedDelay(listenKeyKeepALive, 0, 45, TimeUnit.MINUTES);
         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
+        subscriptionOptions.setReceiveLimitMs(1800000);
         subscriptionOptions.setUri("wss://fstream.binance.com/");
+        subscriptionOptions.setConnectionDelayOnFailure(3);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         subscriptionClient.subscribeUserDataEvent(listenKey, ((event) -> {
                 switch(UserDataEventConstants.valueOf(event.getEventType())) {
@@ -120,6 +127,11 @@ public class BinanceSubscription {
                                     event.getOrderUpdate().getAvgPrice(),
                                     event.getOrderUpdate().getRealizedProfit()));
                             accountService.getAccountInformation();
+                            Long buyCount = symbolRepository.updateNumberOfBuys(event.getOrderUpdate(), settings.getKey(), lickHunterService.getActiveSettings());
+                            log.info(String.format("[BUY/SELL COUNT] symbol: %s, side: %s, buyCount: %s",
+                                    event.getOrderUpdate().getSymbol(),
+                                    event.getOrderUpdate().getSide(),
+                                    buyCount));
                             lickHunterScheduledTasks.writeToCoinsJson();
                         }
                         publishBinanceEvent(UserDataEventConstants.ORDER_TRADE_UPDATE.getValue());
@@ -138,10 +150,11 @@ public class BinanceSubscription {
     }
 
     @Async
-    public void subscribeMarkPrice() throws Exception {
+    public void subscribeMarkPrice() {
         log.info("Subscribing to Binance Mark Price data.");
         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
         subscriptionOptions.setUri("wss://fstream.binance.com/");
+        subscriptionOptions.setConnectionDelayOnFailure(3);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         try {
             subscriptionClient.subscribeAllMarkPriceEvent(data -> {
