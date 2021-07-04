@@ -37,6 +37,12 @@ CREATE TABLE IF NOT EXISTS symbol (
     VOLATILITY           DOUBLE       NULL,
     LICK_MEDIAN          DOUBLE       NULL,
     LICK_AVERAGE         DOUBLE       NULL,
+    FIRST_BUY            BIGINT       NULL        DEFAULT 0,
+    SECOND_BUY           BIGINT       NULL        DEFAULT 0,
+    THIRD_BUY            BIGINT       NULL        DEFAULT 0,
+    FOURTH_BUY           BIGINT       NULL        DEFAULT 0,
+    FIFTH_BUY            BIGINT       NULL        DEFAULT 0,
+    SIXTH_BUY            BIGINT       NULL        DEFAULT 0,
 
     CONSTRAINT pk_symbol           PRIMARY KEY (symbol)
 );
