@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -34,6 +35,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 @Component
 @Slf4j
@@ -75,11 +77,13 @@ public class LickHunterScheduledTasks {
         if(accountService.isMaxOpenActive(settings.getKey(), Long.valueOf(activeSettings.getMaxOpen()))
                 || accountService.isOpenOrderIsolationActive(settings.getKey(), activeSettings.getOpenOrderIsolationPercentage())
                 || pauseOnCloseActive.get()) {
-            positionRecords
+            positionRecords.stream()
+                    .filter(this.allowDca(activeSettings))
                     .forEach(p -> coinsList.add(coinValue(p.getSymbol(), activeSettings)));
         } else {
             symbolRecords
                     .stream()
+                    .filter(this.allowDca(activeSettings, settings.getKey()))
                     .sorted(Comparator.comparing(SymbolRecord::getSymbol))
                     .forEach(s -> coinsList.add((coinValue(s.getSymbol(), activeSettings))));
         }
@@ -290,5 +294,57 @@ public class LickHunterScheduledTasks {
             coins.setShortoffset(activeSettings.getShortOffset().toString());
         }
         return coins;
+    }
+
+    private Predicate<PositionRecord> allowDca(UserDefinedSettings userDefinedSettings) {
+        return positionRecord -> {
+            Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol());
+            if(symbolRecord.isPresent()) {
+                BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.get().getMarkPrice())
+                        .subtract(new BigDecimal(positionRecord.getEntryPrice())).abs()).divide(new BigDecimal(positionRecord.getEntryPrice()), MathContext.DECIMAL128)).multiply(BigDecimal.valueOf(100));
+                if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFive().getPercentFromAverage()) > 0) {
+                    return true;
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
+                    return symbolRecord.get().getFifthBuy() <= Long.parseLong(userDefinedSettings.getRangeFive().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
+                    return symbolRecord.get().getFourthBuy() <= Long.parseLong(userDefinedSettings.getRangeFour().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+                    return symbolRecord.get().getThirdBuy() <= Long.parseLong(userDefinedSettings.getRangeThree().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
+                    return symbolRecord.get().getSecondBuy() <= Long.parseLong(userDefinedSettings.getRangeTwo().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
+                    return symbolRecord.get().getFirstBuy() <= Long.parseLong(userDefinedSettings.getRangeOne().getNumberOfBuys());
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
+
+    private Predicate<SymbolRecord> allowDca(UserDefinedSettings userDefinedSettings, String accountId) {
+        return symbolRecord -> {
+            Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(symbolRecord.getSymbol(), accountId);
+            if(positionRecord.isPresent() && positionRecord.get().getInitialMargin() > 0.0 ) {
+                BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.getMarkPrice())
+                        .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs()).divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128)).multiply(BigDecimal.valueOf(100));
+                if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFive().getPercentFromAverage()) > 0) {
+                    return true;
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
+                    return symbolRecord.getFifthBuy() <= Long.parseLong(userDefinedSettings.getRangeFive().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
+                    return symbolRecord.getFourthBuy() <= Long.parseLong(userDefinedSettings.getRangeFour().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+                    return symbolRecord.getThirdBuy() <= Long.parseLong(userDefinedSettings.getRangeThree().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
+                    return symbolRecord.getSecondBuy() <= Long.parseLong(userDefinedSettings.getRangeTwo().getNumberOfBuys());
+                } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
+                    return symbolRecord.getFirstBuy() <= Long.parseLong(userDefinedSettings.getRangeOne().getNumberOfBuys());
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        };
     }
 }

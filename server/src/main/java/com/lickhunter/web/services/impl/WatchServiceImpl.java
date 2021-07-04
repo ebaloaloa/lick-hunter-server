@@ -2,6 +2,7 @@ package com.lickhunter.web.services.impl;
 
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
+import com.lickhunter.web.services.LickHunterService;
 import com.lickhunter.web.services.WatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -16,6 +17,7 @@ import java.nio.file.*;
 public class WatchServiceImpl implements WatchService {
 
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
+    private final LickHunterService lickHunterService;
 
     @SneakyThrows
     public void fileWatcher() {
@@ -38,6 +40,9 @@ public class WatchServiceImpl implements WatchService {
                         && changed.endsWith(ApplicationConstants.COINS.getValue())) {
                         log.info("File deleted:" + changed);
                         lickHunterScheduledTasks.writeToCoinsJson();
+                    }
+                    if (changed.endsWith(ApplicationConstants.SETTINGS.getValue())) {
+                        lickHunterService.restart();
                     }
                 }
                 // reset the key

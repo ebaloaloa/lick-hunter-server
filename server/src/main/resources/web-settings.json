@@ -19,7 +19,32 @@
       "offsetTwo" : 9.0,
       "offsetVolatilityTwo" : 0.05,
       "offsetThree" : 11.0,
-      "offsetVolatilityThree" : 0.07
+      "offsetVolatilityThree" : 0.07,
+      "dcaStart": 0.5,
+      "rangeOne": {
+        "percentFromAverage": 2.5,
+        "numberOfBuys": 10
+      },
+      "rangeTwo": {
+        "percentFromAverage": 5,
+        "numberOfBuys": 10
+      },
+      "rangeThree": {
+        "percentFromAverage": 7.5,
+        "numberOfBuys": 20
+      },
+      "rangeFour": {
+        "percentFromAverage": 10,
+        "numberOfBuys": 20
+      },
+      "rangeFive": {
+        "percentFromAverage": 15,
+        "numberOfBuys": 40
+      },
+      "rangeSix": {
+        "percentFromAverage": 100,
+        "numberOfBuys": "unlimited"
+      }
     },
     "settings2" : {
       "maxOpen" : 5,
@@ -37,7 +62,32 @@
       "offsetTwo" : 9.0,
       "offsetVolatilityTwo" : 0.05,
       "offsetThree" : 11.0,
-      "offsetVolatilityThree" : 0.07
+      "offsetVolatilityThree" : 0.07,
+      "dcaStart": 0.5,
+      "rangeOne": {
+        "percentFromAverage": 2.5,
+        "numberOfBuys": 10
+      },
+      "rangeTwo": {
+        "percentFromAverage": 5,
+        "numberOfBuys": 10
+      },
+      "rangeThree": {
+        "percentFromAverage": 7.5,
+        "numberOfBuys": 20
+      },
+      "rangeFour": {
+        "percentFromAverage": 10,
+        "numberOfBuys": 20
+      },
+      "rangeFive": {
+        "percentFromAverage": 15,
+        "numberOfBuys": 40
+      },
+      "rangeSix": {
+        "percentFromAverage": 100,
+        "numberOfBuys": "unlimited"
+      }
     },
     "settings3" : {
       "maxOpen" : 10,
@@ -55,7 +105,32 @@
       "offsetTwo" : 7.5,
       "offsetVolatilityTwo" : 0.05,
       "offsetThree" : 9.5,
-      "offsetVolatilityThree" : 0.07
+      "offsetVolatilityThree" : 0.07,
+      "dcaStart": 0.5,
+      "rangeOne": {
+        "percentFromAverage": 2.5,
+        "numberOfBuys": 10
+      },
+      "rangeTwo": {
+        "percentFromAverage": 5,
+        "numberOfBuys": 10
+      },
+      "rangeThree": {
+        "percentFromAverage": 7.5,
+        "numberOfBuys": 20
+      },
+      "rangeFour": {
+        "percentFromAverage": 10,
+        "numberOfBuys": 20
+      },
+      "rangeFive": {
+        "percentFromAverage": 15,
+        "numberOfBuys": 40
+      },
+      "rangeSix": {
+        "percentFromAverage": 100,
+        "numberOfBuys": "unlimited"
+      }
     }
   }
 }
