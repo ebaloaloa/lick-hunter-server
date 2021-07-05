@@ -219,4 +219,9 @@ public class SyncRequestImpl implements SyncRequestClient {
     public List<TakerLongShortStat> getTakerLongShortRatio(String symbol, PeriodType period, Long startTime, Long endTime, Integer limit) {
         return RestApiInvoker.callSync(requestImpl.getTakerLongShortRatio(symbol, period, startTime, endTime, limit));
     }
+
+    @Override
+    public JSONObject futuresTransfer(String asset, Double amount, int type) {
+        return RestApiInvoker.callSync(requestImpl.futuresTransfer(asset, amount, type));
+    }
 }

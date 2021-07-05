@@ -338,4 +338,5 @@ public interface SyncRequestClient {
      */
     List<TakerLongShortStat> getTakerLongShortRatio(String symbol, PeriodType period, Long startTime, Long endTime, Integer limit);
 
+    JSONObject futuresTransfer(String asset, Double amount, int type);
 }

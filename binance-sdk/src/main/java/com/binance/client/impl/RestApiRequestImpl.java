@@ -1331,4 +1331,20 @@ class RestApiRequestImpl {
         return request;
     }
 
+    RestApiRequest<JSONObject> futuresTransfer(String asset, Double amount, int type) {
+        RestApiRequest<JSONObject> request = new RestApiRequest<>();
+        UrlParamsBuilder builder = UrlParamsBuilder.build()
+                .putToUrl("asset", asset)
+                .putToUrl("amount", String.valueOf(amount))
+                .putToUrl("type", type);
+        request.request = this.createRequestByPostWithSignature("/sapi/v1/futures/transfer", builder);
+
+        request.jsonParser = (jsonWrapper -> {
+            JSONObject result = new JSONObject();
+            result.put("tranId", jsonWrapper.getLong("tranId"));
+            return result;
+        });
+        return request;
+    }
+
 }
