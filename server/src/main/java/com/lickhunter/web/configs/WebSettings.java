@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,8 @@ public class WebSettings {
     private String active;
     @JsonProperty("defaultSettings")
     private String defaultSettings;
+    @JsonProperty("dailyReinvestment")
+    private BigDecimal dailyReinvestment;
     @JsonProperty("safe")
     private String safe;
     @JsonProperty("userDefinedSettings")

@@ -1,11 +1,11 @@
 package com.lickhunter.web.services.impl;
 
+import com.binance.client.RequestOptions;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.IncomeType;
 import com.binance.client.model.trade.AccountInformation;
 import com.binance.client.model.trade.Income;
 import com.lickhunter.web.configs.Settings;
-import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.tables.records.AccountRecord;
 import com.lickhunter.web.entities.tables.records.IncomeHistoryRecord;
 import com.lickhunter.web.repositories.AccountRepository;
@@ -13,6 +13,7 @@ import com.lickhunter.web.repositories.IncomeHistoryRepository;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
+import com.lickhunter.web.services.LickHunterService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +36,11 @@ public class AccountServiceImpl implements AccountService {
     private final PositionRepository positionRepository;
     private final FileService<Settings, ?> fileService;
     private final IncomeHistoryRepository incomeHistoryRepository;
+    private final LickHunterService lickHunterService;
 
     @SneakyThrows
     public AccountInformation getAccountInformation() {
-        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = lickHunterService.getLickHunterSettings();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         AccountInformation accountInformation = syncRequestClient.getAccountInformation();
         accountRepository.insertOrUpdate(accountInformation, settings.getKey());
@@ -69,7 +71,7 @@ public class AccountServiceImpl implements AccountService {
 
     @SneakyThrows
     public List<Income> getIncomeHistory(String symbol, IncomeType incomeType, Long startTime, Long endTime, Integer limit) {
-        Settings settings = fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = lickHunterService.getLickHunterSettings();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<Income> incomeList = syncRequestClient.getIncomeHistory(symbol, incomeType, startTime, endTime, limit);
         incomeList.forEach(i -> {
@@ -87,5 +89,13 @@ public class AccountServiceImpl implements AccountService {
                 .filter(incomeHistoryRecord -> !incomeHistoryRecord.getIncomeType().equals(IncomeType.TRANSFER.toString()))
                 .map(IncomeHistoryRecord::getIncome)
                 .reduce(0.0, Double::sum));
+    }
+
+    public void futuresTransfer(String asset, Double amount, int type) {
+        Settings settings = lickHunterService.getLickHunterSettings();
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.setUrl("https://api.binance.com");
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret(), requestOptions);
+        syncRequestClient.futuresTransfer(asset, amount, type);
     }
 }

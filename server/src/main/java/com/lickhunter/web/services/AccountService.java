@@ -14,5 +14,5 @@ public interface AccountService {
     Boolean isMaxOpenActive(String key, Long maxOpen);
     List<Income> getIncomeHistory(String symbol, IncomeType incomeType, Long startTime, Long endTime, Integer limit);
     BigDecimal getDailyPnl();
-
+    void futuresTransfer(String asset, Double amount, int type);
 }

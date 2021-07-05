@@ -3,6 +3,7 @@ package com.lickhunter.web;
 import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.controllers.ApplicationController;
+import com.lickhunter.web.scheduler.BinanceScheduledTasks;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.LickHunterService;

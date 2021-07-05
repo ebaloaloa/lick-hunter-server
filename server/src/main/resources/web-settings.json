@@ -2,6 +2,7 @@
   "active" : "settings1",
   "defaultSettings" : "settings1",
   "safe" : "settings2",
+  "dailyReinvestment": 80,
   "userDefinedSettings" : {
     "settings1" : {
       "maxOpen" : 10,
