@@ -34,7 +34,7 @@ public abstract class Channels {
     public static String markPriceChannel() {
         JSONObject json = new JSONObject();
         JSONArray params = new JSONArray();
-        params.add("!markPrice@arr");
+        params.add("!markPrice@arr@1s");
         json.put("params", params);
         json.put("id", System.currentTimeMillis());
         json.put("method", "SUBSCRIBE");
