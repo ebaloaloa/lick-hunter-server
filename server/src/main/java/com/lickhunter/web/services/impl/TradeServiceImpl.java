@@ -121,12 +121,12 @@ public class TradeServiceImpl implements TradeService {
         if(tickerQueryTO.getExclude().stream().noneMatch(s -> s.concat("USDT").equalsIgnoreCase(orderUpdate.getSymbol()))
             &&
                 ((orderUpdate.getType().equalsIgnoreCase(OrderType.MARKET.name())
-                && orderUpdate.getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
-                && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
-                && !orderUpdate.getIsReduceOnly())
-            || (orderUpdate.getType().equalsIgnoreCase(OrderType.LIMIT.name())
-                && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())
-                && orderUpdate.getIsReduceOnly())
+                    && orderUpdate.getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
+                    && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
+                    && !orderUpdate.getIsReduceOnly())
+                || (orderUpdate.getType().equalsIgnoreCase(OrderType.LIMIT.name())
+                    && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())
+                    && orderUpdate.getIsReduceOnly())
                 && syncRequestClient.getOpenOrders(orderUpdate.getSymbol()).isEmpty()
                 && (positionRecord.isPresent() && symbolRecord.isPresent()))) {
             //cancel open order
@@ -172,6 +172,38 @@ public class TradeServiceImpl implements TradeService {
                         TimeInForce.GTC,
                         String.valueOf(qty),
                         String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.get().getEntryPrice()) - diff).setScale(scale, RoundingMode.HALF_DOWN)),
+                        "true",
+                        null,
+                        null,
+                        null,
+                        NewOrderRespType.RESULT,
+                        "false");
+            }
+            if(orderUpdate.getSide().equalsIgnoreCase(OrderSide.BUY.name()) && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())) {
+                syncRequestClient.postOrder(
+                        orderUpdate.getSymbol(),
+                        OrderSide.BUY,
+                        PositionSide.BOTH,
+                        OrderType.LIMIT,
+                        TimeInForce.GTC,
+                        String.valueOf(orderUpdate.getOrigQty()),
+                        String.valueOf(orderUpdate.getPrice()),
+                        "true",
+                        null,
+                        null,
+                        null,
+                        NewOrderRespType.RESULT,
+                        "false");
+            }
+            if(orderUpdate.getSide().equalsIgnoreCase(OrderSide.SELL.name()) && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())) {
+                syncRequestClient.postOrder(
+                        orderUpdate.getSymbol(),
+                        OrderSide.SELL,
+                        PositionSide.BOTH,
+                        OrderType.LIMIT,
+                        TimeInForce.GTC,
+                        String.valueOf(orderUpdate.getOrigQty()),
+                        String.valueOf(orderUpdate.getPrice()),
                         "true",
                         null,
                         null,
