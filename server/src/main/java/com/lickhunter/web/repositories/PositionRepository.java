@@ -1,6 +1,7 @@
 package com.lickhunter.web.repositories;
 
 import com.binance.client.model.trade.Position;
+import com.binance.client.model.user.OrderUpdate;
 import com.binance.client.model.user.PositionUpdate;
 import com.lickhunter.web.entities.tables.records.PositionRecord;
 import lombok.RequiredArgsConstructor;
@@ -135,5 +136,20 @@ public class PositionRepository {
                 .where(POSITION.ACCOUNT_ID.eq(accountId))
                 .and(POSITION.INITIAL_MARGIN.notEqual(0.0))
                 .fetch();
+    }
+
+    public void updateOrder(OrderUpdate orderUpdate, String accountId) {
+        Optional<PositionRecord> positionRecord = findBySymbolAndAccountId(orderUpdate.getSymbol(), accountId);
+        //update orderId if initial margin is 0 for new orders
+        if(positionRecord.isPresent()
+                && positionRecord.get().getInitialMargin() == 0.0
+                && !orderUpdate.getIsReduceOnly()) {
+            dsl.update(POSITION)
+                    .set(POSITION.ORDER_SIDE, orderUpdate.getSide())
+                    .set(POSITION.ORDER_ID, orderUpdate.getOrderId())
+                    .where(POSITION.SYMBOL.eq(orderUpdate.getSymbol()))
+                    .and(POSITION.ACCOUNT_ID.eq(accountId))
+                    .execute();
+        }
     }
 }

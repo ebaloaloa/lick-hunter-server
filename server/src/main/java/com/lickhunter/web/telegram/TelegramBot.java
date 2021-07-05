@@ -5,8 +5,6 @@ import com.lickhunter.web.configs.MessageConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
-import com.lickhunter.web.repositories.AccountRepository;
-import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
@@ -42,8 +40,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String[] userName;
 
     private final MessageConfig messageProperties;
-    private final AccountRepository accountRepository;
-    private final PositionRepository positionRepository;
     private final FileService fileService;
     private final AccountService accountService;
     private final LickHunterService lickHunterService;
@@ -91,14 +87,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 .divide(accountInformation.getTotalWalletBalance(), 2)
                                 .multiply(BigDecimal.valueOf(100))
                                 .setScale(2, RoundingMode.HALF_UP)));
-            }
-            if (update.getMessage().getText().equals(Commands.START_PROFIT)) {
-                lickHunterService.startProfit();
-                message.setText(messageProperties.getStartProfit());
-            }
-            if (update.getMessage().getText().equals(Commands.STOP_PROFIT)) {
-                lickHunterService.stopProfit();
-                message.setText(messageProperties.getStopProfit());
             }
             if (update.getMessage().getText().equals(Commands.START_WEBSOCKET)) {
                 lickHunterService.startWebsocket();
