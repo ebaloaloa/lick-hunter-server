@@ -26,9 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -131,7 +131,13 @@ public class TradeServiceImpl implements TradeService {
                 && (positionRecord.isPresent() && symbolRecord.isPresent()))) {
             //cancel open order
             syncRequestClient.cancelAllOpenOrder(orderUpdate.getSymbol());
-            List<Order> order = syncRequestClient.getAllOrders(orderUpdate.getSymbol(), positionRecord.get().getOrderId(), null, null, null).stream()
+            List<Order> order = syncRequestClient.getAllOrders(
+                        orderUpdate.getSymbol(),
+                        Objects.isNull(positionRecord.get().getOrderId()) ? null : positionRecord.get().getOrderId(),
+                        null,
+                        null,
+                        null)
+                    .stream()
                     .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
                         && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
                     .collect(Collectors.toList());
@@ -139,9 +145,9 @@ public class TradeServiceImpl implements TradeService {
                     .map(Order::getExecutedQty)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             Integer scale = BigDecimal.valueOf(symbolRecord.get().getTickSize()).stripTrailingZeros().scale();
-            Double diff = BigDecimal.valueOf(Double.parseDouble(positionRecord.get().getEntryPrice()) * this.getPercentTakeProfit(symbolRecord.get(), positionRecord.get()).doubleValue() / 100)
+            Double diff = BigDecimal.valueOf(Double.parseDouble(positionRecord.get().getEntryPrice()) * this.getPercentTakeProfit(symbolRecord.get()).doubleValue() / 100)
                     .setScale(scale, RoundingMode.HALF_DOWN).doubleValue();
-            if(positionRecord.get().getOrderSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+            if(orderUpdate.getSide().equalsIgnoreCase(OrderSide.BUY.name()) && orderUpdate.getType().equalsIgnoreCase(OrderType.MARKET.name())) {
                 syncRequestClient.postOrder(
                         orderUpdate.getSymbol(),
                         OrderSide.SELL,
@@ -157,7 +163,7 @@ public class TradeServiceImpl implements TradeService {
                         NewOrderRespType.RESULT,
                         "false");
             }
-            if(positionRecord.get().getOrderSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+            if(orderUpdate.getSide().equalsIgnoreCase(OrderSide.SELL.name()) && orderUpdate.getType().equalsIgnoreCase(OrderType.MARKET.name())) {
                 syncRequestClient.postOrder(
                         orderUpdate.getSymbol(),
                         OrderSide.BUY,
@@ -176,21 +182,19 @@ public class TradeServiceImpl implements TradeService {
         }
     }
 
-    private BigDecimal getPercentTakeProfit(SymbolRecord symbolRecord, PositionRecord positionRecord) {
+    private BigDecimal getPercentTakeProfit(SymbolRecord symbolRecord) {
         UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
-        BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.getMarkPrice())
-                .subtract(new BigDecimal(positionRecord.getEntryPrice())).abs()).divide(new BigDecimal(positionRecord.getEntryPrice()), MathContext.DECIMAL128)).multiply(BigDecimal.valueOf(100));
-        if(percentageFromAverage.compareTo(activeSettings.getRangeFive().getPercentFromAverage()) > 0) {
+        if(symbolRecord.getSixthBuy() != 0) {
             return activeSettings.getRangeSix().getPercentTakeProfit();
-        } else if(percentageFromAverage.compareTo(activeSettings.getRangeFour().getPercentFromAverage()) > 0) {
+        } else if(symbolRecord.getFifthBuy() != 0) {
             return activeSettings.getRangeFive().getPercentTakeProfit();
-        } else if(percentageFromAverage.compareTo(activeSettings.getRangeThree().getPercentFromAverage()) > 0) {
+        } else if(symbolRecord.getFourthBuy() != 0) {
             return activeSettings.getRangeFour().getPercentTakeProfit();
-        } else if(percentageFromAverage.compareTo(activeSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+        } else if(symbolRecord.getThirdBuy() != 0) {
             return activeSettings.getRangeThree().getPercentTakeProfit();
-        } else if(percentageFromAverage.compareTo(activeSettings.getRangeOne().getPercentFromAverage()) > 0) {
+        } else if(symbolRecord.getSecondBuy() != 0) {
             return activeSettings.getRangeTwo().getPercentTakeProfit();
-        } else if(percentageFromAverage.compareTo(activeSettings.getDcaStart()) > 0) {
+        } else if(symbolRecord.getFirstBuy() != 0) {
             return activeSettings.getRangeOne().getPercentTakeProfit();
         }
         return new BigDecimal(lickHunterService.getLickHunterSettings().getTakeprofit());
