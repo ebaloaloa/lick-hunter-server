@@ -302,9 +302,9 @@ Project Link: [https://github.com/ebaloaloa/lick-hunter-admin](https://github.co
 <!-- DONATIONS -->
 ## Donations
 
-* USDT (ERC20): 0xe1eb10322d33f768c29b3c56e16beca6e1b888a7
-* USDT (TRC20): TF6zmQxCP5hT4f9r4nLe1pYaC3daEmAVuQ
-* BTC: 1N7gtMygqxKMzo1jhzBdG7WnbNpoCB87pa
+* USDT (ERC20): 0xced41376c53f8e5f4dc9d5372d0a1558e0c5959a
+* USDT (TRC20): TSb5T8oyijVsC5nvvbNFRvcY88irAq2rZC
+* BTC: 1P4euVgKLJeKemNFGbKsyUuVy6JbhHp6fE
 
 
 
