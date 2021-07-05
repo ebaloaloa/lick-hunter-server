@@ -160,7 +160,7 @@ public class SymbolRepository {
 
     public Long updateNumberOfBuys(OrderUpdate orderUpdate, String accountId, UserDefinedSettings userDefinedSettings) {
         Optional<SymbolRecord> symbolRecord = this.findBySymbol(orderUpdate.getSymbol());
-        Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(orderUpdate.getSymbol(),accountId);
+        Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(orderUpdate.getSymbol(), accountId);
         if(symbolRecord.isPresent() && positionRecord.isPresent()) {
             //reset number of buys
             if(orderUpdate.getIsReduceOnly()) {
