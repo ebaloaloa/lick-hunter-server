@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS symbol (
     ONBOARD_DATE         BIGINT       NULL,
     PRICE_CHANGE_PERCENT DOUBLE       NULL,
     QUOTE_VOLUME         DOUBLE       NULL,
+    PRICE_PRECISION      BIGINT       NULL,
+    TICK_SIZE            DOUBLE       NULL,
     VOLATILITY           DOUBLE       NULL,
     LICK_MEDIAN          DOUBLE       NULL,
     LICK_AVERAGE         DOUBLE       NULL,
@@ -92,6 +94,8 @@ CREATE TABLE IF NOT EXISTS position (
     ENTRY_PRICE               VARCHAR(255) NOT NULL,
     MAX_NOTIONAL              VARCHAR(255) NULL,
     POSITION_SIDE             VARCHAR(255) NULL,
+    ORDER_ID                  BIGINT       NULL,
+    ORDER_SIDE                VARCHAR(255) NULL,
     ACCOUNT_ID                VARCHAR(255) NOT NULL,
 
     CONSTRAINT pk_position             PRIMARY KEY (SYMBOL),

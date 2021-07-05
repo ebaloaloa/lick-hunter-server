@@ -17,11 +17,15 @@ import java.math.BigDecimal;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "percentFromAverage",
+        "percentTakeProfit",
         "numberOfBuys"
 })
 public class DcaRange {
     @JsonProperty("percentFromAverage")
     private BigDecimal percentFromAverage;
+    @JsonProperty("percentTakeProfit")
+    private BigDecimal percentTakeProfit;
     @JsonProperty("numberOfBuys")
     private String numberOfBuys;
+
 }

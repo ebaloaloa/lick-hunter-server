@@ -1,6 +1,7 @@
 package com.lickhunter.web.services.impl;
 
 import com.lickhunter.web.configs.MessageConfig;
+import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
@@ -19,24 +20,6 @@ public class LickHunterServiceImpl implements LickHunterService {
 
     private final MessageConfig messageConfig;
     private final FileService fileService;
-
-    public void startProfit() {
-        try {
-            Runtime.getRuntime().exec("Start Profit.cmd").waitFor();
-            log.info(messageConfig.getStartProfit());
-        } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    public void stopProfit() {
-        try {
-            Runtime.getRuntime().exec("Stop Profit.cmd").waitFor();
-            log.info(messageConfig.getStopProfit());
-        } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage());
-        }
-    }
 
     public void startWebsocket(){
         try {
@@ -58,15 +41,17 @@ public class LickHunterServiceImpl implements LickHunterService {
 
     public void restart() {
         log.info("Restarting Lickhunter.");
-        stopProfit();
         stopWebsocket();
-        startProfit();
         startWebsocket();
     }
 
-    @Override
     public UserDefinedSettings getActiveSettings() {
         WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
         return webSettings.getUserDefinedSettings().get(webSettings.getActive());
+    }
+
+    public Settings getLickHunterSettings() {
+        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        return settings;
     }
 }
