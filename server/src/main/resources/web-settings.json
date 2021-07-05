@@ -23,26 +23,32 @@
       "dcaStart": 0.5,
       "rangeOne": {
         "percentFromAverage": 2.5,
+        "percentTakeProfit": 0.6,
         "numberOfBuys": 10
       },
       "rangeTwo": {
         "percentFromAverage": 5,
+        "percentTakeProfit": 0.5,
         "numberOfBuys": 10
       },
       "rangeThree": {
         "percentFromAverage": 7.5,
+        "percentTakeProfit": 0.4,
         "numberOfBuys": 20
       },
       "rangeFour": {
         "percentFromAverage": 10,
+        "percentTakeProfit": 0.3,
         "numberOfBuys": 20
       },
       "rangeFive": {
         "percentFromAverage": 15,
+        "percentTakeProfit": 0.3,
         "numberOfBuys": 40
       },
       "rangeSix": {
         "percentFromAverage": 100,
+        "percentTakeProfit": 0.2,
         "numberOfBuys": "unlimited"
       }
     },
@@ -66,26 +72,32 @@
       "dcaStart": 0.5,
       "rangeOne": {
         "percentFromAverage": 2.5,
+        "percentTakeProfit": 0.6,
         "numberOfBuys": 10
       },
       "rangeTwo": {
         "percentFromAverage": 5,
+        "percentTakeProfit": 0.5,
         "numberOfBuys": 10
       },
       "rangeThree": {
         "percentFromAverage": 7.5,
+        "percentTakeProfit": 0.4,
         "numberOfBuys": 20
       },
       "rangeFour": {
         "percentFromAverage": 10,
+        "percentTakeProfit": 0.3,
         "numberOfBuys": 20
       },
       "rangeFive": {
         "percentFromAverage": 15,
+        "percentTakeProfit": 0.3,
         "numberOfBuys": 40
       },
       "rangeSix": {
         "percentFromAverage": 100,
+        "percentTakeProfit": 0.2,
         "numberOfBuys": "unlimited"
       }
     },
@@ -109,26 +121,32 @@
       "dcaStart": 0.5,
       "rangeOne": {
         "percentFromAverage": 2.5,
+        "percentTakeProfit": 0.6,
         "numberOfBuys": 10
       },
       "rangeTwo": {
         "percentFromAverage": 5,
+        "percentTakeProfit": 0.5,
         "numberOfBuys": 10
       },
       "rangeThree": {
         "percentFromAverage": 7.5,
+        "percentTakeProfit": 0.4,
         "numberOfBuys": 20
       },
       "rangeFour": {
         "percentFromAverage": 10,
+        "percentTakeProfit": 0.3,
         "numberOfBuys": 20
       },
       "rangeFive": {
         "percentFromAverage": 15,
+        "percentTakeProfit": 0.3,
         "numberOfBuys": 40
       },
       "rangeSix": {
         "percentFromAverage": 100,
+        "percentTakeProfit": 0.2,
         "numberOfBuys": "unlimited"
       }
     }

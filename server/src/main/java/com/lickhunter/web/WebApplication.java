@@ -72,7 +72,6 @@ public class WebApplication {
 		marketService.getCandleStickData(CandlestickInterval.WEEKLY, 200);
 		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
 		lickHunterService.startWebsocket();
-		lickHunterService.startProfit();
 	}
 
 	@EventListener(ApplicationReadyEvent.class)

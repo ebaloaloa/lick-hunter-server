@@ -87,6 +87,8 @@ public class SymbolRepository {
         dsl.insertInto(SYMBOL)
                 .set(SYMBOL.SYMBOL_, symbol.getSymbol())
                 .set(SYMBOL.ONBOARD_DATE, symbol.getOnboardDate().longValue())
+                .set(SYMBOL.PRICE_PRECISION, symbol.getPricePrecision().longValue())
+                .set(SYMBOL.TICK_SIZE, Double.parseDouble(symbol.getFilters().get(0).getTickSize()))
                 .execute();
     }
 
@@ -119,6 +121,8 @@ public class SymbolRepository {
     public void update(Symbol symbol) {
         dsl.update(SYMBOL)
                 .set(SYMBOL.ONBOARD_DATE, symbol.getOnboardDate().longValue())
+                .set(SYMBOL.PRICE_PRECISION, symbol.getPricePrecision().longValue())
+                .set(SYMBOL.TICK_SIZE, Double.parseDouble(symbol.getFilters().get(0).getTickSize()))
                 .where(SYMBOL.SYMBOL_.eq(symbol.getSymbol()))
                 .execute();
     }

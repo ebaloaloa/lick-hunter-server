@@ -4,21 +4,24 @@ import com.binance.client.SubscriptionClient;
 import com.binance.client.SubscriptionOptions;
 import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.CandlestickInterval;
+import com.binance.client.model.enums.OrderState;
+import com.binance.client.model.enums.OrderType;
+import com.binance.client.model.enums.TransactType;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.MarkPrice;
 import com.lickhunter.web.configs.Settings;
-import com.lickhunter.web.configs.UserDefinedSettings;
-import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.UserDataEventConstants;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.events.BinanceEvents;
 import com.lickhunter.web.repositories.CandlestickRepository;
+import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.LickHunterService;
+import com.lickhunter.web.services.TradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -43,11 +46,13 @@ import java.util.stream.Collectors;
 public class BinanceSubscription {
     private final CandlestickRepository candlestickRepository;
     private final SymbolRepository symbolRepository;
+    private final PositionRepository positionRepository;
     private final FileService fileService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final AccountService accountService;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
     private final LickHunterService lickHunterService;
+    private final TradeService tradeService;
 
     @Value("${binance.candlesticks}")
     private String[] candlesticks;
@@ -90,7 +95,7 @@ public class BinanceSubscription {
         log.info("Subscribing to User Data");
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
-                SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         String listenKey = syncRequestClient.startUserDataStream();
         Thread listenKeyKeepALive = new Thread(() -> syncRequestClient.keepUserDataStream(listenKey));
         executorService.scheduleWithFixedDelay(listenKeyKeepALive, 0, 45, TimeUnit.MINUTES);
@@ -114,26 +119,24 @@ public class BinanceSubscription {
                         break;
                     case ORDER_TRADE_UPDATE:
                         //Update account information for new and closed positions
-                        if((event.getOrderUpdate().getType().equalsIgnoreCase("MARKET")
-                            && event.getOrderUpdate().getExecutionType().equalsIgnoreCase("TRADE")
-                            && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase("FILLED"))
-                            || (event.getOrderUpdate().getExecutionType().equalsIgnoreCase("TRADE")
-                                && event.getOrderUpdate().getType().equalsIgnoreCase("LIMIT")
-                                && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase("FILLED")
+                        if((event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.MARKET.name())
+                            && event.getOrderUpdate().getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
+                            && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name()))
+                            || (event.getOrderUpdate().getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
+                                && event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.LIMIT.name())
+                                && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
                                 && event.getOrderUpdate().getIsReduceOnly().equals(true))) {
-                            log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, avgPrice: %s, realizedProfit: %s",
-                                    event.getOrderUpdate().getSymbol(),
-                                    event.getOrderUpdate().getSide(),
-                                    event.getOrderUpdate().getAvgPrice(),
-                                    event.getOrderUpdate().getRealizedProfit()));
+                            positionRepository.updateOrder(event.getOrderUpdate(), settings.getKey());
                             accountService.getAccountInformation();
                             Long buyCount = symbolRepository.updateNumberOfBuys(event.getOrderUpdate(), settings.getKey(), lickHunterService.getActiveSettings());
-                            log.info(String.format("[BUY/SELL COUNT] symbol: %s, side: %s, buyCount: %s",
+                            log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, buyCount: %s, realizedProfit: %s",
                                     event.getOrderUpdate().getSymbol(),
                                     event.getOrderUpdate().getSide(),
-                                    buyCount));
+                                    buyCount,
+                                    event.getOrderUpdate().getRealizedProfit()));
                             lickHunterScheduledTasks.writeToCoinsJson();
                         }
+                        tradeService.takeProfitLimitOrders(event.getOrderUpdate(), settings.getKey());
                         publishBinanceEvent(UserDataEventConstants.ORDER_TRADE_UPDATE.getValue());
                         break;
                     case ACCOUNT_CONFIG_UPDATE:
