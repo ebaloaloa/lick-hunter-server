@@ -70,7 +70,7 @@ public class BinanceScheduledTasks {
                 });
     }
 
-    @Scheduled(fixedRateString = "${scheduler.daily-reinvestment}")
+    @Scheduled(cron = "${scheduler.daily-reinvestment:-}")
     @SneakyThrows
     public void transferFromFuturesToSpot() {
         WebSettings webSettings = fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
