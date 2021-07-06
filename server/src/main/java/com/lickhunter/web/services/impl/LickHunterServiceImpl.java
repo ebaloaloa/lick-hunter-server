@@ -7,6 +7,7 @@ import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.LickHunterService;
+import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,11 @@ public class LickHunterServiceImpl implements LickHunterService {
         log.info("Restarting Lickhunter.");
         stopWebsocket();
         startWebsocket();
+    }
+
+    public TickerQueryTO getQuery() {
+        TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
+        return tickerQueryTO;
     }
 
     public UserDefinedSettings getActiveSettings() {
