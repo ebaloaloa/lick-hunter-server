@@ -61,13 +61,13 @@ public class LickHunterScheduledTasks {
     private ScheduledFuture<?> future;
 
     @SneakyThrows
+    @Scheduled(fixedRateString = "${scheduler.write-coins}")
     @Retryable( value = UndeclaredThrowableException.class,
             maxAttempts = Integer.MAX_VALUE, backoff = @Backoff(delay = 100))
     public void writeToCoinsJson() {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
-        TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
-        WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
-        UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
+        Settings settings = lickHunterService.getLickHunterSettings();
+        TickerQueryTO tickerQueryTO = lickHunterService.getQuery();
+        UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
         List<Coins> coinsList = new ArrayList<>();
         List<SymbolRecord> symbolRecords = marketService.getTickerByQuery(tickerQueryTO);
         List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
@@ -303,15 +303,15 @@ public class LickHunterScheduledTasks {
                 if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFive().getPercentFromAverage()) > 0) {
                     return true;
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
-                    return symbolRecord.get().getFifthBuy() <= Long.parseLong(userDefinedSettings.getRangeFive().getNumberOfBuys());
+                    return symbolRecord.get().getFifthBuy() < Long.parseLong(userDefinedSettings.getRangeFive().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
-                    return symbolRecord.get().getFourthBuy() <= Long.parseLong(userDefinedSettings.getRangeFour().getNumberOfBuys());
+                    return symbolRecord.get().getFourthBuy() < Long.parseLong(userDefinedSettings.getRangeFour().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
-                    return symbolRecord.get().getThirdBuy() <= Long.parseLong(userDefinedSettings.getRangeThree().getNumberOfBuys());
+                    return symbolRecord.get().getThirdBuy() < Long.parseLong(userDefinedSettings.getRangeThree().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
-                    return symbolRecord.get().getSecondBuy() <= Long.parseLong(userDefinedSettings.getRangeTwo().getNumberOfBuys());
+                    return symbolRecord.get().getSecondBuy() < Long.parseLong(userDefinedSettings.getRangeTwo().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
-                    return symbolRecord.get().getFirstBuy() <= Long.parseLong(userDefinedSettings.getRangeOne().getNumberOfBuys());
+                    return symbolRecord.get().getFirstBuy() < Long.parseLong(userDefinedSettings.getRangeOne().getNumberOfBuys());
                 } else {
                     return false;
                 }
@@ -329,15 +329,15 @@ public class LickHunterScheduledTasks {
                 if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFive().getPercentFromAverage()) > 0) {
                     return true;
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
-                    return symbolRecord.getFifthBuy() <= Long.parseLong(userDefinedSettings.getRangeFive().getNumberOfBuys());
+                    return symbolRecord.getFifthBuy() < Long.parseLong(userDefinedSettings.getRangeFive().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
-                    return symbolRecord.getFourthBuy() <= Long.parseLong(userDefinedSettings.getRangeFour().getNumberOfBuys());
+                    return symbolRecord.getFourthBuy() < Long.parseLong(userDefinedSettings.getRangeFour().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
-                    return symbolRecord.getThirdBuy() <= Long.parseLong(userDefinedSettings.getRangeThree().getNumberOfBuys());
+                    return symbolRecord.getThirdBuy() < Long.parseLong(userDefinedSettings.getRangeThree().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
-                    return symbolRecord.getSecondBuy() <= Long.parseLong(userDefinedSettings.getRangeTwo().getNumberOfBuys());
+                    return symbolRecord.getSecondBuy() < Long.parseLong(userDefinedSettings.getRangeTwo().getNumberOfBuys());
                 } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
-                    return symbolRecord.getFirstBuy() <= Long.parseLong(userDefinedSettings.getRangeOne().getNumberOfBuys());
+                    return symbolRecord.getFirstBuy() < Long.parseLong(userDefinedSettings.getRangeOne().getNumberOfBuys());
                 } else {
                     return false;
                 }
