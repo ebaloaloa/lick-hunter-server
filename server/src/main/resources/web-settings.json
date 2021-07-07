@@ -8,6 +8,7 @@
   "userDefinedSettings" : {
     "settings1" : {
       "maxOpen" : 10,
+      "maxPos": 100,
       "openOrderIsolationPercentage" : 5.0,
       "longOffset" : 3.0,
       "shortOffset" : 3.0,
@@ -63,6 +64,7 @@
     },
     "settings2" : {
       "maxOpen" : 5,
+      "maxPos": 100,
       "openOrderIsolationPercentage" : 3.0,
       "longOffset" : 50.0,
       "shortOffset" : 5.0,
@@ -118,6 +120,7 @@
     },
     "settings3" : {
       "maxOpen" : 10,
+      "maxPos": 100,
       "openOrderIsolationPercentage" : 5.0,
       "longOffset" : 1.5,
       "shortOffset" : 1.5,

@@ -54,7 +54,6 @@ public class LickHunterScheduledTasks {
     private final SymbolRepository symbolRepository;
     @Qualifier("discordNotification")
     private final NotificationService<DiscordWebhook> notificationService;
-    public static AtomicBoolean restartEnabled = new AtomicBoolean(true);
     private AtomicBoolean isBotPaused = new AtomicBoolean(false);
     private AtomicBoolean pauseOnCloseActive = new AtomicBoolean(false);
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -88,13 +87,6 @@ public class LickHunterScheduledTasks {
                     .forEach(s -> coinsList.add((coinValue(s.getSymbol(), activeSettings))));
         }
         fileService.writeToFile("./", ApplicationConstants.COINS.getValue(), coinsList);
-    }
-
-    @Scheduled(cron = "${scheduler.lickhunter:-}")
-    public void restartLickHunter() {
-        if(restartEnabled.get()) {
-            lickHunterService.restart();
-        }
     }
 
     @Scheduled(fixedRateString = "${scheduler.exclude-coins}")
@@ -155,10 +147,13 @@ public class LickHunterScheduledTasks {
     }
 
     public void resumeBot() {
-        restartEnabled.set(true);
         isBotPaused.set(false);
         pauseOnCloseActive.set(false);
         log.info("Bot is now resumed.");
+    }
+
+    public Boolean getIsBotPaused() {
+        return this.isBotPaused.get();
     }
 
     private void socialVolumeAlert(SentimentsAsset sentimentsAsset) throws Exception {
@@ -216,7 +211,6 @@ public class LickHunterScheduledTasks {
             if (isBotPaused.get()) {
                 future.cancel(true);
             }
-            restartEnabled.set(false);
             isBotPaused.set(true);
             log.info(String.format("Bot is now paused. It will resume after %s hours", applicationConfig.getPauseBotHours()));
             future = executorService.schedule(this::resumeBot, applicationConfig.getPauseBotHours().longValue(), TimeUnit.HOURS);

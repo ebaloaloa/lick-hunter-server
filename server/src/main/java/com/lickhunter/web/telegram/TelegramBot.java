@@ -88,23 +88,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 .multiply(BigDecimal.valueOf(100))
                                 .setScale(2, RoundingMode.HALF_UP)));
             }
-            if (update.getMessage().getText().equals(Commands.START_WEBSOCKET)) {
-                message.setText(messageProperties.getStartWebsocket());
-            }
-            if (update.getMessage().getText().equals(Commands.STOP_WEBSOCKET)) {
-                message.setText(messageProperties.getStopWebsocket());
-            }
-            if (update.getMessage().getText().equals(Commands.ENABLE_RESTART)) {
-                LickHunterScheduledTasks.restartEnabled.set(true);
-                message.setText("LickHunter scheduled restart enabled.");
-            }
-            if (update.getMessage().getText().equals(Commands.DISABLE_RESTART)) {
-                LickHunterScheduledTasks.restartEnabled.set(false);
-                message.setText("LickHunter scheduled restart disabled.");
+            if (update.getMessage().getText().equals(Commands.STATUS)) {
+                message.setText("LickHunter will pause after all positions are closed.");
             }
             if (update.getMessage().getText().equals(Commands.PAUSE_BOT)) {
-                lickHunterScheduledTasks.pauseOnClose();
-                message.setText("LickHunter will pause after all positions are closed.");
+                Boolean isBotPaused = lickHunterScheduledTasks.getIsBotPaused();
+                message.setText(String.format("Status: %s\nSettings: %s\n",
+                        isBotPaused ? "Running" : "Paused",
+                        lickHunterService.getWebSettings().getActive()));
             }
             if (update.getMessage().getText().equals(Commands.RESUME_BOT)) {
                 lickHunterScheduledTasks.resumeBot();
