@@ -9,7 +9,6 @@ import com.lickhunter.web.to.TickerQueryTO;
 import java.util.List;
 
 public interface LickHunterService {
-    void restart();
     TickerQueryTO getQuery();
     WebSettings getWebSettings();
     UserDefinedSettings getActiveSettings();

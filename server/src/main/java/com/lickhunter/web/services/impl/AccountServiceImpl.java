@@ -12,7 +12,6 @@ import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.IncomeHistoryRepository;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.services.AccountService;
-import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.LickHunterService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -34,7 +33,6 @@ import java.util.Optional;
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final PositionRepository positionRepository;
-    private final FileService<Settings, ?> fileService;
     private final IncomeHistoryRepository incomeHistoryRepository;
     private final LickHunterService lickHunterService;
 
@@ -66,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
 
     public Boolean isMaxOpenActive(String key, Long maxOpen) {
         maxOpen = Objects.nonNull(maxOpen) ? maxOpen : 0;
-        return positionRepository.findActivePositionsByAccountId(key).stream().count() >= maxOpen;
+        return (long) positionRepository.findActivePositionsByAccountId(key).size() >= maxOpen;
     }
 
     @SneakyThrows
@@ -91,6 +89,7 @@ public class AccountServiceImpl implements AccountService {
                 .reduce(0.0, Double::sum));
     }
 
+    @SneakyThrows
     public void futuresTransfer(String asset, Double amount, int type) {
         Settings settings = lickHunterService.getLickHunterSettings();
         RequestOptions requestOptions = new RequestOptions();
