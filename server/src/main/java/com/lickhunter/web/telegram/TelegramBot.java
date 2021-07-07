@@ -89,13 +89,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 .setScale(2, RoundingMode.HALF_UP)));
             }
             if (update.getMessage().getText().equals(Commands.STATUS)) {
-                message.setText("LickHunter will pause after all positions are closed.");
-            }
-            if (update.getMessage().getText().equals(Commands.PAUSE_BOT)) {
                 Boolean isBotPaused = lickHunterScheduledTasks.getIsBotPaused();
                 message.setText(String.format("Status: %s\nSettings: %s\n",
                         isBotPaused ? "Running" : "Paused",
                         lickHunterService.getWebSettings().getActive()));
+            }
+            if (update.getMessage().getText().equals(Commands.PAUSE_BOT)) {
+                lickHunterScheduledTasks.pauseOnClose();
+                message.setText("LickHunter will pause after all positions are closed.");
             }
             if (update.getMessage().getText().equals(Commands.RESUME_BOT)) {
                 lickHunterScheduledTasks.resumeBot();
