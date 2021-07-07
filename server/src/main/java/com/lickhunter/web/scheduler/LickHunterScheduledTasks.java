@@ -156,7 +156,6 @@ public class LickHunterScheduledTasks {
 
     public void resumeBot() {
         restartEnabled.set(true);
-        lickHunterService.startWebsocket();
         isBotPaused.set(false);
         pauseOnCloseActive.set(false);
         log.info("Bot is now resumed.");
@@ -218,7 +217,6 @@ public class LickHunterScheduledTasks {
                 future.cancel(true);
             }
             restartEnabled.set(false);
-            lickHunterService.stopWebsocket();
             isBotPaused.set(true);
             log.info(String.format("Bot is now paused. It will resume after %s hours", applicationConfig.getPauseBotHours()));
             future = executorService.schedule(this::resumeBot, applicationConfig.getPauseBotHours().longValue(), TimeUnit.HOURS);

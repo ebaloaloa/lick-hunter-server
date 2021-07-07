@@ -4,10 +4,8 @@ import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.controllers.ApplicationController;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
-import com.lickhunter.web.services.AccountService;
-import com.lickhunter.web.services.LickHunterService;
-import com.lickhunter.web.services.MarketService;
-import com.lickhunter.web.services.WatchService;
+import com.lickhunter.web.services.*;
+import com.lickhunter.web.websockets.BinanceSubscription;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +39,12 @@ public class WebApplication {
 	@Autowired
 	private WatchService watchService;
 
+	@Autowired
+	private BinanceSubscription binanceSubscription;
+
+	@Autowired
+	private TechnicalIndicatorService technicalIndicatorService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(WebApplication.class, args);
 	}
@@ -73,7 +77,8 @@ public class WebApplication {
 		lickHunterScheduledTasks.checkSentiments();
 		marketService.getCandleStickData(CandlestickInterval.WEEKLY, 200);
 		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
-		lickHunterService.startWebsocket();
+		marketService.getCandleStickData(CandlestickInterval.HOURLY, 20);
+		binanceSubscription.subscribeLiquidation();
 	}
 
 	@EventListener(ApplicationReadyEvent.class)

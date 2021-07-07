@@ -47,7 +47,7 @@ public class TradeServiceImpl implements TradeService {
     public ResponseResult marginType(String symbol, String marginType) {
         ResponseResult result = new ResponseResult();
         try {
-            Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+            Settings settings = lickHunterService.getLickHunterSettings();
             SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
             result = syncRequestClient.changeMarginType(symbol, marginType);
         } catch (Exception e) {
@@ -57,9 +57,8 @@ public class TradeServiceImpl implements TradeService {
     }
 
     public void changeAllMarginType() {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
-        WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
-        UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
+        Settings settings = lickHunterService.getLickHunterSettings();
+        UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
         List<PositionRecord> positionRecordList = positionRepository.findByAccountId(settings.getKey());
         AtomicReference<Boolean> changed = new AtomicReference<>(false);
         positionRecordList.stream()
@@ -83,9 +82,8 @@ public class TradeServiceImpl implements TradeService {
     }
 
     public void changeAllLeverage() {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
-        WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
-        UserDefinedSettings activeSettings = webSettings.getUserDefinedSettings().get(webSettings.getActive());
+        Settings settings = lickHunterService.getLickHunterSettings();
+        UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
         List<PositionRecord> positionRecordList = positionRepository.findByAccountId(settings.getKey());
         AtomicReference<Boolean> changed = new AtomicReference<>(false);
         positionRecordList.stream()
@@ -106,14 +104,14 @@ public class TradeServiceImpl implements TradeService {
     }
 
     public Leverage changeInitialLeverage(String symbol, int leverage) {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = lickHunterService.getLickHunterSettings();
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         return syncRequestClient.changeInitialLeverage(symbol, leverage);
     }
 
     @SneakyThrows
     public void takeProfitLimitOrders(OrderUpdate orderUpdate, String accountId) {
-        Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
+        Settings settings = lickHunterService.getLickHunterSettings();
         TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(orderUpdate.getSymbol(), accountId);
@@ -212,6 +210,26 @@ public class TradeServiceImpl implements TradeService {
                         "false");
             }
         }
+    }
+
+    @Override
+    public void newOrder(String symbol, OrderSide orderSide, OrderType orderType, TimeInForce timeInForce, String qty, String price, Boolean reduceOnly, Boolean closePosition) {
+        Settings settings = lickHunterService.getLickHunterSettings();
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        syncRequestClient.postOrder(
+                symbol,
+                orderSide,
+                PositionSide.BOTH,
+                orderType,
+                timeInForce,
+                qty,
+                price,
+                String.valueOf(reduceOnly),
+                null,
+                null,
+                null,
+                NewOrderRespType.RESULT,
+                String.valueOf(closePosition));
     }
 
     private BigDecimal getPercentTakeProfit(SymbolRecord symbolRecord) {

@@ -87,4 +87,22 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
         strategy.setUnstablePeriod(5);
         return strategy;
     }
+
+    @Override
+    public Strategy vwapShortStrategy(BarSeries series, int barCount, Double shortOffset, Double price) {
+        ShortOffsetVWAPIndicator vwapIndicator = new ShortOffsetVWAPIndicator(series, barCount, shortOffset);
+        Rule entryRule = new UnderIndicatorRule(vwapIndicator, series.numOf(price));
+        Rule exitRule = new OverIndicatorRule(vwapIndicator, series.numOf(price));
+        Strategy strategy = new BaseStrategy(entryRule, exitRule);
+        return strategy;
+    }
+
+    @Override
+    public Strategy vwapLongStrategy(BarSeries series, int barCount, Double longOffset, Double price) {
+        LongOffsetVWAPIndicator vwapIndicator = new LongOffsetVWAPIndicator(series, barCount, longOffset);
+        Rule entryRule = new OverIndicatorRule(vwapIndicator, series.numOf(price));
+        Rule exitRule = new UnderIndicatorRule(vwapIndicator, series.numOf(price));
+        Strategy strategy = new BaseStrategy(entryRule, exitRule);
+        return strategy;
+    }
 }

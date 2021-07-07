@@ -88,6 +88,7 @@ public class SymbolRepository {
                 .set(SYMBOL.SYMBOL_, symbol.getSymbol())
                 .set(SYMBOL.ONBOARD_DATE, symbol.getOnboardDate().longValue())
                 .set(SYMBOL.PRICE_PRECISION, symbol.getPricePrecision().longValue())
+                .set(SYMBOL.QUANTITY_PRECISION, symbol.getQuantityPrecision().longValue())
                 .set(SYMBOL.TICK_SIZE, Double.parseDouble(symbol.getFilters().get(0).getTickSize()))
                 .execute();
     }
@@ -122,6 +123,7 @@ public class SymbolRepository {
         dsl.update(SYMBOL)
                 .set(SYMBOL.ONBOARD_DATE, symbol.getOnboardDate().longValue())
                 .set(SYMBOL.PRICE_PRECISION, symbol.getPricePrecision().longValue())
+                .set(SYMBOL.QUANTITY_PRECISION, symbol.getQuantityPrecision().longValue())
                 .set(SYMBOL.TICK_SIZE, Double.parseDouble(symbol.getFilters().get(0).getTickSize()))
                 .where(SYMBOL.SYMBOL_.eq(symbol.getSymbol()))
                 .execute();
@@ -174,33 +176,35 @@ public class SymbolRepository {
                         .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
                         .execute();
             } else {
-                BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.get().getMarkPrice())
-                        .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs()).divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128)).multiply(BigDecimal.valueOf(100));
-                if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
-                    dsl.update(SYMBOL)
-                            .set(SYMBOL.FIFTH_BUY, SYMBOL.FIFTH_BUY.plus(1))
-                            .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
-                            .execute();
-                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
-                    dsl.update(SYMBOL)
-                            .set(SYMBOL.FOURTH_BUY, SYMBOL.FOURTH_BUY.plus(1))
-                            .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
-                            .execute();
-                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
-                    dsl.update(SYMBOL)
-                            .set(SYMBOL.THIRD_BUY, SYMBOL.THIRD_BUY.plus(1))
-                            .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
-                            .execute();
-                } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
-                    dsl.update(SYMBOL)
-                            .set(SYMBOL.SECOND_BUY, SYMBOL.SECOND_BUY.plus(1))
-                            .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
-                            .execute();
-                } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
-                    dsl.update(SYMBOL)
-                            .set(SYMBOL.FIRST_BUY, SYMBOL.FIRST_BUY.plus(1))
-                            .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
-                            .execute();
+                if(positionRecord.get().getInitialMargin() != 0.0) {
+                    BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.get().getMarkPrice())
+                            .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs()).divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128)).multiply(BigDecimal.valueOf(100));
+                    if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
+                        dsl.update(SYMBOL)
+                                .set(SYMBOL.FIFTH_BUY, SYMBOL.FIFTH_BUY.plus(1))
+                                .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
+                                .execute();
+                    } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
+                        dsl.update(SYMBOL)
+                                .set(SYMBOL.FOURTH_BUY, SYMBOL.FOURTH_BUY.plus(1))
+                                .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
+                                .execute();
+                    } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+                        dsl.update(SYMBOL)
+                                .set(SYMBOL.THIRD_BUY, SYMBOL.THIRD_BUY.plus(1))
+                                .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
+                                .execute();
+                    } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
+                        dsl.update(SYMBOL)
+                                .set(SYMBOL.SECOND_BUY, SYMBOL.SECOND_BUY.plus(1))
+                                .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
+                                .execute();
+                    } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
+                        dsl.update(SYMBOL)
+                                .set(SYMBOL.FIRST_BUY, SYMBOL.FIRST_BUY.plus(1))
+                                .where(SYMBOL.SYMBOL_.eq(orderUpdate.getSymbol()))
+                                .execute();
+                    }
                 }
             }
             symbolRecord = this.findBySymbol(orderUpdate.getSymbol());
