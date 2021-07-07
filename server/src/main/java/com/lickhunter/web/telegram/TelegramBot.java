@@ -91,7 +91,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (update.getMessage().getText().equals(Commands.STATUS)) {
                 Boolean isBotPaused = lickHunterScheduledTasks.getIsBotPaused();
                 message.setText(String.format("Status: %s\nSettings: %s\n",
-                        isBotPaused ? "Running" : "Paused",
+                        isBotPaused ? "Paused" : "Running",
                         lickHunterService.getWebSettings().getActive()));
             }
             if (update.getMessage().getText().equals(Commands.PAUSE_BOT)) {
