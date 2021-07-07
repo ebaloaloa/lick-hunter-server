@@ -3,25 +3,25 @@ package com.lickhunter.web.websockets;
 import com.binance.client.SubscriptionClient;
 import com.binance.client.SubscriptionOptions;
 import com.binance.client.SyncRequestClient;
-import com.binance.client.model.enums.CandlestickInterval;
-import com.binance.client.model.enums.OrderState;
-import com.binance.client.model.enums.OrderType;
-import com.binance.client.model.enums.TransactType;
+import com.binance.client.model.enums.*;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.MarkPrice;
 import com.lickhunter.web.configs.Settings;
+import com.lickhunter.web.configs.UserDefinedSettings;
+import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.UserDataEventConstants;
+import com.lickhunter.web.entities.tables.records.AccountRecord;
+import com.lickhunter.web.entities.tables.records.PositionRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.events.BinanceEvents;
+import com.lickhunter.web.models.Coins;
+import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.CandlestickRepository;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
-import com.lickhunter.web.services.AccountService;
-import com.lickhunter.web.services.FileService;
-import com.lickhunter.web.services.LickHunterService;
-import com.lickhunter.web.services.TradeService;
+import com.lickhunter.web.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +30,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
+import org.ta4j.core.BarSeries;
+import org.ta4j.core.Strategy;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +59,8 @@ public class BinanceSubscription {
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
     private final LickHunterService lickHunterService;
     private final TradeService tradeService;
+    private final TechnicalIndicatorService technicalIndicatorService;
+    private final AccountRepository accountRepository;
 
     @Value("${binance.candlesticks}")
     private String[] candlesticks;
@@ -127,8 +135,8 @@ public class BinanceSubscription {
                                 && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
                                 && event.getOrderUpdate().getIsReduceOnly().equals(true))) {
                             positionRepository.updateOrder(event.getOrderUpdate(), settings.getKey());
-                            accountService.getAccountInformation();
                             Long buyCount = symbolRepository.updateNumberOfBuys(event.getOrderUpdate(), settings.getKey(), lickHunterService.getActiveSettings());
+                            accountService.getAccountInformation();
                             log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, buyCount: %s, realizedProfit: %s",
                                     event.getOrderUpdate().getSymbol(),
                                     event.getOrderUpdate().getSide(),
@@ -180,8 +188,108 @@ public class BinanceSubscription {
         }
     }
 
-    private void publishBinanceEvent(final String message) {
+     @SneakyThrows
+     public void subscribeLiquidation() {
+         WebSettings webSettings = lickHunterService.getWebSettings();
+         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
+         subscriptionOptions.setUri("wss://fstream.binance.com/");
+         subscriptionOptions.setConnectionDelayOnFailure(3);
+         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
+         subscriptionClient.subscribeAllLiquidationOrderEvent(data -> {
+             List<Coins> coins = lickHunterService.getCoins();
+             coins.stream()
+                     .filter(c -> c.getSymbol().concat("USDT").equalsIgnoreCase(data.getSymbol()))
+                     .forEach(c -> {
+                         BarSeries barSeries = technicalIndicatorService.getBarSeries(data.getSymbol(), CandlestickInterval.of(webSettings.getVwapTimeframe()));
+                         Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(data.getSymbol());
+                         if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+                             Strategy shortStrategy = technicalIndicatorService.vwapShortStrategy(
+                                     barSeries,
+                                     webSettings.getVwapLength(),
+                                     Double.parseDouble(c.getShortoffset()),
+                                     symbolRecord.get().getMarkPrice());
+                             Boolean shortSatisfied = shortStrategy.getEntryRule()
+                                     .isSatisfied(barSeries.getEndIndex());
+                             if(shortSatisfied
+                                     && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
+                                 log.info(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s", data.getSymbol(), data.getPrice().multiply(data.getLastFilledAccumulatedQty()), data.getSide(), data.getPrice()));
+                                 tradeService.newOrder(
+                                         data.getSymbol(),
+                                         OrderSide.SELL,
+                                         OrderType.MARKET,
+                                         null,
+                                         String.valueOf(this.getQty(symbolRecord.get())),
+                                         null,
+                                         false,
+                                         false);
+                             }
+                         }
+                         if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+                             Strategy longStrategy = technicalIndicatorService.vwapLongStrategy(
+                                     barSeries,
+                                     webSettings.getVwapLength(),
+                                     Double.parseDouble(c.getLongoffset()),
+                                     symbolRecord.get().getMarkPrice());
+                             Boolean longSatisfied = longStrategy.getEntryRule()
+                                     .isSatisfied(barSeries.getEndIndex());
+                             if(longSatisfied
+                                     && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
+                                 log.info(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s", data.getSymbol(), data.getPrice().multiply(data.getLastFilledAccumulatedQty()), data.getSide(), data.getPrice()));
+                                 tradeService.newOrder(
+                                         data.getSymbol(),
+                                         OrderSide.BUY,
+                                         OrderType.MARKET,
+                                         null,
+                                         String.valueOf(this.getQty(symbolRecord.get())),
+                                         null,
+                                         false,
+                                         false);
+                             }
+                         }
+                     });
+         }, exception -> log.error("Error during liquidation event: " + exception.getMessage()));
+     }
+
+     private BigDecimal getQty(SymbolRecord symbolRecord) {
+         Settings settings = lickHunterService.getLickHunterSettings();
+         UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
+         Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(symbolRecord.getSymbol(), settings.getKey());
+         Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(settings.getKey());
+         BigDecimal percentBuy = null;
+         if(positionRecord.isPresent()) {
+             //initial buy
+             if(positionRecord.get().getInitialMargin() == 0.0) {
+                 percentBuy = new BigDecimal(settings.getPercentBal());
+             } else {
+                 //existing positions
+                 BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.getMarkPrice())
+                         .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs())
+                         .divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128))
+                         .multiply(BigDecimal.valueOf(100));
+                 if(percentageFromAverage.compareTo(activeSettings.getRangeFive().getPercentFromAverage()) > 0) {
+                     percentBuy = activeSettings.getRangeSix().getPercentBuy();
+                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeFour().getPercentFromAverage()) > 0) {
+                     percentBuy = activeSettings.getRangeFive().getPercentBuy();
+                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeThree().getPercentFromAverage()) > 0) {
+                     percentBuy = activeSettings.getRangeFour().getPercentBuy();
+                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+                     percentBuy = activeSettings.getRangeThree().getPercentBuy();
+                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeOne().getPercentFromAverage()) > 0) {
+                     percentBuy = activeSettings.getRangeTwo().getPercentBuy();
+                 } else if (percentageFromAverage.compareTo(activeSettings.getDcaStart()) > 0) {
+                     percentBuy = activeSettings.getRangeOne().getPercentBuy();
+                 }
+             }
+         }
+         //amount = totalBal * (pbal/100) * leverage
+         //qty = amount/price
+         BigDecimal qty = BigDecimal.valueOf(accountRecord.get().getTotalWalletBalance() * (percentBuy.doubleValue()/100) * Double.parseDouble(settings.getLeverage()))
+                 .divide(BigDecimal.valueOf(symbolRecord.getMarkPrice()), symbolRecord.getQuantityPrecision().intValue(), RoundingMode.HALF_DOWN);
+         return qty;
+     }
+
+     private void publishBinanceEvent(final String message) {
         BinanceEvents binanceEvents = new BinanceEvents(this, message);
         applicationEventPublisher.publishEvent(binanceEvents);
-    }
+     }
 }

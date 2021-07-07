@@ -16,6 +16,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class WebSettings {
 
+    @JsonProperty("vwapTimeframe")
+    private String vwapTimeframe;
+    @JsonProperty("vwapLength")
+    private Integer vwapLength;
     @JsonProperty("active")
     private String active;
     @JsonProperty("defaultSettings")
