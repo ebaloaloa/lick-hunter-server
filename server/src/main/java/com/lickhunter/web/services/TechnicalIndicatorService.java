@@ -8,4 +8,6 @@ public interface TechnicalIndicatorService {
     BarSeries getBarSeries(String symbol, CandlestickInterval timeframe);
     Strategy bollingerBandsStrategy(BarSeries series, Double markprice, int barCount);
     Strategy cciCorrectionStrategy(BarSeries series, int barCount);
+    Strategy vwapShortStrategy(BarSeries series, int barCount, Double shortOffset, Double price);
+    Strategy vwapLongStrategy(BarSeries series, int barCount, Double longOffset, Double price);
 }

@@ -89,11 +89,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 .setScale(2, RoundingMode.HALF_UP)));
             }
             if (update.getMessage().getText().equals(Commands.START_WEBSOCKET)) {
-                lickHunterService.startWebsocket();
                 message.setText(messageProperties.getStartWebsocket());
             }
             if (update.getMessage().getText().equals(Commands.STOP_WEBSOCKET)) {
-                lickHunterService.stopWebsocket();
                 message.setText(messageProperties.getStopWebsocket());
             }
             if (update.getMessage().getText().equals(Commands.ENABLE_RESTART)) {
