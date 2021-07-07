@@ -24,10 +24,6 @@ public class LickHunterServiceImpl implements LickHunterService {
     private final MessageConfig messageConfig;
     private final FileService fileService;
 
-    public void restart() {
-        log.info("Restarting Lickhunter.");
-    }
-
     public TickerQueryTO getQuery() {
         TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         return tickerQueryTO;

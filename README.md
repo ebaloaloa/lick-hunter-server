@@ -146,15 +146,10 @@ To get a local copy up and running follow these simple steps.
    Copy/Paste the following to create new commands:  
    ```
    balance - Check balance  
-   disablerestart - Disables scheduled restart of lickhunter  
-   enablerestart - Enables scheduled restart of lickhunter  
-   startprofit - Start Lickhunter Profit
-   stopprofit - Stop Lickhunter Profit
-   startwebsocket - Start Lickhunter Websocket
-   stopwebsocket - Stop Lickhunter Websocket  
    settings - Change active settings from user defined settings  
    pause - Pause bot after all positions are closed  
    resume - Resume bot  
+   status - Check the status of the bot  
    ```  
 10. Open application.properties and change the following values:  
 * **telegram.bot** - Name of the bot you created   

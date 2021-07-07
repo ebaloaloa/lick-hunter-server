@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 public class UserDefinedSettings {
     @JsonProperty("maxOpen")
     private Integer maxOpen;
+    @JsonProperty("maxPos")
+    private BigDecimal maxPos;
     @JsonProperty("openOrderIsolationPercentage")
     private Double openOrderIsolationPercentage;
     @JsonProperty("longOffset")

@@ -2,12 +2,8 @@ package com.lickhunter.web.scheduler;
 
 import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.configs.WebSettings;
-import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.exceptions.ServiceException;
-import com.lickhunter.web.services.AccountService;
-import com.lickhunter.web.services.FileService;
-import com.lickhunter.web.services.MarketService;
-import com.lickhunter.web.services.TradeService;
+import com.lickhunter.web.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +23,7 @@ public class BinanceScheduledTasks {
     private final TradeService tradeService;
     private final FileService<WebSettings, ?> fileService;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
+    private final LickHunterService lickHunterService;
 
     @Scheduled(fixedRateString = "${scheduler.margin}")
     public void changeMarginType() throws Exception {
@@ -73,7 +70,7 @@ public class BinanceScheduledTasks {
     @Scheduled(cron = "${scheduler.daily-reinvestment:-}")
     @SneakyThrows
     public void transferFromFuturesToSpot() {
-        WebSettings webSettings = fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
+        WebSettings webSettings = lickHunterService.getWebSettings();
         if(webSettings.getDailyReinvestment().compareTo(BigDecimal.valueOf(100)) > 0) {
             throw new Exception("Daily Reinvestment Percentage should not exceed 100.");
         }
@@ -84,5 +81,11 @@ public class BinanceScheduledTasks {
         if(amount.compareTo(BigDecimal.ZERO) > 0) {
             accountService.futuresTransfer("USDT", amount.doubleValue(), 2);
         }
+    }
+
+    @Scheduled(fixedRateString = "60000")
+    @SneakyThrows
+    public void pauseOnStopLoss() {
+        tradeService.stopLoss();
     }
 }

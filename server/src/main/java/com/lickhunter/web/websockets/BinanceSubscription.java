@@ -202,48 +202,59 @@ public class BinanceSubscription {
                      .forEach(c -> {
                          BarSeries barSeries = technicalIndicatorService.getBarSeries(data.getSymbol(), CandlestickInterval.of(webSettings.getVwapTimeframe()));
                          Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(data.getSymbol());
-                         if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
-                             Strategy shortStrategy = technicalIndicatorService.vwapShortStrategy(
-                                     barSeries,
-                                     webSettings.getVwapLength(),
-                                     Double.parseDouble(c.getShortoffset()),
-                                     symbolRecord.get().getMarkPrice());
-                             Boolean shortSatisfied = shortStrategy.getEntryRule()
-                                     .isSatisfied(barSeries.getEndIndex());
-                             if(shortSatisfied
-                                     && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
-                                 log.info(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s", data.getSymbol(), data.getPrice().multiply(data.getLastFilledAccumulatedQty()), data.getSide(), data.getPrice()));
-                                 tradeService.newOrder(
-                                         data.getSymbol(),
-                                         OrderSide.SELL,
-                                         OrderType.MARKET,
-                                         null,
-                                         String.valueOf(this.getQty(symbolRecord.get())),
-                                         null,
-                                         false,
-                                         false);
+                         BigDecimal qty = this.getQty(symbolRecord.get());
+                         if(qty.compareTo(BigDecimal.ZERO) > 0) {
+                             if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+                                 Strategy shortStrategy = technicalIndicatorService.vwapShortStrategy(
+                                         barSeries,
+                                         webSettings.getVwapLength(),
+                                         Double.parseDouble(c.getShortoffset()),
+                                         symbolRecord.get().getMarkPrice());
+                                 boolean shortSatisfied = shortStrategy.getEntryRule()
+                                         .isSatisfied(barSeries.getEndIndex());
+                                 if(shortSatisfied
+                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
+                                     log.debug(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
+                                             data.getSymbol(),
+                                             data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
+                                             data.getSide(),
+                                             symbolRecord.get().getMarkPrice()));
+                                     tradeService.newOrder(
+                                             data.getSymbol(),
+                                             OrderSide.SELL,
+                                             OrderType.MARKET,
+                                             null,
+                                             String.valueOf(qty),
+                                             null,
+                                             false,
+                                             false);
+                                 }
                              }
-                         }
-                         if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
-                             Strategy longStrategy = technicalIndicatorService.vwapLongStrategy(
-                                     barSeries,
-                                     webSettings.getVwapLength(),
-                                     Double.parseDouble(c.getLongoffset()),
-                                     symbolRecord.get().getMarkPrice());
-                             Boolean longSatisfied = longStrategy.getEntryRule()
-                                     .isSatisfied(barSeries.getEndIndex());
-                             if(longSatisfied
-                                     && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
-                                 log.info(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s", data.getSymbol(), data.getPrice().multiply(data.getLastFilledAccumulatedQty()), data.getSide(), data.getPrice()));
-                                 tradeService.newOrder(
-                                         data.getSymbol(),
-                                         OrderSide.BUY,
-                                         OrderType.MARKET,
-                                         null,
-                                         String.valueOf(this.getQty(symbolRecord.get())),
-                                         null,
-                                         false,
-                                         false);
+                             if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+                                 Strategy longStrategy = technicalIndicatorService.vwapLongStrategy(
+                                         barSeries,
+                                         webSettings.getVwapLength(),
+                                         Double.parseDouble(c.getLongoffset()),
+                                         symbolRecord.get().getMarkPrice());
+                                 boolean longSatisfied = longStrategy.getEntryRule()
+                                         .isSatisfied(barSeries.getEndIndex());
+                                 if(longSatisfied
+                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
+                                     log.debug(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
+                                             data.getSymbol(),
+                                             data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
+                                             data.getSide(),
+                                             symbolRecord.get().getMarkPrice()));
+                                     tradeService.newOrder(
+                                             data.getSymbol(),
+                                             OrderSide.BUY,
+                                             OrderType.MARKET,
+                                             null,
+                                             String.valueOf(qty),
+                                             null,
+                                             false,
+                                             false);
+                                 }
                              }
                          }
                      });
@@ -255,29 +266,32 @@ public class BinanceSubscription {
          UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
          Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(symbolRecord.getSymbol(), settings.getKey());
          Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(settings.getKey());
-         BigDecimal percentBuy = null;
+         BigDecimal percentBuy = new BigDecimal(settings.getPercentBal());
          if(positionRecord.isPresent()) {
-             //initial buy
-             if(positionRecord.get().getInitialMargin() == 0.0) {
-                 percentBuy = new BigDecimal(settings.getPercentBal());
-             } else {
-                 //existing positions
+             //existing positions
+             if(positionRecord.get().getInitialMargin() != 0.0) {
                  BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.getMarkPrice())
                          .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs())
                          .divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128))
                          .multiply(BigDecimal.valueOf(100));
-                 if(percentageFromAverage.compareTo(activeSettings.getRangeFive().getPercentFromAverage()) > 0) {
+                 if (percentageFromAverage.compareTo(activeSettings.getRangeFive().getPercentFromAverage()) > 0) {
                      percentBuy = activeSettings.getRangeSix().getPercentBuy();
-                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeFour().getPercentFromAverage()) > 0) {
+                 } else if (percentageFromAverage.compareTo(activeSettings.getRangeFour().getPercentFromAverage()) > 0) {
                      percentBuy = activeSettings.getRangeFive().getPercentBuy();
-                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeThree().getPercentFromAverage()) > 0) {
+                 } else if (percentageFromAverage.compareTo(activeSettings.getRangeThree().getPercentFromAverage()) > 0) {
                      percentBuy = activeSettings.getRangeFour().getPercentBuy();
-                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+                 } else if (percentageFromAverage.compareTo(activeSettings.getRangeTwo().getPercentFromAverage()) > 0) {
                      percentBuy = activeSettings.getRangeThree().getPercentBuy();
-                 } else if(percentageFromAverage.compareTo(activeSettings.getRangeOne().getPercentFromAverage()) > 0) {
+                 } else if (percentageFromAverage.compareTo(activeSettings.getRangeOne().getPercentFromAverage()) > 0) {
                      percentBuy = activeSettings.getRangeTwo().getPercentBuy();
                  } else if (percentageFromAverage.compareTo(activeSettings.getDcaStart()) > 0) {
                      percentBuy = activeSettings.getRangeOne().getPercentBuy();
+                 }
+                 //maxPos reached, percentBuy = 0
+                 if(BigDecimal.valueOf(accountRecord.get().getTotalWalletBalance())
+                    .multiply(activeSettings.getMaxPos().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_DOWN))
+                         .compareTo(BigDecimal.valueOf(positionRecord.get().getInitialMargin()))  < 0 ) {
+                     percentBuy = BigDecimal.ZERO;
                  }
              }
          }

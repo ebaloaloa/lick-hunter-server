@@ -41,14 +41,11 @@ public class WatchServiceImpl implements WatchService {
                         log.info("File deleted:" + changed);
                         lickHunterScheduledTasks.writeToCoinsJson();
                     }
-                    if (changed.endsWith(ApplicationConstants.SETTINGS.getValue())) {
-                        lickHunterService.restart();
-                    }
                 }
                 // reset the key
                 boolean valid = wk.reset();
                 if (!valid) {
-                    System.out.println("Key has been unregisterede");
+                    System.out.println("Key has been unregistered");
                 }
             }
         }

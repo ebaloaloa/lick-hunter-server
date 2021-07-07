@@ -94,6 +94,7 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
         Rule entryRule = new UnderIndicatorRule(vwapIndicator, series.numOf(price));
         Rule exitRule = new OverIndicatorRule(vwapIndicator, series.numOf(price));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
+        log.debug(String.format("[SHORT VWAP] symbol: %s, value: %s", series.getName(), vwapIndicator.getValue(series.getEndIndex())));
         return strategy;
     }
 
@@ -103,6 +104,7 @@ public class TechnicalIndicatorServiceImpl implements TechnicalIndicatorService 
         Rule entryRule = new OverIndicatorRule(vwapIndicator, series.numOf(price));
         Rule exitRule = new UnderIndicatorRule(vwapIndicator, series.numOf(price));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
+        log.debug(String.format("[LONG VWAP] symbol: %s, value: %s", series.getName(), vwapIndicator.getValue(series.getEndIndex())));
         return strategy;
     }
 }
