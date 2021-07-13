@@ -190,7 +190,6 @@ public class BinanceSubscription {
 
      @SneakyThrows
      public void subscribeLiquidation() {
-         WebSettings webSettings = lickHunterService.getWebSettings();
          SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
          subscriptionOptions.setUri("wss://fstream.binance.com/");
          subscriptionOptions.setConnectionDelayOnFailure(3);
@@ -200,16 +199,17 @@ public class BinanceSubscription {
              coins.stream()
                      .filter(c -> c.getSymbol().concat("USDT").equalsIgnoreCase(data.getSymbol()))
                      .forEach(c -> {
-                         BarSeries barSeries = technicalIndicatorService.getBarSeries(data.getSymbol(), CandlestickInterval.of(webSettings.getVwapTimeframe()));
+                         WebSettings webSettings = lickHunterService.getWebSettings();
+                         BarSeries barSeries = technicalIndicatorService.getBarSeries(data.getSymbol(), CandlestickInterval.of(lickHunterService.getWebSettings().getVwapTimeframe()));
                          Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(data.getSymbol());
                          BigDecimal qty = this.getQty(symbolRecord.get());
                          if(qty.compareTo(BigDecimal.ZERO) > 0) {
-                             if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+                             if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
                                  Strategy shortStrategy = technicalIndicatorService.vwapShortStrategy(
                                          barSeries,
                                          webSettings.getVwapLength(),
                                          Double.parseDouble(c.getShortoffset()),
-                                         symbolRecord.get().getMarkPrice());
+                                         data.getAveragePrice().doubleValue());
                                  boolean shortSatisfied = shortStrategy.getEntryRule()
                                          .isSatisfied(barSeries.getEndIndex());
                                  if(shortSatisfied
@@ -218,7 +218,7 @@ public class BinanceSubscription {
                                              data.getSymbol(),
                                              data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
                                              data.getSide(),
-                                             symbolRecord.get().getMarkPrice()));
+                                             data.getAveragePrice().doubleValue()));
                                      tradeService.newOrder(
                                              data.getSymbol(),
                                              OrderSide.SELL,
@@ -230,12 +230,12 @@ public class BinanceSubscription {
                                              false);
                                  }
                              }
-                             if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+                             if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
                                  Strategy longStrategy = technicalIndicatorService.vwapLongStrategy(
                                          barSeries,
                                          webSettings.getVwapLength(),
                                          Double.parseDouble(c.getLongoffset()),
-                                         symbolRecord.get().getMarkPrice());
+                                         data.getAveragePrice().doubleValue());
                                  boolean longSatisfied = longStrategy.getEntryRule()
                                          .isSatisfied(barSeries.getEndIndex());
                                  if(longSatisfied
@@ -244,7 +244,7 @@ public class BinanceSubscription {
                                              data.getSymbol(),
                                              data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
                                              data.getSide(),
-                                             symbolRecord.get().getMarkPrice()));
+                                             data.getAveragePrice().doubleValue()));
                                      tradeService.newOrder(
                                              data.getSymbol(),
                                              OrderSide.BUY,

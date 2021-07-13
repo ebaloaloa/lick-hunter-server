@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -242,31 +243,38 @@ public class TradeServiceImpl implements TradeService {
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
         positionRecords.forEach(positionRecord -> {
-            List<Order> orders = syncRequestClient.getAllOrders(
-                    positionRecord.getSymbol(),
-                    null,
-                    null,
-                    null,
-                    1)
-                    .stream()
-                    .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
-                            && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
-                    .collect(Collectors.toList());
-            syncRequestClient.postOrder(
-                    positionRecord.getSymbol(),
-                    orders.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name()) ? OrderSide.SELL : OrderSide.BUY,
-                    PositionSide.BOTH,
-                    OrderType.MARKET,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    NewOrderRespType.RESULT,
-                    String.valueOf(Boolean.TRUE)
-            );
+            Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol());
+            if(symbolRecord.isPresent()) {
+                List<Order> orders = syncRequestClient.getAllOrders(
+                        positionRecord.getSymbol(),
+                        null,
+                        null,
+                        null,
+                        null)
+                        .stream()
+                        .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
+                                && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
+                        .sorted(Comparator.comparing(Order::getUpdateTime).reversed())
+                        .collect(Collectors.toList());
+                BigDecimal qty = orders.stream()
+                        .map(Order::getExecutedQty)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+//                syncRequestClient.postOrder(
+//                        positionRecord.getSymbol(),
+//                        orders.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name()) ? OrderSide.SELL : OrderSide.BUY,
+//                        PositionSide.BOTH,
+//                        OrderType.MARKET,
+//                        null,
+//                        String.valueOf(orders.get(0).getExecutedQty()),
+//                        null,
+//                        null,
+//                        null,
+//                        null,
+//                        null,
+//                        NewOrderRespType.RESULT,
+//                        null
+//                );
+            }
         });
     }
 
@@ -276,9 +284,10 @@ public class TradeServiceImpl implements TradeService {
         accountService.getAccountInformation();
         Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(settings.getKey());
         if(accountRecord.isPresent()) {
-            if(BigDecimal.valueOf(accountRecord.get().getTotalWalletBalance())
+            if(accountRecord.get().getTotalUnrealizedProfit().compareTo(BigDecimal.ZERO.doubleValue()) < 0
+                && BigDecimal.valueOf(accountRecord.get().getTotalWalletBalance())
                     .multiply(new BigDecimal(settings.getStoploss()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_DOWN))
-                    .compareTo(BigDecimal.valueOf(accountRecord.get().getTotalUnrealizedProfit())) < 0) {
+                    .compareTo(BigDecimal.valueOf(accountRecord.get().getTotalUnrealizedProfit()).abs()) < 0) {
                 lickHunterScheduledTasks.pauseOnClose();
                 this.closeAllPositions();
             }
