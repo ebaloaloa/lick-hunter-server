@@ -61,7 +61,6 @@ public class MarketServiceImpl implements MarketService {
      * {@inheritDoc}
      */
     public List<SymbolRecord> getTickerByQuery(TickerQueryTO query) {
-        log.info(String.format("Retrieving Symbols using input: %s", query));
         List<SymbolRecord> result;
         if(Objects.nonNull(query.getSymbol())) {
             return symbolRepository.findBySymbols(query.getSymbol());
