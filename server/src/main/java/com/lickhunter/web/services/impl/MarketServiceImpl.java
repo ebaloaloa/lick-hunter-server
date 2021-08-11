@@ -2,6 +2,7 @@ package com.lickhunter.web.services.impl;
 
 import com.binance.client.SyncRequestClient;
 import com.binance.client.constant.BinanceApiConstants;
+import com.binance.client.exception.BinanceApiException;
 import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.PriceChangeTicker;
@@ -35,10 +36,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -70,6 +68,7 @@ public class MarketServiceImpl implements MarketService {
         //get symbols by trading age
         List<SymbolRecord> symbols = symbolRecords.stream()
                 .filter(s -> s.getSymbol().matches("^.*USDT$"))
+                .filter(s -> Objects.nonNull(s.getOnboardDate()))
                 .filter(s -> ChronoUnit.DAYS.between(Instant.ofEpochMilli(s.getOnboardDate()).atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now()) > query.getMinimumTradingAge())
                 .collect(Collectors.toList());
 
@@ -155,11 +154,16 @@ public class MarketServiceImpl implements MarketService {
                 .filter(symbolRecord -> symbolRecord.getSymbol().matches("^.*USDT$"))
                 .forEach(s -> {
                     List<CandlestickRecord> candlestickRecords = candlestickRepository.getCandleStickBySymbol(s.getSymbol());
-                    List<Candlestick> candleStickList = syncRequestClient.getCandlestick(s.getSymbol(), interval, null, null, limit);
-                    candleStickList.stream()
-                            .filter(c -> candlestickRecords.stream()
-                                    .noneMatch(cr -> c.getOpenTime().compareTo((cr.getOpenTime())) == 0))
-                            .forEach(c -> candlestickRepository.insert(s.getSymbol(), c, interval));
+                    List<Candlestick> candleStickList;
+                    try {
+                        candleStickList = syncRequestClient.getCandlestick(s.getSymbol(), interval, null, null, limit);
+                        candleStickList.stream()
+                                .filter(c -> candlestickRecords.stream()
+                                        .noneMatch(cr -> c.getOpenTime().compareTo((cr.getOpenTime())) == 0))
+                                .forEach(c -> candlestickRepository.insert(s.getSymbol(), c, interval));
+                    } catch (BinanceApiException e) {
+                        log.warn(String.format("Failed to retrieve candlestick data for symbol: %s", s.getSymbol()));
+                    }
                 });
         log.info("Successfully retrieved Candlestick data");
     }

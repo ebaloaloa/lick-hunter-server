@@ -1,6 +1,6 @@
 {
   "vwapTimeframe": "1H",
-  "vwapLength": 14,
+  "vwapLength": 24,
   "active" : "settings1",
   "defaultSettings" : "settings1",
   "safe" : "settings2",
