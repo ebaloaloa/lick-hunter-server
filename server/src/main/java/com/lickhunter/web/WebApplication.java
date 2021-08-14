@@ -78,6 +78,7 @@ public class WebApplication {
 		marketService.getCandleStickData(CandlestickInterval.WEEKLY, 200);
 		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
 		marketService.getCandleStickData(CandlestickInterval.HOURLY, 20);
+		lickHunterScheduledTasks.writeToCoinsJson();
 		binanceSubscription.subscribeLiquidation();
 	}
 

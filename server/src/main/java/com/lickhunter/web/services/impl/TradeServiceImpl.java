@@ -142,21 +142,38 @@ public class TradeServiceImpl implements TradeService {
                 Integer scale = BigDecimal.valueOf(symbolRecord.get().getTickSize()).stripTrailingZeros().scale();
                 Double diff = BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) * this.getPercentTakeProfit(symbolRecord.get()).doubleValue() / 100)
                         .setScale(scale, RoundingMode.HALF_DOWN).doubleValue();
-                syncRequestClient.postOrder(
-                        positionRecord.getSymbol(),
-                        order.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name()) ? OrderSide.SELL : OrderSide.BUY,
-                        PositionSide.BOTH,
-                        OrderType.LIMIT,
-                        TimeInForce.GTC,
-                        String.valueOf(qty),
-                        String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) + diff).setScale(scale, RoundingMode.HALF_DOWN)),
-                        "true",
-                        null,
-                        null,
-                        null,
-                        NewOrderRespType.RESULT,
-                        "false");
-
+                if(order.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+                    syncRequestClient.postOrder(
+                            positionRecord.getSymbol(),
+                            OrderSide.SELL,
+                            PositionSide.BOTH,
+                            OrderType.LIMIT,
+                            TimeInForce.GTC,
+                            String.valueOf(qty),
+                            String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) + diff).setScale(scale, RoundingMode.HALF_DOWN)),
+                            "true",
+                            null,
+                            null,
+                            null,
+                            NewOrderRespType.RESULT,
+                            "false");
+                }
+                if(order.get(0).getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+                    syncRequestClient.postOrder(
+                            positionRecord.getSymbol(),
+                            OrderSide.BUY,
+                            PositionSide.BOTH,
+                            OrderType.LIMIT,
+                            TimeInForce.GTC,
+                            String.valueOf(qty),
+                            String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) - diff).setScale(scale, RoundingMode.HALF_DOWN)),
+                            "true",
+                            null,
+                            null,
+                            null,
+                            NewOrderRespType.RESULT,
+                            "false");
+                }
             }
         });
     }
