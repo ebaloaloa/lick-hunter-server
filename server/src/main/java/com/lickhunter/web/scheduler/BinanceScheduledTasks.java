@@ -88,4 +88,10 @@ public class BinanceScheduledTasks {
     public void pauseOnStopLoss() {
         tradeService.stopLoss();
     }
+
+    @Scheduled(fixedRateString = "60000")
+    @SneakyThrows
+    public void createTakeProfitOrders() {
+        tradeService.createTakeProfitOrders();
+    }
 }
