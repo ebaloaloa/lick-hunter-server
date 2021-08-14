@@ -15,7 +15,6 @@ import com.lickhunter.web.entities.tables.records.AccountRecord;
 import com.lickhunter.web.entities.tables.records.PositionRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.events.BinanceEvents;
-import com.lickhunter.web.models.Coins;
 import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.CandlestickRepository;
 import com.lickhunter.web.repositories.PositionRepository;
@@ -38,6 +37,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -113,49 +113,49 @@ public class BinanceSubscription {
         subscriptionOptions.setConnectionDelayOnFailure(3);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         subscriptionClient.subscribeUserDataEvent(listenKey, ((event) -> {
-                switch(UserDataEventConstants.valueOf(event.getEventType())) {
-                    case ACCOUNT_UPDATE:
-                        //TODO find a way to update maintenance margin
+            switch (UserDataEventConstants.valueOf(event.getEventType())) {
+                case ACCOUNT_UPDATE:
+                    //TODO find a way to update maintenance margin
 //                        positionRepository.insertOrUpdate(event.getAccountUpdate().getPositions(), settings.getKey());
 //                        assetRepository.updateFromPosition(event.getAccountUpdate(), settings.getKey());
 //                        accountRepository.updateFromAsset(settings.getKey());
-                        publishBinanceEvent(UserDataEventConstants.ACCOUNT_UPDATE.getValue());
-                        break;
-                    case MARGIN_CALL:
-                        //TODO add notifications for margin calls
-                        publishBinanceEvent(UserDataEventConstants.MARGIN_CALL.getValue());
-                        break;
-                    case ORDER_TRADE_UPDATE:
-                        //Update account information for new and closed positions
-                        if((event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.MARKET.name())
+                    publishBinanceEvent(UserDataEventConstants.ACCOUNT_UPDATE.getValue());
+                    break;
+                case MARGIN_CALL:
+                    //TODO add notifications for margin calls
+                    publishBinanceEvent(UserDataEventConstants.MARGIN_CALL.getValue());
+                    break;
+                case ORDER_TRADE_UPDATE:
+                    //Update account information for new and closed positions
+                    if ((event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.MARKET.name())
                             && event.getOrderUpdate().getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
                             && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name()))
                             || (event.getOrderUpdate().getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
-                                && event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.LIMIT.name())
-                                && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
-                                && event.getOrderUpdate().getIsReduceOnly().equals(true))) {
-                            positionRepository.updateOrder(event.getOrderUpdate(), settings.getKey());
-                            Long buyCount = symbolRepository.updateNumberOfBuys(event.getOrderUpdate(), settings.getKey(), lickHunterService.getActiveSettings());
-                            accountService.getAccountInformation();
-                            log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, buyCount: %s, realizedProfit: %s",
-                                    event.getOrderUpdate().getSymbol(),
-                                    event.getOrderUpdate().getSide(),
-                                    buyCount,
-                                    event.getOrderUpdate().getRealizedProfit()));
-                            lickHunterScheduledTasks.writeToCoinsJson();
-                        }
-                        tradeService.takeProfitLimitOrders(event.getOrderUpdate());
-                        publishBinanceEvent(UserDataEventConstants.ORDER_TRADE_UPDATE.getValue());
-                        break;
-                    case ACCOUNT_CONFIG_UPDATE:
-                        //TODO implement leverage change and update position table
+                            && event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.LIMIT.name())
+                            && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
+                            && event.getOrderUpdate().getIsReduceOnly().equals(true))) {
+                        positionRepository.updateOrder(event.getOrderUpdate(), settings.getKey());
+                        Long buyCount = symbolRepository.updateNumberOfBuys(event.getOrderUpdate());
+                        accountService.getAccountInformation();
+                        log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, buyCount: %s, realizedProfit: %s",
+                                event.getOrderUpdate().getSymbol(),
+                                event.getOrderUpdate().getSide(),
+                                buyCount,
+                                event.getOrderUpdate().getRealizedProfit()));
+                        lickHunterScheduledTasks.writeToCoinsJson();
+                    }
+                    tradeService.takeProfitLimitOrders(event.getOrderUpdate());
+                    publishBinanceEvent(UserDataEventConstants.ORDER_TRADE_UPDATE.getValue());
+                    break;
+                case ACCOUNT_CONFIG_UPDATE:
+                    //TODO implement leverage change and update position table
 //                        positionRepository.update(event.getAccountUpdate().getPositions(), settings.getKey());
-                        publishBinanceEvent(UserDataEventConstants.ACCOUNT_CONFIG_UPDATE.getValue());
-                    default:
-                        //TODO add more event types here
-                        // ACCOUNT_CONFIG_UPDATE = leverage
-                        log.warn("Event not identified.");
-                }
+                    publishBinanceEvent(UserDataEventConstants.ACCOUNT_CONFIG_UPDATE.getValue());
+                default:
+                    //TODO add more event types here
+                    // ACCOUNT_CONFIG_UPDATE = leverage
+                    log.warn("Event not identified.");
+            }
         }), e -> log.error(String.format("Error during User Data Subscription event: %s, type: %s", e.getMessage(), e.getErrType())));
         log.info("Successfully subscribed to User Data.");
     }
@@ -193,13 +193,23 @@ public class BinanceSubscription {
          SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
          subscriptionOptions.setUri("wss://fstream.binance.com/");
          subscriptionOptions.setConnectionDelayOnFailure(3);
+         Settings settings = lickHunterService.getLickHunterSettings();
          SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
          subscriptionClient.subscribeAllLiquidationOrderEvent(data -> {
-             List<Coins> coins = lickHunterService.getCoins();
-             coins.stream()
-                     .filter(c -> c.getSymbol().concat("USDT").equalsIgnoreCase(data.getSymbol()))
+             List<SymbolRecord> symbolRecords = symbolRepository.findTradeableSymbols();
+             symbolRecords.stream()
+                     .filter(c -> c.getSymbol().equalsIgnoreCase(data.getSymbol()))
                      .forEach(c -> {
                          WebSettings webSettings = lickHunterService.getWebSettings();
+                         UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
+                         Boolean isMedian = Objects.nonNull(activeSettings.getAutoLickValue())
+                                 ? lickHunterService.getActiveSettings().getAutoLickValue().equalsIgnoreCase("median")
+                                    : null;
+                         BigDecimal lickValue = Objects.isNull(isMedian) ?
+                                                 BigDecimal.valueOf(activeSettings.getLickValue()) :
+                                                 isMedian ?
+                                                         BigDecimal.valueOf(c.getLickMedian()) :
+                                                         BigDecimal.valueOf(c.getLickAverage());
                          BarSeries barSeries = technicalIndicatorService.getBarSeries(data.getSymbol(), CandlestickInterval.of(lickHunterService.getWebSettings().getVwapTimeframe()));
                          Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(data.getSymbol());
                          BigDecimal qty = this.getQty(symbolRecord.get());
@@ -208,12 +218,12 @@ public class BinanceSubscription {
                                  Strategy shortStrategy = technicalIndicatorService.vwapShortStrategy(
                                          barSeries,
                                          webSettings.getVwapLength(),
-                                         Double.parseDouble(c.getShortoffset()),
+                                         c.getShortOffset(),
                                          data.getAveragePrice().doubleValue());
                                  boolean shortSatisfied = shortStrategy.getEntryRule()
                                          .isSatisfied(barSeries.getEndIndex());
                                  if(shortSatisfied
-                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
+                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(lickValue) > 0) {
                                      log.debug(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
                                              data.getSymbol(),
                                              data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
@@ -228,18 +238,19 @@ public class BinanceSubscription {
                                              null,
                                              false,
                                              false);
+                                     symbolRepository.addNumberOfBuys(data.getSymbol(), settings.getKey(), activeSettings);
                                  }
                              }
                              if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
                                  Strategy longStrategy = technicalIndicatorService.vwapLongStrategy(
                                          barSeries,
                                          webSettings.getVwapLength(),
-                                         Double.parseDouble(c.getLongoffset()),
+                                         c.getLongOffset(),
                                          data.getAveragePrice().doubleValue());
                                  boolean longSatisfied = longStrategy.getEntryRule()
                                          .isSatisfied(barSeries.getEndIndex());
                                  if(longSatisfied
-                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(new BigDecimal(c.getLickvalue())) > 0) {
+                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(lickValue) > 0) {
                                      log.debug(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
                                              data.getSymbol(),
                                              data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
@@ -254,8 +265,10 @@ public class BinanceSubscription {
                                              null,
                                              false,
                                              false);
+                                     symbolRepository.addNumberOfBuys(data.getSymbol(), settings.getKey(), activeSettings);
                                  }
                              }
+                             lickHunterScheduledTasks.writeToCoinsJson();
                          }
                      });
          }, exception -> log.error("Error during liquidation event: " + exception.getMessage()));

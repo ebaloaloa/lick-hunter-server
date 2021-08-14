@@ -9,8 +9,7 @@ import java.util.Map;
 @JsonPropertyOrder({
         "symbol",
         "longoffset",
-        "shortoffset",
-        "lickvalue"
+        "shortoffset"
 })
 public class Coins {
     @JsonProperty("symbol")
@@ -19,8 +18,6 @@ public class Coins {
     private String longoffset;
     @JsonProperty("shortoffset")
     private String shortoffset;
-    @JsonProperty("lickvalue")
-    private String lickvalue;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -52,16 +49,6 @@ public class Coins {
     @JsonProperty("shortoffset")
     public void setShortoffset(String shortoffset) {
         this.shortoffset = shortoffset;
-    }
-
-    @JsonProperty("lickvalue")
-    public String getLickvalue() {
-        return lickvalue;
-    }
-
-    @JsonProperty("lickvalue")
-    public void setLickvalue(String lickvalue) {
-        this.lickvalue = lickvalue;
     }
 
     @JsonAnyGetter

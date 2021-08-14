@@ -16,7 +16,6 @@ import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -29,13 +28,17 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -67,26 +70,37 @@ public class LickHunterScheduledTasks {
         Settings settings = lickHunterService.getLickHunterSettings();
         TickerQueryTO tickerQueryTO = lickHunterService.getQuery();
         UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
-        List<Coins> coinsList = new ArrayList<>();
         List<SymbolRecord> symbolRecords = marketService.getTickerByQuery(tickerQueryTO);
-        List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
-        if(pauseOnCloseActive.get() && positionRecords.isEmpty() && !isBotPaused.get()) {
+        List<PositionRecord> activePositions = positionRepository.findActivePositionsByAccountId(settings.getKey());
+        List<SymbolRecord> allSymbols = symbolRepository.findAll();
+        allSymbols.forEach(symbolRecord -> symbolRepository.updateCoinValue(this.coinValue(symbolRecord, activeSettings)));
+        if(pauseOnCloseActive.get() && activePositions.isEmpty() && !isBotPaused.get()) {
             pauseBot();
         }
         if(accountService.isMaxOpenActive(settings.getKey(), Long.valueOf(activeSettings.getMaxOpen()))
                 || accountService.isOpenOrderIsolationActive(settings.getKey(), activeSettings.getOpenOrderIsolationPercentage())
                 || pauseOnCloseActive.get()) {
-            positionRecords.stream()
+            activePositions = activePositions.stream()
                     .filter(this.allowDca(activeSettings))
-                    .forEach(p -> coinsList.add(coinValue(p.getSymbol(), activeSettings)));
+                    .collect(Collectors.toList());
+            activePositions
+                    .forEach(p -> symbolRepository.updateCanTrade(p.getSymbol(), Boolean.TRUE));
+            List<PositionRecord> finalActivePositions = activePositions;
+            allSymbols.stream()
+                    .filter(symbolRecord -> finalActivePositions.stream().noneMatch(positionRecord -> symbolRecord.getSymbol().equalsIgnoreCase(positionRecord.getSymbol())))
+                    .forEach(symbolRecord -> symbolRepository.updateCanTrade(symbolRecord.getSymbol(), Boolean.FALSE));
         } else {
-            symbolRecords
+            symbolRecords = symbolRecords
                     .stream()
                     .filter(this.allowDca(activeSettings, settings.getKey()))
                     .sorted(Comparator.comparing(SymbolRecord::getSymbol))
-                    .forEach(s -> coinsList.add((coinValue(s.getSymbol(), activeSettings))));
+                    .collect(Collectors.toList());
+            symbolRecords.forEach(s -> symbolRepository.updateCanTrade(s.getSymbol(), Boolean.TRUE));
+            List<SymbolRecord> finalSymbolRecords = symbolRecords;
+            allSymbols.stream()
+                    .filter(symbolRecord -> finalSymbolRecords.stream().noneMatch(positionRecord -> symbolRecord.getSymbol().equalsIgnoreCase(positionRecord.getSymbol())))
+                    .forEach(symbolRecord -> symbolRepository.updateCanTrade(symbolRecord.getSymbol(), Boolean.FALSE));
         }
-        fileService.writeToFile("./", ApplicationConstants.COINS.getValue(), coinsList);
     }
 
     @Scheduled(fixedRateString = "${scheduler.exclude-coins}")
@@ -238,44 +252,31 @@ public class LickHunterScheduledTasks {
         }
     }
 
-    private Coins coinValue(String symbol, UserDefinedSettings activeSettings) {
+    private Coins coinValue(SymbolRecord symbolRecord, UserDefinedSettings activeSettings) {
         Coins coins = new Coins();
-        coins.setSymbol(symbol.replace("USDT",""));
-        Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(symbol);
-        if(StringUtils.isNotBlank(activeSettings.getAutoLickValue()) && symbolRecord.isPresent()) {
-            if(activeSettings.getAutoLickValue().equalsIgnoreCase("median") &&
-                    Objects.nonNull(symbolRecord.get().getLickMedian()) ) {
-                coins.setLickvalue(symbolRecord.get().getLickMedian().toString());
-            }
-            if(activeSettings.getAutoLickValue().equalsIgnoreCase("average") &&
-                    Objects.nonNull(symbolRecord.get().getLickAverage())) {
-                coins.setLickvalue(symbolRecord.get().getLickAverage().toString());
-            }
-        } else {
-            coins.setLickvalue(activeSettings.getLickValue().toString());
-        }
-        if(activeSettings.getAutoOffset() && symbolRecord.isPresent() && Objects.nonNull(symbolRecord.get().getVolatility())) {
-            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) < 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) < 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
+        coins.setSymbol(symbolRecord.getSymbol());
+        if(activeSettings.getAutoOffset() && Objects.nonNull(symbolRecord.getVolatility())) {
+            if(symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) < 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) < 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
                 coins.setLongoffset(activeSettings.getLongOffset().toString());
                 coins.setShortoffset(activeSettings.getShortOffset().toString());
             }
-            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) < 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
+            if(symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) < 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
                 coins.setLongoffset(activeSettings.getOffsetOne().toString());
                 coins.setShortoffset(activeSettings.getOffsetOne().toString());
             }
-            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) > 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
+            if(symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) > 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) < 0) {
                 coins.setLongoffset(activeSettings.getOffsetTwo().toString());
                 coins.setShortoffset(activeSettings.getOffsetTwo().toString());
             }
-            if(symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) > 0
-                    && symbolRecord.get().getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) > 0) {
+            if(symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityOne()) > 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityTwo()) > 0
+                    && symbolRecord.getVolatility().compareTo(activeSettings.getOffsetVolatilityThree()) > 0) {
                 coins.setLongoffset(activeSettings.getOffsetThree().toString());
                 coins.setShortoffset(activeSettings.getOffsetThree().toString());
             }
