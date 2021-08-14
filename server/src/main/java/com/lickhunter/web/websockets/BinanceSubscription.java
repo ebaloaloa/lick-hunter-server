@@ -144,7 +144,7 @@ public class BinanceSubscription {
                                     event.getOrderUpdate().getRealizedProfit()));
                             lickHunterScheduledTasks.writeToCoinsJson();
                         }
-                        tradeService.takeProfitLimitOrders(event.getOrderUpdate(), settings.getKey());
+                        tradeService.takeProfitLimitOrders(event.getOrderUpdate());
                         publishBinanceEvent(UserDataEventConstants.ORDER_TRADE_UPDATE.getValue());
                         break;
                     case ACCOUNT_CONFIG_UPDATE:
