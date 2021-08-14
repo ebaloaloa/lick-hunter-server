@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS symbol (
     FOURTH_BUY           BIGINT       NULL        DEFAULT 0,
     FIFTH_BUY            BIGINT       NULL        DEFAULT 0,
     SIXTH_BUY            BIGINT       NULL        DEFAULT 0,
+    SHORT_OFFSET         DOUBLE       NULL,
+    LONG_OFFSET          DOUBLE       NULL,
+    CAN_TRADE            BOOLEAN      NULL        DEFAULT 1,
 
     CONSTRAINT pk_symbol           PRIMARY KEY (symbol)
 );

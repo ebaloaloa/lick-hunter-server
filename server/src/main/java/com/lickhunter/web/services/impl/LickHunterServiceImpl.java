@@ -5,16 +5,12 @@ import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
-import com.lickhunter.web.models.Coins;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.LickHunterService;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +39,5 @@ public class LickHunterServiceImpl implements LickHunterService {
     public Settings getLickHunterSettings() {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         return settings;
-    }
-
-    public List<Coins> getCoins() {
-        Coins[] coins = (Coins[]) fileService.readFromFile("./", ApplicationConstants.COINS.getValue(), Coins[].class);
-        return Arrays.asList(coins);
     }
 }

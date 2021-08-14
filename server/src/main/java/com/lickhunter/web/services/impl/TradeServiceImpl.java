@@ -114,12 +114,76 @@ public class TradeServiceImpl implements TradeService {
         return syncRequestClient.changeInitialLeverage(symbol, leverage);
     }
 
-    @SneakyThrows
-    public void takeProfitLimitOrders(OrderUpdate orderUpdate, String accountId) {
+    public void createTakeProfitOrders() {
         Settings settings = lickHunterService.getLickHunterSettings();
         TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
-        Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(orderUpdate.getSymbol(), accountId);
+        List<PositionRecord> activePositions = positionRepository.findActivePositionsByAccountId(settings.getKey())
+                .stream()
+                .filter(positionRecord -> tickerQueryTO.getExclude().stream().noneMatch(s -> s.concat("USDT").equalsIgnoreCase(positionRecord.getSymbol())))
+                .collect(Collectors.toList());
+        activePositions.forEach(positionRecord -> {
+            Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol());
+            if(syncRequestClient.getOpenOrders(positionRecord.getSymbol()).isEmpty() && symbolRecord.isPresent()) {
+                List<Order> order = syncRequestClient.getAllOrders(
+                        positionRecord.getSymbol(),
+                        Objects.isNull(positionRecord.getOrderId()) ? null : positionRecord.getOrderId(),
+                        null,
+                        null,
+                        null)
+                        .stream()
+                        .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
+                                && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
+                        .sorted(Comparator.comparing(Order::getUpdateTime).reversed())
+                        .collect(Collectors.toList());
+                BigDecimal qty = order.stream()
+                        .map(Order::getExecutedQty)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                Integer scale = BigDecimal.valueOf(symbolRecord.get().getTickSize()).stripTrailingZeros().scale();
+                Double diff = BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) * this.getPercentTakeProfit(symbolRecord.get()).doubleValue() / 100)
+                        .setScale(scale, RoundingMode.HALF_DOWN).doubleValue();
+                if(order.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+                    syncRequestClient.postOrder(
+                            positionRecord.getSymbol(),
+                            OrderSide.SELL,
+                            PositionSide.BOTH,
+                            OrderType.LIMIT,
+                            TimeInForce.GTC,
+                            String.valueOf(qty),
+                            String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) + diff).setScale(scale, RoundingMode.HALF_DOWN)),
+                            "true",
+                            null,
+                            null,
+                            null,
+                            NewOrderRespType.RESULT,
+                            "false");
+                }
+                if(order.get(0).getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+                    syncRequestClient.postOrder(
+                            positionRecord.getSymbol(),
+                            OrderSide.BUY,
+                            PositionSide.BOTH,
+                            OrderType.LIMIT,
+                            TimeInForce.GTC,
+                            String.valueOf(qty),
+                            String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.getEntryPrice()) - diff).setScale(scale, RoundingMode.HALF_DOWN)),
+                            "true",
+                            null,
+                            null,
+                            null,
+                            NewOrderRespType.RESULT,
+                            "false");
+                }
+            }
+        });
+    }
+
+    @SneakyThrows
+    public void takeProfitLimitOrders(OrderUpdate orderUpdate) {
+        Settings settings = lickHunterService.getLickHunterSettings();
+        TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(orderUpdate.getSymbol(), settings.getKey());
         Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(orderUpdate.getSymbol());
         if(tickerQueryTO.getExclude().stream().noneMatch(s -> s.concat("USDT").equalsIgnoreCase(orderUpdate.getSymbol()))
             &&
@@ -127,10 +191,7 @@ public class TradeServiceImpl implements TradeService {
                     && orderUpdate.getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
                     && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
                     && !orderUpdate.getIsReduceOnly())
-                || (orderUpdate.getType().equalsIgnoreCase(OrderType.LIMIT.name())
-                    && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())
-                    && orderUpdate.getIsReduceOnly())
-                && syncRequestClient.getOpenOrders(orderUpdate.getSymbol()).isEmpty()
+//                && syncRequestClient.getOpenOrders(orderUpdate.getSymbol()).isEmpty()
                 && (positionRecord.isPresent() && symbolRecord.isPresent()))) {
             //cancel open order
             syncRequestClient.cancelAllOpenOrder(orderUpdate.getSymbol());
@@ -143,6 +204,7 @@ public class TradeServiceImpl implements TradeService {
                     .stream()
                     .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
                         && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
+                    .sorted(Comparator.comparing(Order::getUpdateTime).reversed())
                     .collect(Collectors.toList());
             BigDecimal qty = order.stream()
                     .map(Order::getExecutedQty)
@@ -175,38 +237,6 @@ public class TradeServiceImpl implements TradeService {
                         TimeInForce.GTC,
                         String.valueOf(qty),
                         String.valueOf(BigDecimal.valueOf(Double.parseDouble(positionRecord.get().getEntryPrice()) - diff).setScale(scale, RoundingMode.HALF_DOWN)),
-                        "true",
-                        null,
-                        null,
-                        null,
-                        NewOrderRespType.RESULT,
-                        "false");
-            }
-            if(orderUpdate.getSide().equalsIgnoreCase(OrderSide.BUY.name()) && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())) {
-                syncRequestClient.postOrder(
-                        orderUpdate.getSymbol(),
-                        OrderSide.BUY,
-                        PositionSide.BOTH,
-                        OrderType.LIMIT,
-                        TimeInForce.GTC,
-                        String.valueOf(orderUpdate.getOrigQty()),
-                        String.valueOf(orderUpdate.getPrice()),
-                        "true",
-                        null,
-                        null,
-                        null,
-                        NewOrderRespType.RESULT,
-                        "false");
-            }
-            if(orderUpdate.getSide().equalsIgnoreCase(OrderSide.SELL.name()) && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.CANCELED.name())) {
-                syncRequestClient.postOrder(
-                        orderUpdate.getSymbol(),
-                        OrderSide.SELL,
-                        PositionSide.BOTH,
-                        OrderType.LIMIT,
-                        TimeInForce.GTC,
-                        String.valueOf(orderUpdate.getOrigQty()),
-                        String.valueOf(orderUpdate.getPrice()),
                         "true",
                         null,
                         null,

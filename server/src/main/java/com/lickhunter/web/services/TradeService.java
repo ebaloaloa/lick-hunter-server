@@ -12,8 +12,9 @@ public interface TradeService {
     void changeAllMarginType();
     void changeAllLeverage();
     Leverage changeInitialLeverage(String symbol, int leverage);
-    void takeProfitLimitOrders(OrderUpdate orderUpdate, String accountId);
+    void takeProfitLimitOrders(OrderUpdate orderUpdate);
     void newOrder(String symbol, OrderSide orderSide, OrderType orderType, TimeInForce timeInForce, String qty, String price, Boolean reduceOnly, Boolean closePosition);
     void closeAllPositions();
     void stopLoss();
+    void createTakeProfitOrders();
 }

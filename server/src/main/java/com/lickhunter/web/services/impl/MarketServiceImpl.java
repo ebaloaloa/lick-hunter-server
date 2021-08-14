@@ -36,7 +36,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -63,17 +66,19 @@ public class MarketServiceImpl implements MarketService {
         if(Objects.nonNull(query.getSymbol())) {
             return symbolRepository.findBySymbols(query.getSymbol());
         }
-        List<SymbolRecord> symbolRecords = symbolRepository.findAll();
+        List<SymbolRecord> symbolRecords = symbolRepository.findAll().stream()
+                .filter(s -> s.getSymbol().matches("^.*USDT$"))
+                .filter(s -> Objects.nonNull(s.getMarkPrice()))
+                .filter(s -> Objects.nonNull(s.getVolatility()))
+                .filter(s -> Objects.nonNull(s.getOnboardDate()))
+                .collect(Collectors.toList());
 
         //get symbols by trading age
         List<SymbolRecord> symbols = symbolRecords.stream()
-                .filter(s -> s.getSymbol().matches("^.*USDT$"))
-                .filter(s -> Objects.nonNull(s.getOnboardDate()))
                 .filter(s -> ChronoUnit.DAYS.between(Instant.ofEpochMilli(s.getOnboardDate()).atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now()) > query.getMinimumTradingAge())
                 .collect(Collectors.toList());
 
-        result = symbolRepository.findAll().stream()
-                .filter(t -> symbols.stream().anyMatch(s -> s.getSymbol().contains(t.getSymbol())))
+        result = symbols.stream()
                 //Exclude
                 .filter(Objects.nonNull(query.getExclude()) ?
                         t -> query.getExclude().stream().noneMatch(e -> t.getSymbol().contains(e)) :
