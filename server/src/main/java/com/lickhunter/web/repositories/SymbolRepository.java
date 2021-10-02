@@ -49,7 +49,7 @@ public class SymbolRepository {
     }
 
     public void insertOrUpdate(Datum datum) {
-        Optional<SymbolRecord> symbolRecord = this.findBySymbol(datum.getSymbol().concat("USDT"));
+        Optional<SymbolRecord> symbolRecord = this.findBySymbol(datum.getName().concat("USDT"));
         if(symbolRecord.isPresent()) {
             this.update(datum);
         } else {
@@ -78,9 +78,9 @@ public class SymbolRepository {
 
     public void insert(Datum datum) {
         dsl.insertInto(SYMBOL)
-                .set(SYMBOL.SYMBOL_, datum.getSymbol().concat("USDT"))
-                .set(SYMBOL.LICK_MEDIAN, Double.valueOf(datum.getMedianUsdt()))
-                .set(SYMBOL.LICK_AVERAGE, Double.valueOf(datum.getAverageUsdt()))
+                .set(SYMBOL.SYMBOL_, datum.getName().concat("USDT"))
+                .set(SYMBOL.LICK_MEDIAN, Double.valueOf(datum.getMedianValue()))
+                .set(SYMBOL.LICK_AVERAGE, Double.valueOf(datum.getMeanValue()))
                 .execute();
     }
 
@@ -114,9 +114,9 @@ public class SymbolRepository {
 
     public void update(Datum datum) {
         dsl.update(SYMBOL)
-                .set(SYMBOL.LICK_MEDIAN, Double.valueOf(datum.getMedianUsdt()))
-                .set(SYMBOL.LICK_AVERAGE, Double.valueOf(datum.getAverageUsdt()))
-                .where(SYMBOL.SYMBOL_.eq(datum.getSymbol().concat("USDT")))
+                .set(SYMBOL.LICK_MEDIAN, Double.valueOf(datum.getMedianValue()))
+                .set(SYMBOL.LICK_AVERAGE, Double.valueOf(datum.getMeanValue()))
+                .where(SYMBOL.SYMBOL_.eq(datum.getName().concat("USDT")))
                 .execute();
     }
 
