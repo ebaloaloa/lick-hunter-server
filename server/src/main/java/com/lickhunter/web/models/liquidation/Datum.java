@@ -1,123 +1,114 @@
 
 package com.lickhunter.web.models.liquidation;
 
-import com.fasterxml.jackson.annotation.*;
-
-import javax.annotation.Generated;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Generated;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "symbol",
-    "total_events",
-    "total_usdt",
-    "average_usdt",
-    "average_amount",
-    "median_usdt",
-    "median_amount",
-    "previous"
+    "last_liquidation",
+    "lick_amount",
+    "lick_value",
+    "mean_value",
+    "median_value",
+    "mode_value",
+    "name"
 })
 @Generated("jsonschema2pojo")
 public class Datum {
 
-    @JsonProperty("symbol")
-    private String symbol;
-    @JsonProperty("total_events")
-    private Integer totalEvents;
-    @JsonProperty("total_usdt")
-    private Double totalUsdt;
-    @JsonProperty("average_usdt")
-    private Double averageUsdt;
-    @JsonProperty("average_amount")
-    private String averageAmount;
-    @JsonProperty("median_usdt")
-    private String medianUsdt;
-    @JsonProperty("median_amount")
-    private String medianAmount;
-    @JsonProperty("previous")
-    private Previous previous;
+    @JsonProperty("last_liquidation")
+    private Long lastLiquidation;
+    @JsonProperty("lick_amount")
+    private Integer lickAmount;
+    @JsonProperty("lick_value")
+    private Integer lickValue;
+    @JsonProperty("mean_value")
+    private Integer meanValue;
+    @JsonProperty("median_value")
+    private Integer medianValue;
+    @JsonProperty("mode_value")
+    private Integer modeValue;
+    @JsonProperty("name")
+    private String name;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("symbol")
-    public String getSymbol() {
-        return symbol;
+    @JsonProperty("last_liquidation")
+    public Long getLastLiquidation() {
+        return lastLiquidation;
     }
 
-    @JsonProperty("symbol")
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    @JsonProperty("last_liquidation")
+    public void setLastLiquidation(Long lastLiquidation) {
+        this.lastLiquidation = lastLiquidation;
     }
 
-    @JsonProperty("total_events")
-    public Integer getTotalEvents() {
-        return totalEvents;
+    @JsonProperty("lick_amount")
+    public Integer getLickAmount() {
+        return lickAmount;
     }
 
-    @JsonProperty("total_events")
-    public void setTotalEvents(Integer totalEvents) {
-        this.totalEvents = totalEvents;
+    @JsonProperty("lick_amount")
+    public void setLickAmount(Integer lickAmount) {
+        this.lickAmount = lickAmount;
     }
 
-    @JsonProperty("total_usdt")
-    public Double getTotalUsdt() {
-        return totalUsdt;
+    @JsonProperty("lick_value")
+    public Integer getLickValue() {
+        return lickValue;
     }
 
-    @JsonProperty("total_usdt")
-    public void setTotalUsdt(Double totalUsdt) {
-        this.totalUsdt = totalUsdt;
+    @JsonProperty("lick_value")
+    public void setLickValue(Integer lickValue) {
+        this.lickValue = lickValue;
     }
 
-    @JsonProperty("average_usdt")
-    public Double getAverageUsdt() {
-        return averageUsdt;
+    @JsonProperty("mean_value")
+    public Integer getMeanValue() {
+        return meanValue;
     }
 
-    @JsonProperty("average_usdt")
-    public void setAverageUsdt(Double averageUsdt) {
-        this.averageUsdt = averageUsdt;
+    @JsonProperty("mean_value")
+    public void setMeanValue(Integer meanValue) {
+        this.meanValue = meanValue;
     }
 
-    @JsonProperty("average_amount")
-    public String getAverageAmount() {
-        return averageAmount;
+    @JsonProperty("median_value")
+    public Integer getMedianValue() {
+        return medianValue;
     }
 
-    @JsonProperty("average_amount")
-    public void setAverageAmount(String averageAmount) {
-        this.averageAmount = averageAmount;
+    @JsonProperty("median_value")
+    public void setMedianValue(Integer medianValue) {
+        this.medianValue = medianValue;
     }
 
-    @JsonProperty("median_usdt")
-    public String getMedianUsdt() {
-        return medianUsdt;
+    @JsonProperty("mode_value")
+    public Integer getModeValue() {
+        return modeValue;
     }
 
-    @JsonProperty("median_usdt")
-    public void setMedianUsdt(String medianUsdt) {
-        this.medianUsdt = medianUsdt;
+    @JsonProperty("mode_value")
+    public void setModeValue(Integer modeValue) {
+        this.modeValue = modeValue;
     }
 
-    @JsonProperty("median_amount")
-    public String getMedianAmount() {
-        return medianAmount;
+    @JsonProperty("name")
+    public String getName() {
+        return name;
     }
 
-    @JsonProperty("median_amount")
-    public void setMedianAmount(String medianAmount) {
-        this.medianAmount = medianAmount;
-    }
-
-    @JsonProperty("previous")
-    public Previous getPrevious() {
-        return previous;
-    }
-
-    @JsonProperty("previous")
-    public void setPrevious(Previous previous) {
-        this.previous = previous;
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
     }
 
     @JsonAnyGetter
