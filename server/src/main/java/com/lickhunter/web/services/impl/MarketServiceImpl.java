@@ -14,7 +14,7 @@ import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.tables.records.CandlestickRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
-import com.lickhunter.web.models.liquidation.Liquidations;
+import com.lickhunter.web.models.liquidation.Liquidation;
 import com.lickhunter.web.models.market.ExchangeInformation;
 import com.lickhunter.web.repositories.CandlestickRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
@@ -198,7 +198,7 @@ public class MarketServiceImpl implements MarketService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("user-agent", "PostmanRuntime/7.26.8");
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<Liquidations> liquidations = restTemplate.exchange(applicationConfig.getLiquidation(), HttpMethod.GET, entity, Liquidations.class);
+        ResponseEntity<Liquidation> liquidations = restTemplate.exchange(applicationConfig.getLiquidation(), HttpMethod.GET, entity, Liquidation.class);
         Objects.requireNonNull(liquidations.getBody()).getData()
                 .forEach(d -> symbolRepository.insertOrUpdate(d));
         log.info("Successfully retrieved liquidation data.");

@@ -1,177 +1,233 @@
 {
-  "vwapTimeframe": "1H",
-  "vwapLength": 24,
-  "active" : "settings1",
+  "vwapTimeframe" : "1H",
+  "vwapLength" : 14,
+  "active" : "settings2",
   "defaultSettings" : "settings1",
+  "dailyReinvestment" : 100,
   "safe" : "settings2",
-  "dailyReinvestment": 100,
   "userDefinedSettings" : {
     "settings1" : {
       "maxOpen" : 10,
-      "maxPos": 100,
+      "maxPos" : 100,
       "openOrderIsolationPercentage" : 5.0,
       "longOffset" : 3.0,
       "shortOffset" : 3.0,
-      "lickValue" : 1000,
+      "lickValue" : 500,
       "marginPercentNotification" : 30,
       "marginType" : "crossed",
-      "leverage" : 4,
+      "leverage" : 6,
       "autoLickValue" : "median",
       "autoOffset" : true,
-      "offsetOne" : 7.0,
+      "offsetOne" : 5.0,
       "offsetVolatilityOne" : 0.04,
-      "offsetTwo" : 9.0,
+      "offsetTwo" : 7.0,
       "offsetVolatilityTwo" : 0.05,
-      "offsetThree" : 11.0,
+      "offsetThree" : 9.0,
       "offsetVolatilityThree" : 0.07,
-      "dcaStart": 0.5,
-      "rangeOne": {
-        "percentFromAverage": 2.5,
-        "percentTakeProfit": 0.6,
-        "percentBuy": 0.20,
-        "numberOfBuys": 10
+      "dcaStart" : 1.0,
+      "rangeOne" : {
+        "percentFromAverage" : 2.5,
+        "percentTakeProfit" : 0.6,
+        "percentBuy" : 0.20,
+        "numberOfBuys" : "4"
       },
-      "rangeTwo": {
-        "percentFromAverage": 5,
-        "percentTakeProfit": 0.5,
-        "percentBuy": 0.30,
-        "numberOfBuys": 10
+      "rangeTwo" : {
+        "percentFromAverage" : 5,
+        "percentTakeProfit" : 0.5,
+        "percentBuy" : 0.30,
+        "numberOfBuys" : "6"
       },
-      "rangeThree": {
-        "percentFromAverage": 7.5,
-        "percentTakeProfit": 0.4,
-        "percentBuy": 0.50,
-        "numberOfBuys": 20
+      "rangeThree" : {
+        "percentFromAverage" : 7.5,
+        "percentTakeProfit" : 0.4,
+        "percentBuy" : 0.50,
+        "numberOfBuys" : "8"
       },
-      "rangeFour": {
-        "percentFromAverage": 10,
-        "percentTakeProfit": 0.3,
-        "percentBuy": 0.80,
-        "numberOfBuys": 20
+      "rangeFour" : {
+        "percentFromAverage" : 10,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 0.80,
+        "numberOfBuys" : "10"
       },
-      "rangeFive": {
-        "percentFromAverage": 15,
-        "percentTakeProfit": 0.3,
-        "percentBuy": 1.10,
-        "numberOfBuys": 40
+      "rangeFive" : {
+        "percentFromAverage" : 15,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 1.1,
+        "numberOfBuys" : "15"
       },
-      "rangeSix": {
-        "percentFromAverage": 100,
-        "percentTakeProfit": 0.2,
-        "percentBuy": 1.5,
-        "numberOfBuys": "unlimited"
+      "rangeSix" : {
+        "percentFromAverage" : 100,
+        "percentTakeProfit" : 0.2,
+        "percentBuy" : 1.5,
+        "numberOfBuys" : "unlimited"
       }
     },
     "settings2" : {
       "maxOpen" : 5,
-      "maxPos": 100,
-      "openOrderIsolationPercentage" : 3.0,
+      "maxPos" : 100,
+      "openOrderIsolationPercentage" : 5.0,
       "longOffset" : 50.0,
-      "shortOffset" : 5.0,
+      "shortOffset" : 3.0,
       "lickValue" : 1000,
       "marginPercentNotification" : 30,
       "marginType" : "crossed",
-      "leverage" : 4,
+      "leverage" : 6,
       "autoLickValue" : "median",
       "autoOffset" : false,
-      "offsetOne" : 7.0,
+      "offsetOne" : 5.0,
       "offsetVolatilityOne" : 0.04,
-      "offsetTwo" : 9.0,
+      "offsetTwo" : 7.0,
       "offsetVolatilityTwo" : 0.05,
-      "offsetThree" : 11.0,
+      "offsetThree" : 9.0,
       "offsetVolatilityThree" : 0.07,
-      "dcaStart": 0.5,
-      "rangeOne": {
-        "percentFromAverage": 2.5,
-        "percentTakeProfit": 0.6,
-        "percentBuy": 0.20,
-        "numberOfBuys": 10
+      "dcaStart" : 0.5,
+      "rangeOne" : {
+        "percentFromAverage" : 2.5,
+        "percentTakeProfit" : 0.6,
+        "percentBuy" : 0.20,
+        "numberOfBuys" : "8"
       },
-      "rangeTwo": {
-        "percentFromAverage": 5,
-        "percentTakeProfit": 0.5,
-        "percentBuy": 0.30,
-        "numberOfBuys": 10
+      "rangeTwo" : {
+        "percentFromAverage" : 5,
+        "percentTakeProfit" : 0.5,
+        "percentBuy" : 0.30,
+        "numberOfBuys" : "8"
       },
-      "rangeThree": {
-        "percentFromAverage": 7.5,
-        "percentTakeProfit": 0.4,
-        "percentBuy": 0.50,
-        "numberOfBuys": 20
+      "rangeThree" : {
+        "percentFromAverage" : 7.5,
+        "percentTakeProfit" : 0.4,
+        "percentBuy" : 0.50,
+        "numberOfBuys" : "20"
       },
-      "rangeFour": {
-        "percentFromAverage": 10,
-        "percentTakeProfit": 0.3,
-        "percentBuy": 0.80,
-        "numberOfBuys": 20
+      "rangeFour" : {
+        "percentFromAverage" : 10,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 0.80,
+        "numberOfBuys" : "20"
       },
-      "rangeFive": {
-        "percentFromAverage": 15,
-        "percentTakeProfit": 0.3,
-        "percentBuy": 1.10,
-        "numberOfBuys": 40
+      "rangeFive" : {
+        "percentFromAverage" : 15,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 1.1,
+        "numberOfBuys" : "15"
       },
-      "rangeSix": {
-        "percentFromAverage": 100,
-        "percentTakeProfit": 0.2,
-        "percentBuy": 1.5,
-        "numberOfBuys": "unlimited"
+      "rangeSix" : {
+        "percentFromAverage" : 100,
+        "percentTakeProfit" : 0.2,
+        "percentBuy" : 1.5,
+        "numberOfBuys" : "unlimited"
       }
     },
     "settings3" : {
-      "maxOpen" : 10,
-      "maxPos": 100,
-      "openOrderIsolationPercentage" : 5.0,
-      "longOffset" : 1.5,
-      "shortOffset" : 1.5,
-      "lickValue" : 1000,
+      "maxOpen" : 5,
+      "maxPos" : 100,
+      "openOrderIsolationPercentage" : 3.0,
+      "longOffset" : 2.0,
+      "shortOffset" : 0.5,
+      "lickValue" : 0,
       "marginPercentNotification" : 30,
       "marginType" : "crossed",
-      "leverage" : 4,
+      "leverage" : 6,
       "autoLickValue" : "median",
       "autoOffset" : true,
-      "offsetOne" : 3.0,
+      "offsetOne" : 2.5,
       "offsetVolatilityOne" : 0.04,
-      "offsetTwo" : 5.0,
+      "offsetTwo" : 3.0,
       "offsetVolatilityTwo" : 0.05,
-      "offsetThree" : 7.0,
+      "offsetThree" : 3.5,
       "offsetVolatilityThree" : 0.07,
-      "dcaStart": 0.5,
-      "rangeOne": {
-        "percentFromAverage": 2.5,
-        "percentTakeProfit": 0.6,
-        "percentBuy": 0.20,
-        "numberOfBuys": 10
+      "dcaStart" : 0.5,
+      "rangeOne" : {
+        "percentFromAverage" : 2.5,
+        "percentTakeProfit" : 0.6,
+        "percentBuy" : 0.20,
+        "numberOfBuys" : "10"
       },
-      "rangeTwo": {
-        "percentFromAverage": 5,
-        "percentTakeProfit": 0.5,
-        "percentBuy": 0.30,
-        "numberOfBuys": 10
+      "rangeTwo" : {
+        "percentFromAverage" : 5,
+        "percentTakeProfit" : 0.5,
+        "percentBuy" : 0.30,
+        "numberOfBuys" : "10"
       },
-      "rangeThree": {
-        "percentFromAverage": 7.5,
-        "percentTakeProfit": 0.4,
-        "percentBuy": 0.50,
-        "numberOfBuys": 20
+      "rangeThree" : {
+        "percentFromAverage" : 7.5,
+        "percentTakeProfit" : 0.4,
+        "percentBuy" : 0.50,
+        "numberOfBuys" : "20"
       },
-      "rangeFour": {
-        "percentFromAverage": 10,
-        "percentTakeProfit": 0.3,
-        "percentBuy": 0.80,
-        "numberOfBuys": 20
+      "rangeFour" : {
+        "percentFromAverage" : 10,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 0.80,
+        "numberOfBuys" : "20"
       },
-      "rangeFive": {
-        "percentFromAverage": 15,
-        "percentTakeProfit": 0.3,
-        "percentBuy": 1.10,
-        "numberOfBuys": 40
+      "rangeFive" : {
+        "percentFromAverage" : 15,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 1.10,
+        "numberOfBuys" : "40"
       },
-      "rangeSix": {
-        "percentFromAverage": 100,
-        "percentTakeProfit": 0.2,
-        "percentBuy": 1.5,
-        "numberOfBuys": "unlimited"
+      "rangeSix" : {
+        "percentFromAverage" : 100,
+        "percentTakeProfit" : 0.2,
+        "percentBuy" : 1.5,
+        "numberOfBuys" : "unlimited"
+      }
+    },
+    "settings4" : {
+      "maxOpen" : 5,
+      "maxPos" : 100,
+      "openOrderIsolationPercentage" : 5.0,
+      "longOffset" : 0.5,
+      "shortOffset" : 0.5,
+      "lickValue" : 0,
+      "marginPercentNotification" : 30,
+      "marginType" : "crossed",
+      "leverage" : 6,
+      "autoLickValue" : "median",
+      "autoOffset" : true,
+      "offsetOne" : 0.8,
+      "offsetVolatilityOne" : 0.04,
+      "offsetTwo" : 1.2,
+      "offsetVolatilityTwo" : 0.05,
+      "offsetThree" : 1.5,
+      "offsetVolatilityThree" : 0.07,
+      "dcaStart" : 0.5,
+      "rangeOne" : {
+        "percentFromAverage" : 2.5,
+        "percentTakeProfit" : 0.6,
+        "percentBuy" : 0.20,
+        "numberOfBuys" : "10"
+      },
+      "rangeTwo" : {
+        "percentFromAverage" : 5,
+        "percentTakeProfit" : 0.5,
+        "percentBuy" : 0.30,
+        "numberOfBuys" : "10"
+      },
+      "rangeThree" : {
+        "percentFromAverage" : 7.5,
+        "percentTakeProfit" : 0.4,
+        "percentBuy" : 0.50,
+        "numberOfBuys" : "20"
+      },
+      "rangeFour" : {
+        "percentFromAverage" : 10,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 0.80,
+        "numberOfBuys" : "20"
+      },
+      "rangeFive" : {
+        "percentFromAverage" : 15,
+        "percentTakeProfit" : 0.3,
+        "percentBuy" : 1.10,
+        "numberOfBuys" : "40"
+      },
+      "rangeSix" : {
+        "percentFromAverage" : 100,
+        "percentTakeProfit" : 0.2,
+        "percentBuy" : 1.5,
+        "numberOfBuys" : "unlimited"
       }
     }
   }
