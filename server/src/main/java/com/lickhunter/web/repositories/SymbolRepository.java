@@ -185,35 +185,40 @@ public class SymbolRepository {
     public void addNumberOfBuys(String symbol, String accountId, UserDefinedSettings userDefinedSettings) {
         Optional<SymbolRecord> symbolRecord = this.findBySymbol(symbol);
         Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(symbol, accountId);
-        BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.get().getMarkPrice())
-                .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs()).divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128)).multiply(BigDecimal.valueOf(100));
-        if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
-            dsl.update(SYMBOL)
-                    .set(SYMBOL.FIFTH_BUY, SYMBOL.FIFTH_BUY.plus(1))
-                    .where(SYMBOL.SYMBOL_.eq(symbol))
-                    .execute();
-        } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
-            dsl.update(SYMBOL)
-                    .set(SYMBOL.FOURTH_BUY, SYMBOL.FOURTH_BUY.plus(1))
-                    .where(SYMBOL.SYMBOL_.eq(symbol))
-                    .execute();
-        } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
-            dsl.update(SYMBOL)
-                    .set(SYMBOL.THIRD_BUY, SYMBOL.THIRD_BUY.plus(1))
-                    .where(SYMBOL.SYMBOL_.eq(symbol))
-                    .execute();
-        } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
-            dsl.update(SYMBOL)
-                    .set(SYMBOL.SECOND_BUY, SYMBOL.SECOND_BUY.plus(1))
-                    .where(SYMBOL.SYMBOL_.eq(symbol))
-                    .execute();
-        } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
-            dsl.update(SYMBOL)
-                    .set(SYMBOL.FIRST_BUY, SYMBOL.FIRST_BUY.plus(1))
-                    .where(SYMBOL.SYMBOL_.eq(symbol))
-                    .execute();
+        if(positionRecord.isPresent() && positionRecord.get().getInitialMargin() != 0.0) {
+            BigDecimal percentageFromAverage = ((BigDecimal.valueOf(symbolRecord.get().getMarkPrice())
+                    .subtract(new BigDecimal(positionRecord.get().getEntryPrice())).abs())
+                    .divide(new BigDecimal(positionRecord.get().getEntryPrice()), MathContext.DECIMAL128))
+                    .multiply(BigDecimal.valueOf(100));
+            if(percentageFromAverage.compareTo(userDefinedSettings.getRangeFour().getPercentFromAverage()) > 0) {
+                dsl.update(SYMBOL)
+                        .set(SYMBOL.FIFTH_BUY, SYMBOL.FIFTH_BUY.plus(1))
+                        .where(SYMBOL.SYMBOL_.eq(symbol))
+                        .execute();
+            } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeThree().getPercentFromAverage()) > 0) {
+                dsl.update(SYMBOL)
+                        .set(SYMBOL.FOURTH_BUY, SYMBOL.FOURTH_BUY.plus(1))
+                        .where(SYMBOL.SYMBOL_.eq(symbol))
+                        .execute();
+            } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeTwo().getPercentFromAverage()) > 0) {
+                dsl.update(SYMBOL)
+                        .set(SYMBOL.THIRD_BUY, SYMBOL.THIRD_BUY.plus(1))
+                        .where(SYMBOL.SYMBOL_.eq(symbol))
+                        .execute();
+            } else if(percentageFromAverage.compareTo(userDefinedSettings.getRangeOne().getPercentFromAverage()) > 0) {
+                dsl.update(SYMBOL)
+                        .set(SYMBOL.SECOND_BUY, SYMBOL.SECOND_BUY.plus(1))
+                        .where(SYMBOL.SYMBOL_.eq(symbol))
+                        .execute();
+            } else if(percentageFromAverage.compareTo(userDefinedSettings.getDcaStart()) > 0) {
+                dsl.update(SYMBOL)
+                        .set(SYMBOL.FIRST_BUY, SYMBOL.FIRST_BUY.plus(1))
+                        .where(SYMBOL.SYMBOL_.eq(symbol))
+                        .execute();
+            }
         }
     }
+
     public Long updateNumberOfBuys(OrderUpdate orderUpdate) {
         Optional<SymbolRecord> symbolRecord = this.findBySymbol(orderUpdate.getSymbol());
         if(symbolRecord.isPresent() ) {
