@@ -51,16 +51,12 @@ public class WebApplication {
 
 	@PostConstruct
 	public void initProcess() throws Exception {
-		applicationController.subscribeCandleStickData();
-		applicationController.subscribeMarkPrice();
-		applicationController.subscribeUserData();
-
-		/**
-		 * BinanceScheduledTasks
-		 */
 		accountService.getAccountInformation();
 		marketService.getExchangeInformation();
 		marketService.get24hrTickerPriceChange();
+		applicationController.subscribeCandleStickData();
+		applicationController.subscribeMarkPrice();
+		applicationController.subscribeUserData();
 		marketService.getLiquidations();
 		Arrays.stream(IncomeType.values())
 				.forEach(incomeType -> {
