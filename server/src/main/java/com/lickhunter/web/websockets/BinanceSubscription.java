@@ -72,34 +72,29 @@ public class BinanceSubscription {
         log.info("Subscribing to Binance candlesticks data");
         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
         subscriptionOptions.setUri("wss://fstream.binance.com");
-        subscriptionOptions.setConnectionDelayOnFailure(3);
+        subscriptionOptions.setConnectionDelayOnFailure(10);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         List<String> symbols = symbolRepository.findAll().stream()
                 .map(SymbolRecord::getSymbol)
                 .filter(s -> s.matches("^.*USDT$"))
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
-        try {
-            Arrays.stream(candlesticks).forEach(c -> subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
-                Candlestick candlestick = new Candlestick();
-                candlestick.setOpenTime(event.getStartTime());
-                candlestick.setOpen(event.getOpen());
-                candlestick.setHigh(event.getHigh());
-                candlestick.setLow(event.getClose());
-                candlestick.setClose(event.getClose());
-                candlestick.setVolume(event.getVolume());
-                candlestick.setCloseTime(event.getCloseTime());
-                candlestick.setQuoteAssetVolume(event.getQuoteAssetVolume());
-                candlestick.setNumTrades(event.getNumTrades().intValue());
-                candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
-                candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
-                candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.of(c));
-            }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage()))));
-            log.info("Subscribed to Binance Candlestick data");
-        } catch (Exception e) {
-            subscriptionClient.unsubscribeAll();
-            log.error("Unsubscribed to Binance Candlestick data");
-        }
+        Arrays.stream(candlesticks).forEach(c -> subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
+            Candlestick candlestick = new Candlestick();
+            candlestick.setOpenTime(event.getStartTime());
+            candlestick.setOpen(event.getOpen());
+            candlestick.setHigh(event.getHigh());
+            candlestick.setLow(event.getClose());
+            candlestick.setClose(event.getClose());
+            candlestick.setVolume(event.getVolume());
+            candlestick.setCloseTime(event.getCloseTime());
+            candlestick.setQuoteAssetVolume(event.getQuoteAssetVolume());
+            candlestick.setNumTrades(event.getNumTrades().intValue());
+            candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
+            candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
+            candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.of(c));
+        }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage()))));
+        log.info("Subscribed to Binance Candlestick data");
     }
 
     @Async
