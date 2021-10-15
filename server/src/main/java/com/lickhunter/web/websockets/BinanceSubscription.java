@@ -6,6 +6,7 @@ import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.MarkPrice;
+import com.jcabi.aspects.RetryOnFailure;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
@@ -66,6 +67,7 @@ public class BinanceSubscription {
     private String[] candlesticks;
 
     @Async
+    @RetryOnFailure(attempts = 5, delay = 5, unit = TimeUnit.SECONDS)
     public void subscribeCandleStickData() {
         log.info("Subscribing to Binance candlesticks data");
         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
@@ -77,8 +79,8 @@ public class BinanceSubscription {
                 .filter(s -> s.matches("^.*USDT$"))
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
-        Arrays.stream(candlesticks).forEach(c -> {
-            subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
+        try {
+            Arrays.stream(candlesticks).forEach(c -> subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
                 Candlestick candlestick = new Candlestick();
                 candlestick.setOpenTime(event.getStartTime());
                 candlestick.setOpen(event.getOpen());
@@ -92,9 +94,12 @@ public class BinanceSubscription {
                 candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
                 candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
                 candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.of(c));
-            }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage())));
-        });
-        log.info("Subscribed to Binance Candlestick data");
+            }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage()))));
+            log.info("Subscribed to Binance Candlestick data");
+        } catch (Exception e) {
+            subscriptionClient.unsubscribeAll();
+            log.error("Unsubscribed to Binance Candlestick data");
+        }
     }
 
     @Async
@@ -161,6 +166,7 @@ public class BinanceSubscription {
     }
 
     @Async
+    @RetryOnFailure(attempts = 5, delay = 5, unit = TimeUnit.SECONDS)
     public void subscribeMarkPrice() {
         log.info("Subscribing to Binance Mark Price data.");
         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
@@ -168,23 +174,20 @@ public class BinanceSubscription {
         subscriptionOptions.setConnectionDelayOnFailure(3);
         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         try {
-            subscriptionClient.subscribeAllMarkPriceEvent(data -> {
-                data.forEach(event -> {
-                    if(event.getEventType().contains("markPriceUpdate")) {
-                            MarkPrice markPrice = new MarkPrice();
-                            markPrice.setMarkPrice(event.getMarkPrice());
-                            markPrice.setSymbol(event.getSymbol());
-                            markPrice.setTime(event.getEventTime());
-                            markPrice.setLastFundingRate(event.getFundingRate());
-                            markPrice.setNextFundingTime(event.getNextFundingTime());
-                            symbolRepository.insertOrUpdate(markPrice);
-                        }
-                });
-            }, e-> log.error("Error during mark price subscription event: %s", e.getMessage()));
+            subscriptionClient.subscribeAllMarkPriceEvent(data -> data.forEach(event -> {
+                if(event.getEventType().contains("markPriceUpdate")) {
+                        MarkPrice markPrice = new MarkPrice();
+                        markPrice.setMarkPrice(event.getMarkPrice());
+                        markPrice.setSymbol(event.getSymbol());
+                        markPrice.setTime(event.getEventTime());
+                        markPrice.setLastFundingRate(event.getFundingRate());
+                        markPrice.setNextFundingTime(event.getNextFundingTime());
+                        symbolRepository.insertOrUpdate(markPrice);
+                    }
+            }), e-> log.error("Error during mark price subscription event: %s", e.getMessage()));
         } catch (Exception e) {
             subscriptionClient.unsubscribeAll();
             log.error("Unsubscribed to Mark Price Events.");
-            subscribeMarkPrice();
         }
     }
 
