@@ -17,14 +17,13 @@ import com.lickhunter.web.repositories.AccountRepository;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
-import com.lickhunter.web.services.AccountService;
-import com.lickhunter.web.services.FileService;
-import com.lickhunter.web.services.LickHunterService;
-import com.lickhunter.web.services.TradeService;
+import com.lickhunter.web.services.*;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -48,6 +47,9 @@ public class TradeServiceImpl implements TradeService {
     private final LickHunterService lickHunterService;
     private final AccountRepository accountRepository;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
+    @Qualifier("telegramNotification")
+    @Autowired
+    private NotificationService<String> telegramService;
 
     public ResponseResult marginType(String symbol, String marginType) {
         ResponseResult result = new ResponseResult();
@@ -56,7 +58,9 @@ public class TradeServiceImpl implements TradeService {
             SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
             result = syncRequestClient.changeMarginType(symbol, marginType);
         } catch (Exception e) {
-            log.error(String.format("Error when changing margin type for symbol: %s marginType: %s | msg: %s", symbol, marginType, e.getMessage()));
+            String message = String.format("Error when changing margin type for symbol: %s marginType: %s. Exception: %s", symbol, marginType, e.getMessage());
+            telegramService.send(message);
+            log.error(message);
         }
         return result;
     }
@@ -77,7 +81,9 @@ public class TradeServiceImpl implements TradeService {
                             log.info(String.format("Successfully changed margin type of %s to %s", p.getSymbol(), activeSettings.getMarginType().toUpperCase()));
                             changed.set(true);
                         } catch (Exception e) {
-                            log.error(e.getMessage());
+                            String message = String.format("Failed changing margin for %s. Exception: %s", p.getSymbol(), e.getMessage());
+                            telegramService.send(message);
+                            log.error(message);
                         }
                     }
                 });
@@ -100,7 +106,9 @@ public class TradeServiceImpl implements TradeService {
                         log.info(String.format("Successfully changed leverage of %s to %s", p.getSymbol(), activeSettings.getLeverage()));
                         changed.set(true);
                     } catch (Exception e) {
-                        log.error(e.getMessage());
+                        String message = String.format("Failed changing leverage for %s. Exception: %s", p.getSymbol(), e.getMessage());
+                        telegramService.send(message);
+                        log.error(message);
                     }
                 });
         if(changed.get()) {

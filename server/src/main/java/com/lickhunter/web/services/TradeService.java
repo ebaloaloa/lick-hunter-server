@@ -8,7 +8,7 @@ import com.binance.client.model.trade.Leverage;
 import com.binance.client.model.user.OrderUpdate;
 
 public interface TradeService {
-    ResponseResult marginType(String symbol, String marginType);
+    ResponseResult marginType(String symbol, String marginType) throws Exception;
     void changeAllMarginType();
     void changeAllLeverage();
     Leverage changeInitialLeverage(String symbol, int leverage);
