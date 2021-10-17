@@ -25,6 +25,8 @@ import com.lickhunter.web.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
@@ -62,9 +64,19 @@ public class BinanceSubscription {
     private final TradeService tradeService;
     private final TechnicalIndicatorService technicalIndicatorService;
     private final AccountRepository accountRepository;
+    @Qualifier("telegramNotification")
+    @Autowired
+    private NotificationService<String> telegramService;
 
     @Value("${binance.candlesticks}")
     private String[] candlesticks;
+    @Value("${telegram.notification.dcaBuys}")
+    private Boolean tgNotifdcaBuys;
+    @Value("${telegram.notification.tradeClosed}")
+    private Boolean tgNotifTradeClosed;
+    @Value("${telegram.notification.liquidation}")
+    private Boolean tgNotifLiquidation;
+
 
     @Async
     @RetryOnFailure(attempts = 5, delay = 5, unit = TimeUnit.SECONDS)
@@ -93,7 +105,11 @@ public class BinanceSubscription {
             candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
             candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
             candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.of(c));
-        }), e -> log.error(String.format("Error during candlestick subscription event: %s", e.getMessage()))));
+        }), e -> {
+            String message = String.format("Error during candlestick subscription event: %s", e.getMessage());
+            telegramService.send(message);
+            log.error(message);
+        }));
         log.info("Subscribed to Binance Candlestick data");
     }
 
@@ -126,7 +142,6 @@ public class BinanceSubscription {
                     publishBinanceEvent(UserDataEventConstants.MARGIN_CALL.getValue());
                     break;
                 case ORDER_TRADE_UPDATE:
-                    //Update account information for new and closed positions
                     if ((event.getOrderUpdate().getType().equalsIgnoreCase(OrderType.MARKET.name())
                             && event.getOrderUpdate().getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
                             && event.getOrderUpdate().getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name()))
@@ -137,11 +152,18 @@ public class BinanceSubscription {
                         positionRepository.updateOrder(event.getOrderUpdate(), settings.getKey());
                         Long buyCount = symbolRepository.updateNumberOfBuys(event.getOrderUpdate());
                         accountService.getAccountInformation();
-                        log.info(String.format("[ORDER UPDATE] symbol: %s, side: %s, buyCount: %s, realizedProfit: %s",
+                        String orderUpdateMessage = String.format("symbol: %s, side: %s, buyCount: %s, realizedProfit: %s",
                                 event.getOrderUpdate().getSymbol(),
                                 event.getOrderUpdate().getSide(),
-                                buyCount,
-                                event.getOrderUpdate().getRealizedProfit()));
+                                buyCount + 1,
+                                event.getOrderUpdate().getRealizedProfit());
+                        if(tgNotifTradeClosed && event.getOrderUpdate().getRealizedProfit().compareTo(BigDecimal.ZERO) != 0) {
+                            telegramService.send(String.format("[CLOSED] %s", orderUpdateMessage));
+                        }
+                        if(tgNotifdcaBuys && event.getOrderUpdate().getRealizedProfit().compareTo(BigDecimal.ZERO) == 0) {
+                            telegramService.send(String.format("[NEW ORDER] %s", orderUpdateMessage));
+                        }
+                        log.info(String.format("[ORDER UPDATE] %s", orderUpdateMessage));
                         lickHunterScheduledTasks.writeToCoinsJson();
                     }
                     tradeService.takeProfitLimitOrders(event.getOrderUpdate());
@@ -156,7 +178,11 @@ public class BinanceSubscription {
                     // ACCOUNT_CONFIG_UPDATE = leverage
                     log.warn("Event not identified.");
             }
-        }), e -> log.error(String.format("Error during User Data Subscription event: %s, type: %s", e.getMessage(), e.getErrType())));
+        }), e -> {
+            String message = String.format("Error during User Data Subscription event: %s, type: %s.", e.getMessage(), e.getErrType());
+            telegramService.send(message);
+            log.error(message);
+        });
         log.info("Successfully subscribed to User Data.");
     }
 
@@ -179,7 +205,11 @@ public class BinanceSubscription {
                         markPrice.setNextFundingTime(event.getNextFundingTime());
                         symbolRepository.insertOrUpdate(markPrice);
                     }
-            }), e-> log.error("Error during mark price subscription event: %s", e.getMessage()));
+            }), e -> {
+                String message = String.format("Error during mark price subscription event: %s.", e.getMessage());
+                telegramService.send(message);
+                log.error(message);
+            });
         } catch (Exception e) {
             subscriptionClient.unsubscribeAll();
             log.error("Unsubscribed to Mark Price Events.");
@@ -222,11 +252,15 @@ public class BinanceSubscription {
                                          .isSatisfied(barSeries.getEndIndex());
                                  if(shortSatisfied
                                          && (data.getPrice().multiply(data.getOrigQty())).compareTo(lickValue) > 0) {
-                                     log.debug(String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
+                                     String liquidationMessage = String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
                                              data.getSymbol(),
                                              data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
                                              data.getSide(),
-                                             data.getAveragePrice().doubleValue()));
+                                             data.getAveragePrice().doubleValue());
+                                     if(tgNotifLiquidation) {
+                                         telegramService.send(liquidationMessage);
+                                     }
+                                     log.debug(liquidationMessage);
                                      tradeService.newOrder(
                                              data.getSymbol(),
                                              OrderSide.SELL,
@@ -269,7 +303,11 @@ public class BinanceSubscription {
                              lickHunterScheduledTasks.writeToCoinsJson();
                          }
                      });
-         }, exception -> log.error("Error during liquidation event: " + exception.getMessage()));
+         }, exception -> {
+             String message = String.format("Error during liquidation event: %s", exception.getMessage());
+             telegramService.send(message);
+             log.error(message);
+         });
      }
 
      private BigDecimal getQty(SymbolRecord symbolRecord) {

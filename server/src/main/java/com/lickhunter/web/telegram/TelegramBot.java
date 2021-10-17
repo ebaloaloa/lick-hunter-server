@@ -5,6 +5,8 @@ import com.lickhunter.web.configs.MessageConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.entities.tables.records.TelegramUsersRecord;
+import com.lickhunter.web.repositories.TelegramRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
@@ -22,6 +24,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Component
@@ -44,6 +47,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final AccountService accountService;
     private final LickHunterService lickHunterService;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
+    private final TelegramRepository telegramRepository;
 
     @Override
     public String getBotUsername() {
@@ -119,11 +123,28 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                 });
             }
+            telegramRepository.insertOrUpdate(update.getMessage().getFrom().getUserName(), chat_id);
             try {
                 execute(message); // Sending our message object to user
             } catch (TelegramApiException e) {
-                e.printStackTrace();
+                log.error(String.format("Failed sending telegram response: %s", e.getMessage()));
             }
         }
+    }
+
+    public void sendNotification(String notification) {
+        Stream.of(userName).forEach(s -> {
+            Optional<TelegramUsersRecord> telegramUsersRecord = telegramRepository.findByUsername(s);
+            if(telegramUsersRecord.isPresent()) {
+                SendMessage message = new SendMessage();
+                message.setText(notification);
+                message.setChatId(telegramUsersRecord.get().getChatId().toString());
+                try {
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    log.error(String.format("Failed sending notification: %s", e.getMessage()));
+                }
+            }
+        });
     }
 }

@@ -7,6 +7,7 @@ import com.lickhunter.web.models.webhook.DiscordWebhook;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +25,8 @@ public class DiscordServiceImpl implements NotificationService<DiscordWebhook> {
 
     private final FileService fileService;
 
-    public void send(DiscordWebhook webhook) throws Exception {
+    @SneakyThrows
+    public void send(DiscordWebhook webhook) {
         Settings settings = (Settings) fileService.readFromFile("./", ApplicationConstants.SETTINGS.getValue(), Settings.class);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
