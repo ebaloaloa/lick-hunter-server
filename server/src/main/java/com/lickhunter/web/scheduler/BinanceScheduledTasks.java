@@ -7,6 +7,9 @@ import com.lickhunter.web.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +27,11 @@ public class BinanceScheduledTasks {
     private final FileService<WebSettings, ?> fileService;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
     private final LickHunterService lickHunterService;
+    @Qualifier("telegramNotification")
+    @Autowired
+    private NotificationService<String> telegramService;
+    @Value("${telegram.notification.dailyReinvestment}")
+    private Boolean tgNotifDailyReinvestment;
 
     @Scheduled(fixedRateString = "${scheduler.margin}")
     public void changeMarginType() throws Exception {
@@ -72,7 +80,9 @@ public class BinanceScheduledTasks {
     public void transferFromFuturesToSpot() {
         WebSettings webSettings = lickHunterService.getWebSettings();
         if(webSettings.getDailyReinvestment().compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new Exception("Daily Reinvestment Percentage should not exceed 100.");
+            String message = "Daily Reinvestment Percentage should not exceed 100.";
+            telegramService.send(message);
+            throw new Exception(message);
         }
         BigDecimal amount = accountService.getDailyPnl()
                 .multiply(BigDecimal.valueOf(100)
@@ -80,6 +90,9 @@ public class BinanceScheduledTasks {
                         .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_DOWN));
         if(amount.compareTo(BigDecimal.ZERO) > 0) {
             accountService.futuresTransfer("USDT", amount.doubleValue(), 2);
+            if(tgNotifDailyReinvestment) {
+                telegramService.send(String.format("Successfully transfered %s USDT from Futures to Spot.", amount));
+            }
         }
     }
 

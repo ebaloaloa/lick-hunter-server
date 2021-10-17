@@ -16,6 +16,7 @@ import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -56,7 +57,8 @@ public class LickHunterScheduledTasks {
     private final MessageConfig messageConfig;
     private final SymbolRepository symbolRepository;
     @Qualifier("discordNotification")
-    private final NotificationService<DiscordWebhook> notificationService;
+    @Autowired
+    private NotificationService<DiscordWebhook> notificationService;
     private AtomicBoolean isBotPaused = new AtomicBoolean(false);
     private AtomicBoolean pauseOnCloseActive = new AtomicBoolean(false);
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();

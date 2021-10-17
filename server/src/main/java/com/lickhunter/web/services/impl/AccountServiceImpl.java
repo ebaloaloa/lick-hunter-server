@@ -51,7 +51,8 @@ public class AccountServiceImpl implements AccountService {
         isolationPercentage = Objects.nonNull(isolationPercentage) ? isolationPercentage : 0.0;
         if(accountRecord.isPresent()) {
             if(accountRecord.get().getTotalMarginBalance() == 0.0) {
-                throw new Exception("Account Balance is 0. Make sure you have enough balance!");
+                String message = "Account Balance is 0. Make sure you have enough balance!";
+                throw new Exception(message);
             }
             return BigDecimal.valueOf(accountRecord.get().getTotalPositionInitialMargin())
                         .divide(BigDecimal.valueOf(accountRecord.get().getTotalMarginBalance()), 2, RoundingMode.HALF_DOWN)

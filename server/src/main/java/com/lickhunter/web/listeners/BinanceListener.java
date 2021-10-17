@@ -17,7 +17,9 @@ import com.lickhunter.web.services.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -33,8 +35,16 @@ public class BinanceListener implements ApplicationListener<BinanceEvents> {
     private final AccountRepository accountRepository;
     private final FileService fileService;
     @Qualifier("discordNotification")
-    private final NotificationService notificationService;
+    @Autowired
+    private NotificationService notificationService;
     private final MessageConfig message;
+    @Qualifier("telegramNotification")
+    @Autowired
+    private NotificationService<String> telegramService;
+    @Value("${telegram.notification.isolationActive}")
+    private Boolean tgNotifIsolationActive;
+    @Value("${telegram.notification.maxPosActive}")
+    private Boolean tgNotifMaxPosActive;
 
     @SneakyThrows
     @Override
@@ -45,17 +55,27 @@ public class BinanceListener implements ApplicationListener<BinanceEvents> {
         Optional<AccountRecord> accountRecord = accountRepository.findByAccountId(settings.getKey());
         switch(UserDataEventConstants.valueOf(event.getMessage())) {
             case ACCOUNT_UPDATE:
-//                lickHunterScheduledTasks.writeToCoinsJson();
-                if(accountRecord.isPresent()
-                    && accountService.isOpenOrderIsolationActive(settings.getKey(),
-                        activeSettings.getMarginPercentNotification().doubleValue())) {
-                    DiscordWebhook webhook = new DiscordWebhook();
-                    webhook.setWebhook(settings.getDiscordwebhook());
-                    webhook.setContent(String.format(message.getMarginThreshold(),
-                            activeSettings.getMarginPercentNotification().toString(),
-                            accountRecord.get().getTotalInitialMargin(),
-                            accountRecord.get().getTotalMarginBalance()));
-                    notificationService.send(webhook);
+                if(accountRecord.isPresent()){
+                    if(accountService.isOpenOrderIsolationActive(settings.getKey(),
+                            activeSettings.getMarginPercentNotification().doubleValue())) {
+                        DiscordWebhook webhook = new DiscordWebhook();
+                        webhook.setWebhook(settings.getDiscordwebhook());
+                        webhook.setContent(String.format(message.getMarginThreshold(),
+                                activeSettings.getMarginPercentNotification().toString(),
+                                accountRecord.get().getTotalInitialMargin(),
+                                accountRecord.get().getTotalMarginBalance()));
+                        notificationService.send(webhook);
+                        telegramService.send(String.format(message.getMarginThreshold(),
+                                activeSettings.getMarginPercentNotification().toString(),
+                                accountRecord.get().getTotalInitialMargin(),
+                                accountRecord.get().getTotalMarginBalance()));
+                    }
+                    if(tgNotifIsolationActive && accountService.isOpenOrderIsolationActive(settings.getKey(), activeSettings.getOpenOrderIsolationPercentage())) {
+                        telegramService.send(String.format("Order Isolation reached %s percent", activeSettings.getOpenOrderIsolationPercentage()));
+                    }
+                    if(tgNotifMaxPosActive && accountService.isMaxOpenActive(settings.getKey(), activeSettings.getMaxOpen().longValue())) {
+                        telegramService.send(String.format("Maximum allowed position of %s active", activeSettings.getMaxOpen()));
+                    }
                 }
                 break;
             case MARGIN_CALL:

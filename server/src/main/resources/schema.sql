@@ -118,6 +118,14 @@ CREATE TABLE IF NOT EXISTS income_history (
     CONSTRAINT pk_income_history PRIMARY KEY (ID)
 );
 
+CREATE TABLE IF NOT EXISTS telegram_users (
+    ID          INTEGER           NOT NULL,
+    USERNAME    VARCHAR(20)       NULL,
+    CHAT_ID     BIGINT            NULL,
+
+    CONSTRAINT pk_telegram PRIMARY KEY (ID)
+);
+
 CREATE INDEX idx_candlestick_symbol
 ON candlestick (symbol);
 CREATE INDEX idx_candlestick_timeframe
