@@ -124,12 +124,8 @@ public class TradeServiceImpl implements TradeService {
 
     public void createTakeProfitOrders() {
         Settings settings = lickHunterService.getLickHunterSettings();
-        TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
-        List<PositionRecord> activePositions = positionRepository.findActivePositionsByAccountId(settings.getKey())
-                .stream()
-                .filter(positionRecord -> tickerQueryTO.getExclude().stream().noneMatch(s -> s.concat("USDT").equalsIgnoreCase(positionRecord.getSymbol())))
-                .collect(Collectors.toList());
+        List<PositionRecord> activePositions = positionRepository.findActivePositionsByAccountId(settings.getKey());
         activePositions.forEach(positionRecord -> {
             Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol());
             if(syncRequestClient.getOpenOrders(positionRecord.getSymbol()).isEmpty() && symbolRecord.isPresent()) {
@@ -189,18 +185,15 @@ public class TradeServiceImpl implements TradeService {
     @SneakyThrows
     public void takeProfitLimitOrders(OrderUpdate orderUpdate) {
         Settings settings = lickHunterService.getLickHunterSettings();
-        TickerQueryTO tickerQueryTO = (TickerQueryTO) fileService.readFromFile("./", ApplicationConstants.TICKER_QUERY.getValue(), TickerQueryTO.class);
         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(orderUpdate.getSymbol(), settings.getKey());
         Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(orderUpdate.getSymbol());
-        if(tickerQueryTO.getExclude().stream().noneMatch(s -> s.concat("USDT").equalsIgnoreCase(orderUpdate.getSymbol()))
-            &&
-                ((orderUpdate.getType().equalsIgnoreCase(OrderType.MARKET.name())
+        if((orderUpdate.getType().equalsIgnoreCase(OrderType.MARKET.name())
                     && orderUpdate.getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
                     && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
                     && !orderUpdate.getIsReduceOnly())
 //                && syncRequestClient.getOpenOrders(orderUpdate.getSymbol()).isEmpty()
-                && (positionRecord.isPresent() && symbolRecord.isPresent()))) {
+                && (positionRecord.isPresent() && symbolRecord.isPresent())) {
             //cancel open order
             syncRequestClient.cancelAllOpenOrder(orderUpdate.getSymbol());
             List<Order> order = syncRequestClient.getAllOrders(
