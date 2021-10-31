@@ -198,7 +198,6 @@ public class BinanceSubscription {
          Settings settings = lickHunterService.getLickHunterSettings();
          SubscriptionClient subscriptionClient = SubscriptionClient.create();
          subscriptionClient.subscribeAllLiquidationOrderEvent(data -> {
-             log.debug(data.toString());
              List<SymbolRecord> symbolRecords = symbolRepository.findTradeableSymbols();
              symbolRecords.stream()
                      .filter(c -> c.getSymbol().equalsIgnoreCase(data.getSymbol()))
