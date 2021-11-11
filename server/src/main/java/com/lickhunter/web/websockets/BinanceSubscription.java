@@ -81,7 +81,9 @@ public class BinanceSubscription {
                 .filter(s -> s.matches("^.*USDT$"))
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
-        SubscriptionClient subscriptionClient = SubscriptionClient.create();
+        SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
+        subscriptionOptions.setReceiveLimitMs(1800000);
+        SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         Arrays.stream(candlesticks)
             .forEach(c -> {
                 subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
@@ -115,7 +117,9 @@ public class BinanceSubscription {
         String listenKey = syncRequestClient.startUserDataStream();
         Thread listenKeyKeepALive = new Thread(() -> syncRequestClient.keepUserDataStream(listenKey));
         executorService.scheduleWithFixedDelay(listenKeyKeepALive, 0, 45, TimeUnit.MINUTES);
-        SubscriptionClient subscriptionClient = SubscriptionClient.create();
+        SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
+        subscriptionOptions.setReceiveLimitMs(1800000);
+        SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         subscriptionClient.subscribeUserDataEvent(listenKey, ((event) -> {
             switch (UserDataEventConstants.valueOf(event.getEventType())) {
                 case ACCOUNT_UPDATE:
@@ -176,7 +180,9 @@ public class BinanceSubscription {
 
     public void subscribeMarkPrice() {
         log.info("Subscribing to Binance Mark Price data.");
-        SubscriptionClient subscriptionClient = SubscriptionClient.create();
+        SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
+        subscriptionOptions.setReceiveLimitMs(1800000);
+        SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
         subscriptionClient.subscribeAllMarkPriceEvent(data -> data.forEach(event -> {
             if(event.getEventType().contains("markPriceUpdate")) {
                 MarkPrice markPrice = new MarkPrice();
@@ -196,8 +202,11 @@ public class BinanceSubscription {
 
      public void subscribeLiquidation() {
          Settings settings = lickHunterService.getLickHunterSettings();
-         SubscriptionClient subscriptionClient = SubscriptionClient.create();
+         SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
+         subscriptionOptions.setReceiveLimitMs(1800000);
+         SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
          subscriptionClient.subscribeAllLiquidationOrderEvent(data -> {
+             log.debug(data.toString());
              List<SymbolRecord> symbolRecords = symbolRepository.findTradeableSymbols();
              symbolRecords.stream()
                      .filter(c -> c.getSymbol().equalsIgnoreCase(data.getSymbol()))
