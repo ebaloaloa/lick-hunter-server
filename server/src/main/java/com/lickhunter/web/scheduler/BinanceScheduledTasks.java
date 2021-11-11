@@ -34,17 +34,18 @@ public class BinanceScheduledTasks {
     private Boolean tgNotifDailyReinvestment;
 
     @Scheduled(fixedRateString = "${scheduler.margin}")
-    public void changeMarginType() throws Exception {
+    public void changeMarginType() {
         tradeService.changeAllMarginType();
     }
 
     @Scheduled(fixedRateString = "${scheduler.leverage}")
-    public void changeLeverage() throws Exception {
+    public void changeLeverage() {
         tradeService.changeAllLeverage();
     }
 
     @Scheduled(fixedRateString = "${scheduler.liquidation}")
-    public void getLiquidationData() throws Exception {
+    @SneakyThrows
+    public void getLiquidationData() {
         marketService.getLiquidations();
         lickHunterScheduledTasks.writeToCoinsJson();
     }
