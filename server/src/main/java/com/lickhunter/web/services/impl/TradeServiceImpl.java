@@ -1,6 +1,7 @@
 package com.lickhunter.web.services.impl;
 
 import com.binance.client.SyncRequestClient;
+import com.binance.client.exception.BinanceApiException;
 import com.binance.client.model.ResponseResult;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.trade.Leverage;
@@ -8,7 +9,6 @@ import com.binance.client.model.trade.Order;
 import com.binance.client.model.user.OrderUpdate;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.UserDefinedSettings;
-import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.constants.TradeConstants;
 import com.lickhunter.web.entities.tables.records.AccountRecord;
 import com.lickhunter.web.entities.tables.records.PositionRecord;
@@ -18,7 +18,6 @@ import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.*;
-import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -260,7 +259,7 @@ public class TradeServiceImpl implements TradeService {
                 timeInForce,
                 qty,
                 price,
-                String.valueOf(reduceOnly),
+                Objects.nonNull(reduceOnly) ? String.valueOf(reduceOnly) : null,
                 null,
                 null,
                 null,
@@ -271,42 +270,54 @@ public class TradeServiceImpl implements TradeService {
     @SneakyThrows
     public void closeAllPositions() {
         Settings settings = lickHunterService.getLickHunterSettings();
-        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
         List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
         positionRecords.forEach(positionRecord -> {
             Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol());
             if(symbolRecord.isPresent()) {
-                List<Order> orders = syncRequestClient.getAllOrders(
-                        positionRecord.getSymbol(),
-                        null,
-                        null,
-                        null,
-                        null)
-                        .stream()
-                        .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
-                                && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
-                        .sorted(Comparator.comparing(Order::getUpdateTime).reversed())
-                        .collect(Collectors.toList());
-                BigDecimal qty = orders.stream()
-                        .map(Order::getExecutedQty)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-//                syncRequestClient.postOrder(
-//                        positionRecord.getSymbol(),
-//                        orders.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name()) ? OrderSide.SELL : OrderSide.BUY,
-//                        PositionSide.BOTH,
-//                        OrderType.MARKET,
-//                        null,
-//                        String.valueOf(orders.get(0).getExecutedQty()),
-//                        null,
-//                        null,
-//                        null,
-//                        null,
-//                        null,
-//                        NewOrderRespType.RESULT,
-//                        null
-//                );
+                this.closePosition(symbolRecord.get());
             }
         });
+    }
+
+    @SneakyThrows
+    public void closePosition(SymbolRecord symbolRecord)  {
+        Settings settings = lickHunterService.getLickHunterSettings();
+        SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
+        List<Order> orders = syncRequestClient.getAllOrders(
+                symbolRecord.getSymbol(),
+                null,
+                null,
+                null,
+                null)
+                .stream()
+                .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
+                        && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
+                .sorted(Comparator.comparing(Order::getUpdateTime).reversed())
+                .collect(Collectors.toList());
+
+        if(orders.isEmpty()) {
+            String msg = String.format("Orders for symbol %s is empty", symbolRecord.getSymbol());
+            log.error(msg);
+            throw new Exception(msg);
+        }
+        BigDecimal qty = orders.stream()
+                .map(Order::getExecutedQty)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        try {
+            this.newOrder(
+                    symbolRecord.getSymbol(),
+                    orders.get(0).getSide().equalsIgnoreCase(OrderSide.SELL.name()) ? OrderSide.BUY : OrderSide.SELL,
+                    OrderType.MARKET,
+                    null,
+                    String.valueOf(qty),
+                    null,
+                    true,
+                    false);
+        } catch (BinanceApiException e) {
+            String msg = String.format("Failed closing position for symbol %s: %s", symbolRecord.getSymbol(), e.getMessage());
+            log.error(msg);
+            telegramService.send(msg);
+        }
     }
 
     @SneakyThrows
@@ -321,6 +332,7 @@ public class TradeServiceImpl implements TradeService {
                     .compareTo(BigDecimal.valueOf(accountRecord.get().getTotalUnrealizedProfit()).abs()) < 0) {
                 lickHunterScheduledTasks.pauseOnClose();
                 this.closeAllPositions();
+                telegramService.send("Stop Loss triggered. Closed all positions.");
             }
         }
     }

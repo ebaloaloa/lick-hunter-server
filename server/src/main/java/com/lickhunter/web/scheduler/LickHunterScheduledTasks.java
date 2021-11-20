@@ -192,7 +192,9 @@ public class LickHunterScheduledTasks {
                         applicationConfig.getSocialVolumePercentage()));
                 sendSentimentsDiscordNotification(webhook);
                 isBotPaused.set(false);
-                pauseOnCloseActive.set(true);
+                if(applicationConfig.getPauseBotEnable()) {
+                    pauseOnCloseActive.set(true);
+                }
             }
         }
     }

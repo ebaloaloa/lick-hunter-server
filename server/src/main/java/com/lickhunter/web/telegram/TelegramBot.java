@@ -5,12 +5,15 @@ import com.lickhunter.web.configs.MessageConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.entities.tables.records.TelegramUsersRecord;
+import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.repositories.TelegramRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
 import com.lickhunter.web.services.AccountService;
 import com.lickhunter.web.services.FileService;
 import com.lickhunter.web.services.LickHunterService;
+import com.lickhunter.web.services.TradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +22,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -48,6 +53,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final LickHunterService lickHunterService;
     private final LickHunterScheduledTasks lickHunterScheduledTasks;
     private final TelegramRepository telegramRepository;
+    private final TradeService tradeService;
+    private final SymbolRepository symbolRepository;
+
+    private HashMap<Long, Message> oldMessage = null;
 
     @Override
     public String getBotUsername() {
@@ -122,6 +131,23 @@ public class TelegramBot extends TelegramLongPollingBot {
                         }
                     }
                 });
+            }
+            if (update.getMessage().getText().contains(Commands.CLOSE_POSITION)) {
+                try {
+                    String symbol = update.getMessage().getText().split(" ")[1];
+                    Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(symbol.toUpperCase());
+                    if (symbolRecord.isPresent()) {
+                        tradeService.closePosition(symbolRecord.get());
+                    }
+                    message.setText(String.format("Close position for %s", symbol));
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    message.setText("Invalid close command. example: /close btcusdt");
+                }
+            }
+            if (update.getMessage().getText().contains(Commands.CLOSE_ALL_POSITIONS)) {
+                tradeService.closeAllPositions();
+                message.setText("Closed all positions");
             }
             telegramRepository.insertOrUpdate(update.getMessage().getFrom().getUserName(), chat_id);
             try {
