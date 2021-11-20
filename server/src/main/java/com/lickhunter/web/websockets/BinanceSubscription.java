@@ -6,6 +6,7 @@ import com.binance.client.SyncRequestClient;
 import com.binance.client.model.enums.*;
 import com.binance.client.model.market.Candlestick;
 import com.binance.client.model.market.MarkPrice;
+import com.binance.client.model.trade.Order;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.UserDefinedSettings;
 import com.lickhunter.web.configs.WebSettings;
@@ -35,10 +36,7 @@ import org.ta4j.core.Strategy;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -202,15 +200,26 @@ public class BinanceSubscription {
 
      public void subscribeLiquidation() {
          Settings settings = lickHunterService.getLickHunterSettings();
+         SyncRequestClient syncRequestClient = SyncRequestClient.create(settings.getKey(), settings.getSecret());
          SubscriptionOptions subscriptionOptions = new SubscriptionOptions();
          subscriptionOptions.setReceiveLimitMs(1800000);
          SubscriptionClient subscriptionClient = SubscriptionClient.create(subscriptionOptions);
          subscriptionClient.subscribeAllLiquidationOrderEvent(data -> {
-             log.debug(data.toString());
              List<SymbolRecord> symbolRecords = symbolRepository.findTradeableSymbols();
              symbolRecords.stream()
                      .filter(c -> c.getSymbol().equalsIgnoreCase(data.getSymbol()))
                      .forEach(c -> {
+                         List<Order> order = syncRequestClient.getAllOrders(
+                                 data.getSymbol(),
+                                 null,
+                                 null,
+                                 null,
+                                 null)
+                                 .stream()
+                                 .filter(o -> o.getStatus().equalsIgnoreCase(OrderState.FILLED.name())
+                                                && o.getType().equalsIgnoreCase(OrderType.MARKET.name()))
+                                 .sorted(Comparator.comparing(Order::getUpdateTime).reversed())
+                                 .collect(Collectors.toList());
                          WebSettings webSettings = lickHunterService.getWebSettings();
                          UserDefinedSettings activeSettings = lickHunterService.getActiveSettings();
                          Boolean isMedian = Objects.nonNull(activeSettings.getAutoLickValue())
@@ -223,9 +232,13 @@ public class BinanceSubscription {
                                          BigDecimal.valueOf(c.getLickAverage());
                          BarSeries barSeries = technicalIndicatorService.getBarSeries(data.getSymbol(), CandlestickInterval.of(lickHunterService.getWebSettings().getVwapTimeframe()));
                          Optional<SymbolRecord> symbolRecord = symbolRepository.findBySymbol(data.getSymbol());
+                         Optional<PositionRecord> positionRecord = positionRepository.findBySymbolAndAccountId(c.getSymbol(), settings.getKey());
                          BigDecimal qty = this.getQty(symbolRecord.get());
-                         if(qty.compareTo(BigDecimal.ZERO) > 0) {
-                             if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())) {
+                         if(qty.compareTo(BigDecimal.ZERO) > 0 && positionRecord.isPresent()) {
+                             //uptrend
+                             if(data.getSide().equalsIgnoreCase(OrderSide.BUY.name())
+                                    && ((positionRecord.get().getInitialMargin() != 0.0 && order.get(0).getSide().equalsIgnoreCase(OrderSide.SELL.name())))
+                                        || positionRecord.get().getInitialMargin() == 0.0) {
                                  Strategy shortStrategy = technicalIndicatorService.vwapShortStrategy(
                                          barSeries,
                                          webSettings.getVwapLength(),
@@ -234,7 +247,8 @@ public class BinanceSubscription {
                                  boolean shortSatisfied = shortStrategy.getEntryRule()
                                          .isSatisfied(barSeries.getEndIndex());
                                  if(shortSatisfied
-                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(lickValue) > 0) {
+                                         && (data.getPrice().multiply(data.getOrigQty())).compareTo(lickValue) > 0
+                                         && true ) {
                                      String liquidationMessage = String.format("[LIQUIDATION SATISFIED] symbol: %s, price: %s, side: %s, markprice: %s",
                                              data.getSymbol(),
                                              data.getPrice().multiply(data.getLastFilledAccumulatedQty()),
@@ -256,7 +270,10 @@ public class BinanceSubscription {
                                      symbolRepository.addNumberOfBuys(data.getSymbol(), settings.getKey(), activeSettings);
                                  }
                              }
-                             if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())) {
+                             //downtrend
+                             if(data.getSide().equalsIgnoreCase(OrderSide.SELL.name())
+                                     && ((positionRecord.get().getInitialMargin() != 0.0 && order.get(0).getSide().equalsIgnoreCase(OrderSide.BUY.name())))
+                                     || positionRecord.get().getInitialMargin() == 0.0) {
                                  Strategy longStrategy = technicalIndicatorService.vwapLongStrategy(
                                          barSeries,
                                          webSettings.getVwapLength(),
