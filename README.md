@@ -33,7 +33,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/ebaloaloa/lick-hunter-server">
-    <img src="https://ephraimbaloaloa.myqnapcloud.com:8081/share.cgi/binance.png?ssid=66e60d44418a49efa412e5cd637273ca&fid=66e60d44418a49efa412e5cd637273ca&open=normal&ep=" alt="Logo">
+    <img src="https://ephraimbaloaloa.myqnapcloud.com:8081/share.cgi/binance.png?ssid=8689040c78864bb1af236588317f17d4&fid=8689040c78864bb1af236588317f17d4&open=normal&ep=" alt="Logo">
   </a>
 
 <h3 align="center">Lick Hunter Server</h3>
