@@ -157,9 +157,11 @@ public class LickHunterScheduledTasks {
     }
 
     public void pauseOnClose() {
-        isBotPaused.set(false);
-        pauseOnCloseActive.set(true);
-        log.info("Bot will pause after all positions are closed.");
+        if(applicationConfig.getPauseBotEnable()) {
+            isBotPaused.set(false);
+            pauseOnCloseActive.set(true);
+            log.info("Bot will pause after all positions are closed.");
+        }
     }
 
     public void resumeBot() {

@@ -89,7 +89,7 @@ public class BinanceSubscription {
                         candlestick.setOpenTime(event.getStartTime());
                         candlestick.setOpen(event.getOpen());
                         candlestick.setHigh(event.getHigh());
-                        candlestick.setLow(event.getClose());
+                        candlestick.setLow(event.getLow());
                         candlestick.setClose(event.getClose());
                         candlestick.setVolume(event.getVolume());
                         candlestick.setCloseTime(event.getCloseTime());
