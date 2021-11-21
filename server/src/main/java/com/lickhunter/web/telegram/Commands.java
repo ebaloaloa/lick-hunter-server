@@ -9,4 +9,5 @@ public class Commands {
     public static final String STATUS = commandInitChar + "status";
     public static final String CLOSE_POSITION = commandInitChar + "close";
     public static final String CLOSE_ALL_POSITIONS = commandInitChar + "close_all";
+    public static final String POSITIONS = commandInitChar + "positions";
 }

@@ -146,10 +146,13 @@ To get a local copy up and running follow these simple steps.
    Copy/Paste the following to create new commands:  
    ```
    balance - Check balance  
-   settings - Change active settings from user defined settings  
+   settings - Change active settings from user defined settings. Example: /settings settings1
    pause - Pause bot after all positions are closed  
    resume - Resume bot  
    status - Check the status of the bot  
+   positions - Check all active positions  
+   close_all - Close all active positions  
+   close - Close an active position. Example: /close btcusdt
    ```  
 10. Open application.properties and change the following values:  
 * **telegram.bot** - Name of the bot you created   

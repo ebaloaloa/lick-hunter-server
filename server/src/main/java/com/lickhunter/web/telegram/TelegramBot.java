@@ -5,8 +5,10 @@ import com.lickhunter.web.configs.MessageConfig;
 import com.lickhunter.web.configs.Settings;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.constants.ApplicationConstants;
+import com.lickhunter.web.entities.tables.records.PositionRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.entities.tables.records.TelegramUsersRecord;
+import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.repositories.TelegramRepository;
 import com.lickhunter.web.scheduler.LickHunterScheduledTasks;
@@ -29,6 +31,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -55,6 +58,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final TelegramRepository telegramRepository;
     private final TradeService tradeService;
     private final SymbolRepository symbolRepository;
+    private final PositionRepository positionRepository;
 
     private HashMap<Long, Message> oldMessage = null;
 
@@ -130,6 +134,24 @@ public class TelegramBot extends TelegramLongPollingBot {
                             log.error("Error writing settings. " + e.getMessage());
                         }
                     }
+                });
+            }
+            if (update.getMessage().getText().contains(Commands.POSITIONS)) {
+                List<PositionRecord> positionRecords = positionRepository.findActivePositionsByAccountId(settings.getKey());
+                message.setText(String.format("Active Positions: %s \n", positionRecords.size()));
+                positionRecords.forEach(positionRecord -> {
+                    SymbolRecord symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol()).orElse(null);
+                    String pos_msg = String.format("[%s], EP: %.2f, MP: %.2f, Margin: %.2f, PNL: %.2f (%s%%), Vola: %.3f\n",
+                            positionRecord.getSymbol(),
+                            Double.valueOf(positionRecord.getEntryPrice()),
+                            symbolRecord.getMarkPrice(),
+                            positionRecord.getInitialMargin(),
+                            positionRecord.getUnrealizedProfit(),
+                            BigDecimal.valueOf(positionRecord.getUnrealizedProfit())
+                                    .divide(BigDecimal.valueOf(positionRecord.getInitialMargin()), 2, RoundingMode.HALF_UP)
+                                    .multiply(BigDecimal.valueOf(100)),
+                            symbolRecord.getVolatility());
+                    message.setText(message.getText().concat(pos_msg));
                 });
             }
             if (update.getMessage().getText().contains(Commands.CLOSE_POSITION)) {
