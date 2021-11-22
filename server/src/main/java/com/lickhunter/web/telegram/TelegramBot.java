@@ -141,15 +141,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                 message.setText(String.format("Active Positions: %s \n", positionRecords.size()));
                 positionRecords.forEach(positionRecord -> {
                     SymbolRecord symbolRecord = symbolRepository.findBySymbol(positionRecord.getSymbol()).orElse(null);
-                    String pos_msg = String.format("[%s], EP: %.2f, MP: %.2f, Margin: %.2f, PNL: %.2f (%s%%), Vola: %.3f\n",
+                    String pos_msg = String.format("[%s] EP: %.2f, MP: %.2f, Margin: %.2f, PNL: %.2f (%.2f%%), Vola: %.3f\n",
                             positionRecord.getSymbol(),
                             Double.valueOf(positionRecord.getEntryPrice()),
                             symbolRecord.getMarkPrice(),
                             positionRecord.getInitialMargin(),
                             positionRecord.getUnrealizedProfit(),
-                            BigDecimal.valueOf(positionRecord.getUnrealizedProfit())
-                                    .divide(BigDecimal.valueOf(positionRecord.getInitialMargin()), 2, RoundingMode.HALF_UP)
-                                    .multiply(BigDecimal.valueOf(100)),
+                            positionRecord.getUnrealizedProfit() / positionRecord.getInitialMargin() * 100,
                             symbolRecord.getVolatility());
                     message.setText(message.getText().concat(pos_msg));
                 });
