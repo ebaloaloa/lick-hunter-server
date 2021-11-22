@@ -133,6 +133,7 @@ public class SymbolRepository {
     public void update(SentimentsAsset sentimentsAsset) {
         dsl.update(SYMBOL)
                 .set(SYMBOL.VOLATILITY, sentimentsAsset.getData().get(0).getVolatility())
+                .set(SYMBOL.MARKET_CAP, Optional.ofNullable(sentimentsAsset.getData().get(0).getMarketCap()).orElse(0L))
                 .where(SYMBOL.SYMBOL_.eq(sentimentsAsset.getData().get(0).getSymbol().concat("USDT")))
                 .execute();
     }

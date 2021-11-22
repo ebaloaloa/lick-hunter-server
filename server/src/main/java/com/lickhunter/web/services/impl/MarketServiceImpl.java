@@ -92,6 +92,10 @@ public class MarketServiceImpl implements MarketService {
                         t -> t.getQuoteVolume().compareTo(query.getVolumeLowerLimit().doubleValue()) > 0 &&
                             t.getQuoteVolume().compareTo(query.getVolumeUpperLimit().doubleValue()) < 0
                         : t -> true)
+                //Market Cap
+                .filter(Objects.nonNull(query.getMinMarketCap()) ?
+                        t -> t.getMarketCap().compareTo(query.getMinMarketCap()) > 0
+                        : t -> true)
                 //Bollinger Bands Strategy
                 .filter(Objects.nonNull(query.getBbStrategy()) && query.getBbStrategy() ?
                         t -> {
