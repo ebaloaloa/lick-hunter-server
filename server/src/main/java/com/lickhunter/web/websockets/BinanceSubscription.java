@@ -86,17 +86,17 @@ public class BinanceSubscription {
             .forEach(c -> {
                 subscriptionClient.subscribeCandlestickEvent(symbols, CandlestickInterval.of(c), ((event) -> {
                         Candlestick candlestick = new Candlestick();
-                        candlestick.setOpenTime(event.getStartTime());
-                        candlestick.setOpen(event.getOpen());
-                        candlestick.setHigh(event.getHigh());
-                        candlestick.setLow(event.getLow());
-                        candlestick.setClose(event.getClose());
-                        candlestick.setVolume(event.getVolume());
-                        candlestick.setCloseTime(event.getCloseTime());
-                        candlestick.setQuoteAssetVolume(event.getQuoteAssetVolume());
-                        candlestick.setNumTrades(event.getNumTrades().intValue());
-                        candlestick.setTakerBuyBaseAssetVolume(event.getTakerBuyBaseAssetVolume());
-                        candlestick.setTakerBuyQuoteAssetVolume(event.getTakerBuyQuoteAssetVolume());
+                        candlestick.setOpenTime(Optional.ofNullable(event.getStartTime()).orElse(null));
+                        candlestick.setOpen(Optional.of(event.getOpen()).orElse(null));
+                        candlestick.setHigh(Optional.ofNullable(event.getHigh()).orElse(null));
+                        candlestick.setLow(Optional.ofNullable(event.getLow()).orElse(null));
+                        candlestick.setClose(Optional.ofNullable(event.getClose()).orElse(null));
+                        candlestick.setVolume(Optional.ofNullable(event.getVolume()).orElse(null));
+                        candlestick.setCloseTime(Optional.ofNullable(event.getCloseTime()).orElse(null));
+                        candlestick.setQuoteAssetVolume(Optional.ofNullable(event.getQuoteAssetVolume()).orElse(null));
+                        candlestick.setNumTrades(Math.toIntExact(Optional.ofNullable(event.getNumTrades()).orElse(null)));
+                        candlestick.setTakerBuyBaseAssetVolume(Optional.ofNullable(event.getTakerBuyBaseAssetVolume()).orElse(null));
+                        candlestick.setTakerBuyQuoteAssetVolume(Optional.ofNullable(event.getTakerBuyQuoteAssetVolume()).orElse(null));
                         candlestickRepository.insertOrUpdate(event.getSymbol(), candlestick, CandlestickInterval.of(c));
                     }), e -> {
                         String message = String.format("Error during candlestick subscription event: %s", e.getMessage());
