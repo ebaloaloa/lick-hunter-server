@@ -50,11 +50,6 @@ public class BinanceScheduledTasks {
         lickHunterScheduledTasks.writeToCoinsJson();
     }
 
-    @Scheduled(fixedRateString = "${scheduler.account-information}")
-    public void accountInformation() {
-        accountService.getAccountInformation();
-    }
-
     @Scheduled(fixedRateString = "${scheduler.exchange-information}")
     public void getExchangeInformation() throws ServiceException {
         marketService.getExchangeInformation();
@@ -105,6 +100,7 @@ public class BinanceScheduledTasks {
     @Scheduled(fixedRateString = "60000")
     @SneakyThrows
     public void pauseOnStopLoss() {
+        accountService.getAccountInformation();
         tradeService.stopLoss();
     }
 
