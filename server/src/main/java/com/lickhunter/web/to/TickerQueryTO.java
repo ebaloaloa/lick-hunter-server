@@ -97,4 +97,9 @@ public class TickerQueryTO extends AbstractTO {
      * Timeframe to be used for CCI
      */
     private String cciTimeframe;
+
+    /**
+     * Minim market cap allowed
+     */
+    private Long minMarketCap;
 }

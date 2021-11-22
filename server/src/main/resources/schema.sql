@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS symbol (
     QUANTITY_PRECISION   BIGINT       NULL,
     TICK_SIZE            DOUBLE       NULL,
     VOLATILITY           DOUBLE       NULL,
+    MARKET_CAP           BIGINT       NULL        DEFAULT 0,
     LICK_MEDIAN          DOUBLE       NULL,
     LICK_AVERAGE         DOUBLE       NULL,
     FIRST_BUY            BIGINT       NULL        DEFAULT 0,

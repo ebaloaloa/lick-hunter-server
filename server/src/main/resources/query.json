@@ -13,5 +13,6 @@
   "bbBarCount": 20,
   "cciStrategy": false,
   "cciBarCount": 20,
-  "cciTimeframe": "15m"
+  "cciTimeframe": "15m",
+  "minMarketCap": 0
 }
