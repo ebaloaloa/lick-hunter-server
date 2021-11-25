@@ -9,9 +9,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -38,6 +44,12 @@ public class SentimentsServiceImpl implements SentimentsService {
                     .queryParam("data_points", sentimentsTO.getDataPoints())
                     .queryParam("change", sentimentsTO.getChange())
                     .queryParam("interval", sentimentsTO.getInterval());
+
+            List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+            MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+            converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
+            messageConverters.add(converter);
+            restTemplate.setMessageConverters(messageConverters);
 
             ResponseEntity<SentimentsAsset> res = restTemplate.exchange(builder.toUriString(), HttpMethod.GET , entity, SentimentsAsset.class);
             symbolRepository.update(res.getBody());
