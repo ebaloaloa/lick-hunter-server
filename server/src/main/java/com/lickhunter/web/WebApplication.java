@@ -54,7 +54,7 @@ public class WebApplication {
 		accountService.getAccountInformation();
 		marketService.getExchangeInformation();
 		marketService.get24hrTickerPriceChange();
-		applicationController.subscribeCandleStickData();
+//		applicationController.subscribeCandleStickData();
 		applicationController.subscribeMarkPrice();
 		applicationController.subscribeUserData();
 		marketService.getLiquidations();
@@ -71,7 +71,7 @@ public class WebApplication {
 					}
 				});
 		lickHunterScheduledTasks.checkSentiments();
-		marketService.getCandleStickData(CandlestickInterval.WEEKLY, 200);
+		marketService.getCandleStickData(CandlestickInterval.MONTHLY, 200);
 		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
 		marketService.getCandleStickData(CandlestickInterval.HOURLY, 20);
 		lickHunterScheduledTasks.writeToCoinsJson();
