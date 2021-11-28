@@ -1,5 +1,6 @@
 package com.lickhunter.web.scheduler;
 
+import com.binance.client.model.enums.CandlestickInterval;
 import com.binance.client.model.enums.IncomeType;
 import com.lickhunter.web.configs.WebSettings;
 import com.lickhunter.web.exceptions.ServiceException;
@@ -74,6 +75,12 @@ public class BinanceScheduledTasks {
                         e.printStackTrace();
                     }
                 });
+    }
+
+    @Scheduled(cron = "${scheduler.candlesticks:-}")
+    public void getCandlesticks() throws Exception {
+        marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 5);
+        marketService.getCandleStickData(CandlestickInterval.HOURLY, 5);
     }
 
     @Scheduled(cron = "${scheduler.daily-reinvestment:-}")
