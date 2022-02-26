@@ -38,15 +38,13 @@ import java.util.Map;
     "cr",
     "acr",
     "tc",
-    "categories",
-    "df",
-    "e2"
+    "categories"
 })
 @Generated("jsonschema2pojo")
-public class Datum {
+public class Btc {
 
     @JsonProperty("id")
-    private Integer id;
+    private Long id;
     @JsonProperty("s")
     private String s;
     @JsonProperty("n")
@@ -54,7 +52,7 @@ public class Datum {
     @JsonProperty("p")
     private Double p;
     @JsonProperty("p_btc")
-    private Double pBtc;
+    private Long pBtc;
     @JsonProperty("v")
     private Double v;
     @JsonProperty("vt")
@@ -66,7 +64,7 @@ public class Datum {
     @JsonProperty("mc")
     private Long mc;
     @JsonProperty("gs")
-    private Long gs;
+    private Double gs;
     @JsonProperty("ss")
     private Long ss;
     @JsonProperty("as")
@@ -105,20 +103,16 @@ public class Datum {
     private Long tc;
     @JsonProperty("categories")
     private String categories;
-    @JsonProperty("df")
-    private Long df;
-    @JsonProperty("e2")
-    private Long e2;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("id")
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
     @JsonProperty("id")
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -153,12 +147,12 @@ public class Datum {
     }
 
     @JsonProperty("p_btc")
-    public Double getpBtc() {
+    public Long getpBtc() {
         return pBtc;
     }
 
     @JsonProperty("p_btc")
-    public void setpBtc(Double pBtc) {
+    public void setpBtc(Long pBtc) {
         this.pBtc = pBtc;
     }
 
@@ -213,12 +207,12 @@ public class Datum {
     }
 
     @JsonProperty("gs")
-    public Long getGs() {
+    public Double getGs() {
         return gs;
     }
 
     @JsonProperty("gs")
-    public void setGs(Long gs) {
+    public void setGs(Double gs) {
         this.gs = gs;
     }
 
@@ -410,26 +404,6 @@ public class Datum {
     @JsonProperty("categories")
     public void setCategories(String categories) {
         this.categories = categories;
-    }
-
-    @JsonProperty("df")
-    public Long getDf() {
-        return df;
-    }
-
-    @JsonProperty("df")
-    public void setDf(Long df) {
-        this.df = df;
-    }
-
-    @JsonProperty("e2")
-    public Long getE2() {
-        return e2;
-    }
-
-    @JsonProperty("e2")
-    public void setE2(Long e2) {
-        this.e2 = e2;
     }
 
     @JsonAnyGetter
