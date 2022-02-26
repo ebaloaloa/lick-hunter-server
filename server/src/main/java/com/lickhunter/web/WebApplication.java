@@ -72,8 +72,8 @@ public class WebApplication {
 				});
 		lickHunterScheduledTasks.checkSentiments();
 		marketService.getCandleStickData(CandlestickInterval.MONTHLY, 200);
-		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 20);
-		marketService.getCandleStickData(CandlestickInterval.HOURLY, 20);
+		marketService.getCandleStickData(CandlestickInterval.FIFTEEN_MINUTES, 30);
+		marketService.getCandleStickData(CandlestickInterval.HOURLY, 30);
 		lickHunterScheduledTasks.writeToCoinsJson();
 		binanceSubscription.subscribeLiquidation();
 	}

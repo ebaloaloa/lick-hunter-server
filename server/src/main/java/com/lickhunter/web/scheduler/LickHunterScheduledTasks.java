@@ -5,13 +5,12 @@ import com.lickhunter.web.constants.ApplicationConstants;
 import com.lickhunter.web.entities.tables.records.PositionRecord;
 import com.lickhunter.web.entities.tables.records.SymbolRecord;
 import com.lickhunter.web.models.Coins;
-import com.lickhunter.web.models.sentiments.SentimentsAsset;
-import com.lickhunter.web.models.sentiments.TimeSeries;
+import com.lickhunter.web.models.sentiments.Datum;
+import com.lickhunter.web.models.sentiments.SentimentData;
 import com.lickhunter.web.models.webhook.DiscordWebhook;
 import com.lickhunter.web.repositories.PositionRepository;
 import com.lickhunter.web.repositories.SymbolRepository;
 import com.lickhunter.web.services.*;
-import com.lickhunter.web.to.SentimentsTO;
 import com.lickhunter.web.to.TickerQueryTO;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -127,31 +126,19 @@ public class LickHunterScheduledTasks {
 
     @Scheduled(cron = "${scheduler.sentiments:-}")
     @Async
-    public void checkSentiments() throws Exception {
+    public void checkSentiments() {
         if(applicationConfig.getSentimentsEnable()) {
             log.info("Checking sentiments information.");
-            SentimentsTO btc = new SentimentsTO()
-                    .withEndpoint("assets")
-                    .withChange("1h")
-                    .withInterval("hour")
-                    .withDataPoints(1)
-                    .withSymbol("BTC");
-            SentimentsAsset sentimentsAsset = sentimentsService.getSentiments(btc);
-            if(!sentimentsAsset.getData().isEmpty()) {
-                socialVolumeAlert(sentimentsAsset);
-                twitterVolumeAlert(sentimentsAsset);
-                changeSettings(sentimentsAsset);
+            SentimentData sentimentData = sentimentsService.getSentiments();
+            if(sentimentData.getData().size() > 0) {
+                sentimentData.getData()
+                        .forEach(datum -> {
+                            symbolRepository.update(datum);
+                            if(datum.getS().equalsIgnoreCase("btc")) {
+                                this.changeSettings(datum);
+                            }
+                        });
             }
-            //retrieve all sentiments
-            symbolRepository.findAll().forEach(symbolRecord -> {
-                SentimentsTO asset = new SentimentsTO()
-                        .withEndpoint("assets")
-                        .withChange("1h")
-                        .withInterval("hour")
-                        .withDataPoints(1)
-                        .withSymbol(symbolRecord.getSymbol().replace("USDT", ""));
-                sentimentsService.getSentiments(asset);
-            });
             this.writeToCoinsJson();
         }
     }
@@ -174,60 +161,6 @@ public class LickHunterScheduledTasks {
         return this.isBotPaused.get();
     }
 
-    private void socialVolumeAlert(SentimentsAsset sentimentsAsset) throws Exception {
-        TimeSeries current = sentimentsAsset.getData().get(0).getTimeSeries().get(0);
-        TimeSeries previous = sentimentsAsset.getData().get(0).getTimeSeries().get(1);
-        if(current.getSocialVolume().compareTo(previous.getSocialVolume()) > 0) {
-            BigDecimal socialVolumeChange = BigDecimal.valueOf(((current.getSocialVolume().doubleValue() -
-                    previous.getSocialVolume().doubleValue()) /
-                    previous.getSocialVolume().doubleValue()) *
-                    100D)
-                    .setScale(2, RoundingMode.HALF_UP);
-            if(socialVolumeChange.compareTo(BigDecimal.valueOf(applicationConfig.getSocialVolumePercentage())) > 0) {
-                DiscordWebhook webhook = new DiscordWebhook();
-                webhook.setWebhook(applicationConfig.getSentimentsDiscordAlertsWebhook());
-                webhook.setContent(String.format(messageConfig.getSocialVolumeAlerts(),
-                        socialVolumeChange,
-                        previous.getSocialVolume(),
-                        current.getSocialVolume(),
-                        "Bitcoin (BTC)",
-                        applicationConfig.getSocialVolumePercentage()));
-                sendSentimentsDiscordNotification(webhook);
-                isBotPaused.set(false);
-                if(applicationConfig.getPauseBotEnable()) {
-                    pauseOnCloseActive.set(true);
-                }
-            }
-        }
-    }
-
-    private void twitterVolumeAlert(SentimentsAsset sentimentsAsset) throws Exception {
-        TimeSeries current = sentimentsAsset.getData().get(0).getTimeSeries().get(0);
-        TimeSeries previous = sentimentsAsset.getData().get(0).getTimeSeries().get(1);
-        if(current.getTweets().compareTo(previous.getTweets()) > 0) {
-            BigDecimal tweetChange = BigDecimal.valueOf(((current.getTweets().doubleValue() -
-                    previous.getTweets().doubleValue()) /
-                    previous.getTweets().doubleValue()) *
-                    100D)
-                    .setScale(2, RoundingMode.HALF_UP);
-            if(tweetChange.compareTo(BigDecimal.valueOf(applicationConfig.getTwitterVolumePercentage())) > 0) {
-                DiscordWebhook webhook = new DiscordWebhook();
-                webhook.setWebhook(applicationConfig.getSentimentsDiscordAlertsWebhook());
-                webhook.setContent(String.format(messageConfig.getTwitterVolumeAlerts(),
-                        tweetChange,
-                        previous.getTweets(),
-                        current.getTweets(),
-                        "Bitcoin (BTC)",
-                        applicationConfig.getTwitterVolumePercentage()));
-                sendSentimentsDiscordNotification(webhook);
-                isBotPaused.set(false);
-                if(applicationConfig.getPauseBotEnable()) {
-                    pauseOnCloseActive.set(true);
-                }
-            }
-        }
-    }
-
     private void pauseBot() {
         if(applicationConfig.getPauseBotEnable()) {
             if (isBotPaused.get()) {
@@ -239,10 +172,10 @@ public class LickHunterScheduledTasks {
         }
     }
 
-    private void changeSettings(SentimentsAsset sentimentsAsset) {
+    private void changeSettings(Datum datum) {
         if(applicationConfig.getSentimentsChangeSettingsEnable()) {
             WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
-            if(sentimentsAsset.getData().get(0).getVolatility()
+            if(datum.getVt()
                     .compareTo(applicationConfig.getChangeSettingsVolatility())  >= 0) {
                 webSettings.setActive(webSettings.getSafe());
                 log.info("Changed to safe settings: " + webSettings.getSafe());

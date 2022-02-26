@@ -191,7 +191,6 @@ public class TradeServiceImpl implements TradeService {
                     && orderUpdate.getExecutionType().equalsIgnoreCase(TransactType.TRADE.name())
                     && orderUpdate.getOrderStatus().equalsIgnoreCase(OrderState.FILLED.name())
                     && !orderUpdate.getIsReduceOnly())
-//                && syncRequestClient.getOpenOrders(orderUpdate.getSymbol()).isEmpty()
                 && (positionRecord.isPresent() && symbolRecord.isPresent())) {
             //cancel open order
             syncRequestClient.cancelAllOpenOrder(orderUpdate.getSymbol());
