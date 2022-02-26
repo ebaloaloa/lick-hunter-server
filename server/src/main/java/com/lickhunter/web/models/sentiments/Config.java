@@ -3,41 +3,36 @@ package com.lickhunter.web.models.sentiments;
 
 import com.fasterxml.jackson.annotation.*;
 
+import javax.annotation.Generated;
 import java.util.HashMap;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "change",
     "data",
-    "data_points",
-    "interval",
-    "symbol"
+    "type",
+    "limit",
+    "page",
+    "total_rows",
+    "btc"
 })
+@Generated("jsonschema2pojo")
 public class Config {
 
-    @JsonProperty("change")
-    private String change;
     @JsonProperty("data")
     private String data;
-    @JsonProperty("data_points")
-    private Integer dataPoints;
-    @JsonProperty("interval")
-    private String interval;
-    @JsonProperty("symbol")
-    private String symbol;
+    @JsonProperty("type")
+    private String type;
+    @JsonProperty("limit")
+    private Integer limit;
+    @JsonProperty("page")
+    private Integer page;
+    @JsonProperty("total_rows")
+    private Integer totalRows;
+    @JsonProperty("btc")
+    private Btc btc;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-
-    @JsonProperty("change")
-    public String getChange() {
-        return change;
-    }
-
-    @JsonProperty("change")
-    public void setChange(String change) {
-        this.change = change;
-    }
 
     @JsonProperty("data")
     public String getData() {
@@ -49,34 +44,54 @@ public class Config {
         this.data = data;
     }
 
-    @JsonProperty("data_points")
-    public Integer getDataPoints() {
-        return dataPoints;
+    @JsonProperty("type")
+    public String getType() {
+        return type;
     }
 
-    @JsonProperty("data_points")
-    public void setDataPoints(Integer dataPoints) {
-        this.dataPoints = dataPoints;
+    @JsonProperty("type")
+    public void setType(String type) {
+        this.type = type;
     }
 
-    @JsonProperty("interval")
-    public String getInterval() {
-        return interval;
+    @JsonProperty("limit")
+    public Integer getLimit() {
+        return limit;
     }
 
-    @JsonProperty("interval")
-    public void setInterval(String interval) {
-        this.interval = interval;
+    @JsonProperty("limit")
+    public void setLimit(Integer limit) {
+        this.limit = limit;
     }
 
-    @JsonProperty("symbol")
-    public String getSymbol() {
-        return symbol;
+    @JsonProperty("page")
+    public Integer getPage() {
+        return page;
     }
 
-    @JsonProperty("symbol")
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    @JsonProperty("page")
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    @JsonProperty("total_rows")
+    public Integer getTotalRows() {
+        return totalRows;
+    }
+
+    @JsonProperty("total_rows")
+    public void setTotalRows(Integer totalRows) {
+        this.totalRows = totalRows;
+    }
+
+    @JsonProperty("btc")
+    public Btc getBtc() {
+        return btc;
+    }
+
+    @JsonProperty("btc")
+    public void setBtc(Btc btc) {
+        this.btc = btc;
     }
 
     @JsonAnyGetter

@@ -2,6 +2,7 @@
 package com.lickhunter.web.models.market;
 
 import com.fasterxml.jackson.annotation.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -33,6 +34,11 @@ import java.util.Map;
     "orderTypes",
     "timeInForce"
 })
+@Getter
+@Setter
+@With
+@AllArgsConstructor
+@NoArgsConstructor
 public class Symbol {
 
     @JsonProperty("symbol")
