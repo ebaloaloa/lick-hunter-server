@@ -131,9 +131,9 @@ public class SymbolRepository {
 
     public void update(com.lickhunter.web.models.sentiments.Datum datum) {
         dsl.update(SYMBOL)
-                .set(SYMBOL.VOLATILITY, datum.getVt())
-                .set(SYMBOL.MARKET_CAP, Optional.ofNullable(datum.getMc()).orElse(0L))
-                .where(SYMBOL.SYMBOL_.eq(datum.getS().concat("USDT")))
+                .set(SYMBOL.VOLATILITY, datum.getVolatility())
+                .set(SYMBOL.MARKET_CAP, Optional.ofNullable(datum.getMarketCap()).orElse(0L))
+                .where(SYMBOL.SYMBOL_.eq(datum.getSymbol().concat("USDT")))
                 .execute();
     }
 

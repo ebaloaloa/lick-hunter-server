@@ -1,36 +1,34 @@
 
 package com.lickhunter.web.models.sentiments;
 
-import com.fasterxml.jackson.annotation.*;
-
-import javax.annotation.Generated;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Generated;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
     "data",
-    "type",
-    "limit",
-    "page",
-    "total_rows",
-    "btc"
+    "symbol",
+    "interval",
+    "data_points"
 })
 @Generated("jsonschema2pojo")
 public class Config {
 
     @JsonProperty("data")
     private String data;
-    @JsonProperty("type")
-    private String type;
-    @JsonProperty("limit")
-    private Integer limit;
-    @JsonProperty("page")
-    private Integer page;
-    @JsonProperty("total_rows")
-    private Integer totalRows;
-    @JsonProperty("btc")
-    private Btc btc;
+    @JsonProperty("symbol")
+    private String symbol;
+    @JsonProperty("interval")
+    private String interval;
+    @JsonProperty("data_points")
+    private Integer dataPoints;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -44,54 +42,34 @@ public class Config {
         this.data = data;
     }
 
-    @JsonProperty("type")
-    public String getType() {
-        return type;
+    @JsonProperty("symbol")
+    public String getSymbol() {
+        return symbol;
     }
 
-    @JsonProperty("type")
-    public void setType(String type) {
-        this.type = type;
+    @JsonProperty("symbol")
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
-    @JsonProperty("limit")
-    public Integer getLimit() {
-        return limit;
+    @JsonProperty("interval")
+    public String getInterval() {
+        return interval;
     }
 
-    @JsonProperty("limit")
-    public void setLimit(Integer limit) {
-        this.limit = limit;
+    @JsonProperty("interval")
+    public void setInterval(String interval) {
+        this.interval = interval;
     }
 
-    @JsonProperty("page")
-    public Integer getPage() {
-        return page;
+    @JsonProperty("data_points")
+    public Integer getDataPoints() {
+        return dataPoints;
     }
 
-    @JsonProperty("page")
-    public void setPage(Integer page) {
-        this.page = page;
-    }
-
-    @JsonProperty("total_rows")
-    public Integer getTotalRows() {
-        return totalRows;
-    }
-
-    @JsonProperty("total_rows")
-    public void setTotalRows(Integer totalRows) {
-        this.totalRows = totalRows;
-    }
-
-    @JsonProperty("btc")
-    public Btc getBtc() {
-        return btc;
-    }
-
-    @JsonProperty("btc")
-    public void setBtc(Btc btc) {
-        this.btc = btc;
+    @JsonProperty("data_points")
+    public void setDataPoints(Integer dataPoints) {
+        this.dataPoints = dataPoints;
     }
 
     @JsonAnyGetter

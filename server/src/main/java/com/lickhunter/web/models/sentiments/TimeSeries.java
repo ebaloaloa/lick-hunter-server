@@ -2,7 +2,6 @@
 package com.lickhunter.web.models.sentiments;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -14,51 +13,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "id",
-    "name",
-    "symbol",
-    "price",
-    "price_btc",
-    "market_cap",
-    "percent_change_24h",
-    "percent_change_7d",
-    "percent_change_30d",
-    "volume_24h",
-    "max_supply",
-    "categories",
-    "timeSeries",
-    "social_dominance_calc_24h_previous",
-    "social_contributors_calc_24h_previous",
-    "url_shares_calc_24h_previous",
-    "tweet_spam_calc_24h_previous",
-    "news_calc_24h_previous",
-    "average_sentiment_calc_24h_previous",
-    "social_score_calc_24h_previous",
-    "social_volume_calc_24h_previous",
-    "alt_rank_30d_calc_24h_previous",
-    "alt_rank_calc_24h_previous",
-    "social_dominance_calc_24h",
-    "social_dominance_calc_24h_percent",
-    "social_contributors_calc_24h",
-    "social_contributors_calc_24h_percent",
-    "url_shares_calc_24h",
-    "url_shares_calc_24h_percent",
-    "tweet_spam_calc_24h",
-    "tweet_spam_calc_24h_percent",
-    "news_calc_24h",
-    "news_calc_24h_percent",
-    "average_sentiment_calc_24h",
-    "average_sentiment_calc_24h_percent",
-    "social_score_calc_24h",
-    "social_score_calc_24h_percent",
-    "social_volume_calc_24h",
-    "social_volume_calc_24h_percent",
     "asset_id",
     "time",
     "open",
+    "close",
     "high",
     "low",
     "volume",
+    "market_cap",
     "url_shares",
     "unique_url_shares",
     "reddit_posts",
@@ -86,6 +48,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "average_sentiment",
     "sentiment_absolute",
     "sentiment_relative",
+    "search_average",
+    "news",
     "price_score",
     "social_impact_score",
     "correlation_rank",
@@ -98,114 +62,36 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "volume_24h_rank",
     "social_volume_24h_rank",
     "social_score_24h_rank",
+    "medium",
+    "youtube",
     "social_contributors",
     "social_volume",
+    "price_btc",
     "social_volume_global",
     "social_dominance",
     "market_cap_global",
     "market_dominance",
-    "medium",
-    "news",
-    "defi",
-    "erc20",
-    "nft",
-    "bsc",
-    "tags",
-    "close"
+    "percent_change_24h"
 })
 @Generated("jsonschema2pojo")
-public class Datum {
+public class TimeSeries {
 
-    @JsonProperty("id")
-    private Integer id;
-    @JsonProperty("name")
-    private String name;
-    @JsonProperty("symbol")
-    private String symbol;
-    @JsonProperty("price")
-    private Double price;
-    @JsonProperty("price_btc")
-    private Double priceBtc;
-    @JsonProperty("market_cap")
-    private Long marketCap;
-    @JsonProperty("percent_change_24h")
-    private Double percentChange24h;
-    @JsonProperty("percent_change_7d")
-    private Double percentChange7d;
-    @JsonProperty("percent_change_30d")
-    private Double percentChange30d;
-    @JsonProperty("volume_24h")
-    private Double volume24h;
-    @JsonProperty("max_supply")
-    private String maxSupply;
-    @JsonProperty("categories")
-    private String categories;
-    @JsonProperty("timeSeries")
-    private List<TimeSeries> timeSeries = null;
-    @JsonProperty("social_dominance_calc_24h_previous")
-    private Integer socialDominanceCalc24hPrevious;
-    @JsonProperty("social_contributors_calc_24h_previous")
-    private Integer socialContributorsCalc24hPrevious;
-    @JsonProperty("url_shares_calc_24h_previous")
-    private Integer urlSharesCalc24hPrevious;
-    @JsonProperty("tweet_spam_calc_24h_previous")
-    private Integer tweetSpamCalc24hPrevious;
-    @JsonProperty("news_calc_24h_previous")
-    private Integer newsCalc24hPrevious;
-    @JsonProperty("average_sentiment_calc_24h_previous")
-    private Double averageSentimentCalc24hPrevious;
-    @JsonProperty("social_score_calc_24h_previous")
-    private Double socialScoreCalc24hPrevious;
-    @JsonProperty("social_volume_calc_24h_previous")
-    private Integer socialVolumeCalc24hPrevious;
-    @JsonProperty("alt_rank_30d_calc_24h_previous")
-    private Integer altRank30dCalc24hPrevious;
-    @JsonProperty("alt_rank_calc_24h_previous")
-    private Integer altRankCalc24hPrevious;
-    @JsonProperty("social_dominance_calc_24h")
-    private Integer socialDominanceCalc24h;
-    @JsonProperty("social_dominance_calc_24h_percent")
-    private Integer socialDominanceCalc24hPercent;
-    @JsonProperty("social_contributors_calc_24h")
-    private Integer socialContributorsCalc24h;
-    @JsonProperty("social_contributors_calc_24h_percent")
-    private Double socialContributorsCalc24hPercent;
-    @JsonProperty("url_shares_calc_24h")
-    private Integer urlSharesCalc24h;
-    @JsonProperty("url_shares_calc_24h_percent")
-    private Double urlSharesCalc24hPercent;
-    @JsonProperty("tweet_spam_calc_24h")
-    private Integer tweetSpamCalc24h;
-    @JsonProperty("tweet_spam_calc_24h_percent")
-    private Double tweetSpamCalc24hPercent;
-    @JsonProperty("news_calc_24h")
-    private Integer newsCalc24h;
-    @JsonProperty("news_calc_24h_percent")
-    private Integer newsCalc24hPercent;
-    @JsonProperty("average_sentiment_calc_24h")
-    private Double averageSentimentCalc24h;
-    @JsonProperty("average_sentiment_calc_24h_percent")
-    private Double averageSentimentCalc24hPercent;
-    @JsonProperty("social_score_calc_24h")
-    private Integer socialScoreCalc24h;
-    @JsonProperty("social_score_calc_24h_percent")
-    private Double socialScoreCalc24hPercent;
-    @JsonProperty("social_volume_calc_24h")
-    private Integer socialVolumeCalc24h;
-    @JsonProperty("social_volume_calc_24h_percent")
-    private Double socialVolumeCalc24hPercent;
     @JsonProperty("asset_id")
     private Integer assetId;
     @JsonProperty("time")
     private Integer time;
     @JsonProperty("open")
     private Double open;
+    @JsonProperty("close")
+    private Double close;
     @JsonProperty("high")
     private Double high;
     @JsonProperty("low")
     private Double low;
     @JsonProperty("volume")
     private Double volume;
+    @JsonProperty("market_cap")
+    private Long marketCap;
     @JsonProperty("url_shares")
     private Integer urlShares;
     @JsonProperty("unique_url_shares")
@@ -260,6 +146,10 @@ public class Datum {
     private Integer sentimentAbsolute;
     @JsonProperty("sentiment_relative")
     private Integer sentimentRelative;
+    @JsonProperty("search_average")
+    private Object searchAverage;
+    @JsonProperty("news")
+    private Object news;
     @JsonProperty("price_score")
     private Double priceScore;
     @JsonProperty("social_impact_score")
@@ -284,10 +174,16 @@ public class Datum {
     private Integer socialVolume24hRank;
     @JsonProperty("social_score_24h_rank")
     private Integer socialScore24hRank;
+    @JsonProperty("medium")
+    private Object medium;
+    @JsonProperty("youtube")
+    private Object youtube;
     @JsonProperty("social_contributors")
     private Integer socialContributors;
     @JsonProperty("social_volume")
     private Integer socialVolume;
+    @JsonProperty("price_btc")
+    private Double priceBtc;
     @JsonProperty("social_volume_global")
     private Integer socialVolumeGlobal;
     @JsonProperty("social_dominance")
@@ -296,414 +192,10 @@ public class Datum {
     private Long marketCapGlobal;
     @JsonProperty("market_dominance")
     private Double marketDominance;
-    @JsonProperty("medium")
-    private Integer medium;
-    @JsonProperty("news")
-    private Integer news;
-    @JsonProperty("defi")
-    private Integer defi;
-    @JsonProperty("erc20")
-    private Integer erc20;
-    @JsonProperty("nft")
-    private Integer nft;
-    @JsonProperty("bsc")
-    private Integer bsc;
-    @JsonProperty("tags")
-    private String tags;
-    @JsonProperty("close")
-    private Double close;
+    @JsonProperty("percent_change_24h")
+    private Double percentChange24h;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-
-    @JsonProperty("id")
-    public Integer getId() {
-        return id;
-    }
-
-    @JsonProperty("id")
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    @JsonProperty("name")
-    public String getName() {
-        return name;
-    }
-
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @JsonProperty("symbol")
-    public String getSymbol() {
-        return symbol;
-    }
-
-    @JsonProperty("symbol")
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    @JsonProperty("price")
-    public Double getPrice() {
-        return price;
-    }
-
-    @JsonProperty("price")
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    @JsonProperty("price_btc")
-    public Double getPriceBtc() {
-        return priceBtc;
-    }
-
-    @JsonProperty("price_btc")
-    public void setPriceBtc(Double priceBtc) {
-        this.priceBtc = priceBtc;
-    }
-
-    @JsonProperty("market_cap")
-    public Long getMarketCap() {
-        return marketCap;
-    }
-
-    @JsonProperty("market_cap")
-    public void setMarketCap(Long marketCap) {
-        this.marketCap = marketCap;
-    }
-
-    @JsonProperty("percent_change_24h")
-    public Double getPercentChange24h() {
-        return percentChange24h;
-    }
-
-    @JsonProperty("percent_change_24h")
-    public void setPercentChange24h(Double percentChange24h) {
-        this.percentChange24h = percentChange24h;
-    }
-
-    @JsonProperty("percent_change_7d")
-    public Double getPercentChange7d() {
-        return percentChange7d;
-    }
-
-    @JsonProperty("percent_change_7d")
-    public void setPercentChange7d(Double percentChange7d) {
-        this.percentChange7d = percentChange7d;
-    }
-
-    @JsonProperty("percent_change_30d")
-    public Double getPercentChange30d() {
-        return percentChange30d;
-    }
-
-    @JsonProperty("percent_change_30d")
-    public void setPercentChange30d(Double percentChange30d) {
-        this.percentChange30d = percentChange30d;
-    }
-
-    @JsonProperty("volume_24h")
-    public Double getVolume24h() {
-        return volume24h;
-    }
-
-    @JsonProperty("volume_24h")
-    public void setVolume24h(Double volume24h) {
-        this.volume24h = volume24h;
-    }
-
-    @JsonProperty("max_supply")
-    public String getMaxSupply() {
-        return maxSupply;
-    }
-
-    @JsonProperty("max_supply")
-    public void setMaxSupply(String maxSupply) {
-        this.maxSupply = maxSupply;
-    }
-
-    @JsonProperty("categories")
-    public String getCategories() {
-        return categories;
-    }
-
-    @JsonProperty("categories")
-    public void setCategories(String categories) {
-        this.categories = categories;
-    }
-
-    @JsonProperty("timeSeries")
-    public List<TimeSeries> getTimeSeries() {
-        return timeSeries;
-    }
-
-    @JsonProperty("timeSeries")
-    public void setTimeSeries(List<TimeSeries> timeSeries) {
-        this.timeSeries = timeSeries;
-    }
-
-    @JsonProperty("social_dominance_calc_24h_previous")
-    public Integer getSocialDominanceCalc24hPrevious() {
-        return socialDominanceCalc24hPrevious;
-    }
-
-    @JsonProperty("social_dominance_calc_24h_previous")
-    public void setSocialDominanceCalc24hPrevious(Integer socialDominanceCalc24hPrevious) {
-        this.socialDominanceCalc24hPrevious = socialDominanceCalc24hPrevious;
-    }
-
-    @JsonProperty("social_contributors_calc_24h_previous")
-    public Integer getSocialContributorsCalc24hPrevious() {
-        return socialContributorsCalc24hPrevious;
-    }
-
-    @JsonProperty("social_contributors_calc_24h_previous")
-    public void setSocialContributorsCalc24hPrevious(Integer socialContributorsCalc24hPrevious) {
-        this.socialContributorsCalc24hPrevious = socialContributorsCalc24hPrevious;
-    }
-
-    @JsonProperty("url_shares_calc_24h_previous")
-    public Integer getUrlSharesCalc24hPrevious() {
-        return urlSharesCalc24hPrevious;
-    }
-
-    @JsonProperty("url_shares_calc_24h_previous")
-    public void setUrlSharesCalc24hPrevious(Integer urlSharesCalc24hPrevious) {
-        this.urlSharesCalc24hPrevious = urlSharesCalc24hPrevious;
-    }
-
-    @JsonProperty("tweet_spam_calc_24h_previous")
-    public Integer getTweetSpamCalc24hPrevious() {
-        return tweetSpamCalc24hPrevious;
-    }
-
-    @JsonProperty("tweet_spam_calc_24h_previous")
-    public void setTweetSpamCalc24hPrevious(Integer tweetSpamCalc24hPrevious) {
-        this.tweetSpamCalc24hPrevious = tweetSpamCalc24hPrevious;
-    }
-
-    @JsonProperty("news_calc_24h_previous")
-    public Integer getNewsCalc24hPrevious() {
-        return newsCalc24hPrevious;
-    }
-
-    @JsonProperty("news_calc_24h_previous")
-    public void setNewsCalc24hPrevious(Integer newsCalc24hPrevious) {
-        this.newsCalc24hPrevious = newsCalc24hPrevious;
-    }
-
-    @JsonProperty("average_sentiment_calc_24h_previous")
-    public Double getAverageSentimentCalc24hPrevious() {
-        return averageSentimentCalc24hPrevious;
-    }
-
-    @JsonProperty("average_sentiment_calc_24h_previous")
-    public void setAverageSentimentCalc24hPrevious(Double averageSentimentCalc24hPrevious) {
-        this.averageSentimentCalc24hPrevious = averageSentimentCalc24hPrevious;
-    }
-
-    @JsonProperty("social_score_calc_24h_previous")
-    public Double getSocialScoreCalc24hPrevious() {
-        return socialScoreCalc24hPrevious;
-    }
-
-    @JsonProperty("social_score_calc_24h_previous")
-    public void setSocialScoreCalc24hPrevious(Double socialScoreCalc24hPrevious) {
-        this.socialScoreCalc24hPrevious = socialScoreCalc24hPrevious;
-    }
-
-    @JsonProperty("social_volume_calc_24h_previous")
-    public Integer getSocialVolumeCalc24hPrevious() {
-        return socialVolumeCalc24hPrevious;
-    }
-
-    @JsonProperty("social_volume_calc_24h_previous")
-    public void setSocialVolumeCalc24hPrevious(Integer socialVolumeCalc24hPrevious) {
-        this.socialVolumeCalc24hPrevious = socialVolumeCalc24hPrevious;
-    }
-
-    @JsonProperty("alt_rank_30d_calc_24h_previous")
-    public Integer getAltRank30dCalc24hPrevious() {
-        return altRank30dCalc24hPrevious;
-    }
-
-    @JsonProperty("alt_rank_30d_calc_24h_previous")
-    public void setAltRank30dCalc24hPrevious(Integer altRank30dCalc24hPrevious) {
-        this.altRank30dCalc24hPrevious = altRank30dCalc24hPrevious;
-    }
-
-    @JsonProperty("alt_rank_calc_24h_previous")
-    public Integer getAltRankCalc24hPrevious() {
-        return altRankCalc24hPrevious;
-    }
-
-    @JsonProperty("alt_rank_calc_24h_previous")
-    public void setAltRankCalc24hPrevious(Integer altRankCalc24hPrevious) {
-        this.altRankCalc24hPrevious = altRankCalc24hPrevious;
-    }
-
-    @JsonProperty("social_dominance_calc_24h")
-    public Integer getSocialDominanceCalc24h() {
-        return socialDominanceCalc24h;
-    }
-
-    @JsonProperty("social_dominance_calc_24h")
-    public void setSocialDominanceCalc24h(Integer socialDominanceCalc24h) {
-        this.socialDominanceCalc24h = socialDominanceCalc24h;
-    }
-
-    @JsonProperty("social_dominance_calc_24h_percent")
-    public Integer getSocialDominanceCalc24hPercent() {
-        return socialDominanceCalc24hPercent;
-    }
-
-    @JsonProperty("social_dominance_calc_24h_percent")
-    public void setSocialDominanceCalc24hPercent(Integer socialDominanceCalc24hPercent) {
-        this.socialDominanceCalc24hPercent = socialDominanceCalc24hPercent;
-    }
-
-    @JsonProperty("social_contributors_calc_24h")
-    public Integer getSocialContributorsCalc24h() {
-        return socialContributorsCalc24h;
-    }
-
-    @JsonProperty("social_contributors_calc_24h")
-    public void setSocialContributorsCalc24h(Integer socialContributorsCalc24h) {
-        this.socialContributorsCalc24h = socialContributorsCalc24h;
-    }
-
-    @JsonProperty("social_contributors_calc_24h_percent")
-    public Double getSocialContributorsCalc24hPercent() {
-        return socialContributorsCalc24hPercent;
-    }
-
-    @JsonProperty("social_contributors_calc_24h_percent")
-    public void setSocialContributorsCalc24hPercent(Double socialContributorsCalc24hPercent) {
-        this.socialContributorsCalc24hPercent = socialContributorsCalc24hPercent;
-    }
-
-    @JsonProperty("url_shares_calc_24h")
-    public Integer getUrlSharesCalc24h() {
-        return urlSharesCalc24h;
-    }
-
-    @JsonProperty("url_shares_calc_24h")
-    public void setUrlSharesCalc24h(Integer urlSharesCalc24h) {
-        this.urlSharesCalc24h = urlSharesCalc24h;
-    }
-
-    @JsonProperty("url_shares_calc_24h_percent")
-    public Double getUrlSharesCalc24hPercent() {
-        return urlSharesCalc24hPercent;
-    }
-
-    @JsonProperty("url_shares_calc_24h_percent")
-    public void setUrlSharesCalc24hPercent(Double urlSharesCalc24hPercent) {
-        this.urlSharesCalc24hPercent = urlSharesCalc24hPercent;
-    }
-
-    @JsonProperty("tweet_spam_calc_24h")
-    public Integer getTweetSpamCalc24h() {
-        return tweetSpamCalc24h;
-    }
-
-    @JsonProperty("tweet_spam_calc_24h")
-    public void setTweetSpamCalc24h(Integer tweetSpamCalc24h) {
-        this.tweetSpamCalc24h = tweetSpamCalc24h;
-    }
-
-    @JsonProperty("tweet_spam_calc_24h_percent")
-    public Double getTweetSpamCalc24hPercent() {
-        return tweetSpamCalc24hPercent;
-    }
-
-    @JsonProperty("tweet_spam_calc_24h_percent")
-    public void setTweetSpamCalc24hPercent(Double tweetSpamCalc24hPercent) {
-        this.tweetSpamCalc24hPercent = tweetSpamCalc24hPercent;
-    }
-
-    @JsonProperty("news_calc_24h")
-    public Integer getNewsCalc24h() {
-        return newsCalc24h;
-    }
-
-    @JsonProperty("news_calc_24h")
-    public void setNewsCalc24h(Integer newsCalc24h) {
-        this.newsCalc24h = newsCalc24h;
-    }
-
-    @JsonProperty("news_calc_24h_percent")
-    public Integer getNewsCalc24hPercent() {
-        return newsCalc24hPercent;
-    }
-
-    @JsonProperty("news_calc_24h_percent")
-    public void setNewsCalc24hPercent(Integer newsCalc24hPercent) {
-        this.newsCalc24hPercent = newsCalc24hPercent;
-    }
-
-    @JsonProperty("average_sentiment_calc_24h")
-    public Double getAverageSentimentCalc24h() {
-        return averageSentimentCalc24h;
-    }
-
-    @JsonProperty("average_sentiment_calc_24h")
-    public void setAverageSentimentCalc24h(Double averageSentimentCalc24h) {
-        this.averageSentimentCalc24h = averageSentimentCalc24h;
-    }
-
-    @JsonProperty("average_sentiment_calc_24h_percent")
-    public Double getAverageSentimentCalc24hPercent() {
-        return averageSentimentCalc24hPercent;
-    }
-
-    @JsonProperty("average_sentiment_calc_24h_percent")
-    public void setAverageSentimentCalc24hPercent(Double averageSentimentCalc24hPercent) {
-        this.averageSentimentCalc24hPercent = averageSentimentCalc24hPercent;
-    }
-
-    @JsonProperty("social_score_calc_24h")
-    public Integer getSocialScoreCalc24h() {
-        return socialScoreCalc24h;
-    }
-
-    @JsonProperty("social_score_calc_24h")
-    public void setSocialScoreCalc24h(Integer socialScoreCalc24h) {
-        this.socialScoreCalc24h = socialScoreCalc24h;
-    }
-
-    @JsonProperty("social_score_calc_24h_percent")
-    public Double getSocialScoreCalc24hPercent() {
-        return socialScoreCalc24hPercent;
-    }
-
-    @JsonProperty("social_score_calc_24h_percent")
-    public void setSocialScoreCalc24hPercent(Double socialScoreCalc24hPercent) {
-        this.socialScoreCalc24hPercent = socialScoreCalc24hPercent;
-    }
-
-    @JsonProperty("social_volume_calc_24h")
-    public Integer getSocialVolumeCalc24h() {
-        return socialVolumeCalc24h;
-    }
-
-    @JsonProperty("social_volume_calc_24h")
-    public void setSocialVolumeCalc24h(Integer socialVolumeCalc24h) {
-        this.socialVolumeCalc24h = socialVolumeCalc24h;
-    }
-
-    @JsonProperty("social_volume_calc_24h_percent")
-    public Double getSocialVolumeCalc24hPercent() {
-        return socialVolumeCalc24hPercent;
-    }
-
-    @JsonProperty("social_volume_calc_24h_percent")
-    public void setSocialVolumeCalc24hPercent(Double socialVolumeCalc24hPercent) {
-        this.socialVolumeCalc24hPercent = socialVolumeCalc24hPercent;
-    }
 
     @JsonProperty("asset_id")
     public Integer getAssetId() {
@@ -735,6 +227,16 @@ public class Datum {
         this.open = open;
     }
 
+    @JsonProperty("close")
+    public Double getClose() {
+        return close;
+    }
+
+    @JsonProperty("close")
+    public void setClose(Double close) {
+        this.close = close;
+    }
+
     @JsonProperty("high")
     public Double getHigh() {
         return high;
@@ -763,6 +265,16 @@ public class Datum {
     @JsonProperty("volume")
     public void setVolume(Double volume) {
         this.volume = volume;
+    }
+
+    @JsonProperty("market_cap")
+    public Long getMarketCap() {
+        return marketCap;
+    }
+
+    @JsonProperty("market_cap")
+    public void setMarketCap(Long marketCap) {
+        this.marketCap = marketCap;
     }
 
     @JsonProperty("url_shares")
@@ -1035,6 +547,26 @@ public class Datum {
         this.sentimentRelative = sentimentRelative;
     }
 
+    @JsonProperty("search_average")
+    public Object getSearchAverage() {
+        return searchAverage;
+    }
+
+    @JsonProperty("search_average")
+    public void setSearchAverage(Object searchAverage) {
+        this.searchAverage = searchAverage;
+    }
+
+    @JsonProperty("news")
+    public Object getNews() {
+        return news;
+    }
+
+    @JsonProperty("news")
+    public void setNews(Object news) {
+        this.news = news;
+    }
+
     @JsonProperty("price_score")
     public Double getPriceScore() {
         return priceScore;
@@ -1155,6 +687,26 @@ public class Datum {
         this.socialScore24hRank = socialScore24hRank;
     }
 
+    @JsonProperty("medium")
+    public Object getMedium() {
+        return medium;
+    }
+
+    @JsonProperty("medium")
+    public void setMedium(Object medium) {
+        this.medium = medium;
+    }
+
+    @JsonProperty("youtube")
+    public Object getYoutube() {
+        return youtube;
+    }
+
+    @JsonProperty("youtube")
+    public void setYoutube(Object youtube) {
+        this.youtube = youtube;
+    }
+
     @JsonProperty("social_contributors")
     public Integer getSocialContributors() {
         return socialContributors;
@@ -1173,6 +725,16 @@ public class Datum {
     @JsonProperty("social_volume")
     public void setSocialVolume(Integer socialVolume) {
         this.socialVolume = socialVolume;
+    }
+
+    @JsonProperty("price_btc")
+    public Double getPriceBtc() {
+        return priceBtc;
+    }
+
+    @JsonProperty("price_btc")
+    public void setPriceBtc(Double priceBtc) {
+        this.priceBtc = priceBtc;
     }
 
     @JsonProperty("social_volume_global")
@@ -1215,84 +777,14 @@ public class Datum {
         this.marketDominance = marketDominance;
     }
 
-    @JsonProperty("medium")
-    public Integer getMedium() {
-        return medium;
+    @JsonProperty("percent_change_24h")
+    public Double getPercentChange24h() {
+        return percentChange24h;
     }
 
-    @JsonProperty("medium")
-    public void setMedium(Integer medium) {
-        this.medium = medium;
-    }
-
-    @JsonProperty("news")
-    public Integer getNews() {
-        return news;
-    }
-
-    @JsonProperty("news")
-    public void setNews(Integer news) {
-        this.news = news;
-    }
-
-    @JsonProperty("defi")
-    public Integer getDefi() {
-        return defi;
-    }
-
-    @JsonProperty("defi")
-    public void setDefi(Integer defi) {
-        this.defi = defi;
-    }
-
-    @JsonProperty("erc20")
-    public Integer getErc20() {
-        return erc20;
-    }
-
-    @JsonProperty("erc20")
-    public void setErc20(Integer erc20) {
-        this.erc20 = erc20;
-    }
-
-    @JsonProperty("nft")
-    public Integer getNft() {
-        return nft;
-    }
-
-    @JsonProperty("nft")
-    public void setNft(Integer nft) {
-        this.nft = nft;
-    }
-
-    @JsonProperty("bsc")
-    public Integer getBsc() {
-        return bsc;
-    }
-
-    @JsonProperty("bsc")
-    public void setBsc(Integer bsc) {
-        this.bsc = bsc;
-    }
-
-    @JsonProperty("tags")
-    public String getTags() {
-        return tags;
-    }
-
-    @JsonProperty("tags")
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
-    @JsonProperty("close")
-    public Double getClose() {
-        return close;
-    }
-
-    @JsonProperty("close")
-    public void setClose(Double close) {
-        this.close = close;
+    @JsonProperty("percent_change_24h")
+    public void setPercentChange24h(Double percentChange24h) {
+        this.percentChange24h = percentChange24h;
     }
 
     @JsonAnyGetter
