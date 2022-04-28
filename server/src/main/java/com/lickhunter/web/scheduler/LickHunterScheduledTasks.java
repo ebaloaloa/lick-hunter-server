@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -129,16 +128,18 @@ public class LickHunterScheduledTasks {
     public void checkSentiments() {
         if(applicationConfig.getSentimentsEnable()) {
             log.info("Checking sentiments information.");
-            SentimentData sentimentData = sentimentsService.getSentiments();
-            if(sentimentData.getData().size() > 0) {
-                sentimentData.getData()
-                        .forEach(datum -> {
-                            symbolRepository.update(datum);
-                            if(datum.getS().equalsIgnoreCase("btc")) {
-                                this.changeSettings(datum);
-                            }
-                        });
-            }
+            symbolRepository.findAll().forEach(symbolRecord -> {
+                SentimentData sentimentData = sentimentsService.getSentiments(symbolRecord.getSymbol().toUpperCase().replace("USDT",""));
+                if(sentimentData.getData().size() > 0) {
+                    sentimentData.getData()
+                            .forEach(datum -> {
+                                symbolRepository.update(datum);
+                                if(datum.getSymbol().equalsIgnoreCase("btc")) {
+                                    this.changeSettings(datum);
+                                }
+                            });
+                }
+            });
             this.writeToCoinsJson();
         }
     }
@@ -175,7 +176,7 @@ public class LickHunterScheduledTasks {
     private void changeSettings(Datum datum) {
         if(applicationConfig.getSentimentsChangeSettingsEnable()) {
             WebSettings webSettings = (WebSettings) fileService.readFromFile("./", ApplicationConstants.WEB_SETTINGS.getValue(), WebSettings.class);
-            if(datum.getVt()
+            if(datum.getVolatility()
                     .compareTo(applicationConfig.getChangeSettingsVolatility())  >= 0) {
                 webSettings.setActive(webSettings.getSafe());
                 log.info("Changed to safe settings: " + webSettings.getSafe());

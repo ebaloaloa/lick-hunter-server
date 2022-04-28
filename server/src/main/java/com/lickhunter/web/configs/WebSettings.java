@@ -28,8 +28,6 @@ public class WebSettings {
     private BigDecimal dailyReinvestment;
     @JsonProperty("safe")
     private String safe;
-    @JsonProperty("user-agent")
-    private String userAgent;
     @JsonProperty("userDefinedSettings")
     private Map<String, UserDefinedSettings> userDefinedSettings = new HashMap<>();
 
