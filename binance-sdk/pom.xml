@@ -15,8 +15,8 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <java.version>1.8</java.version>
-        <okhttp3.version>4.9.1</okhttp3.version>
-        <fastjson.version>1.2.47</fastjson.version>
+        <okhttp3.version>4.9.2</okhttp3.version>
+        <fastjson.version>1.2.83</fastjson.version>
     </properties>
 
     <dependencies>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.13</version>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
@@ -50,13 +50,13 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.6</version>
+            <version>3.18.0</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
